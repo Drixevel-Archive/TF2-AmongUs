@@ -6,7 +6,7 @@
 /*****************************/
 //Defines
 #define PLUGIN_NAME "[Mode] Among Us"
-#define PLUGIN_DESCRIPTION ""
+#define PLUGIN_DESCRIPTION "A mode which replicates the Among Us game."
 #define PLUGIN_VERSION "1.0.0"
 
 /*****************************/
