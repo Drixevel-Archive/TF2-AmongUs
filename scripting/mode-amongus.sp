@@ -38,6 +38,10 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 
+}
+
+public Action OnClientCommand(int client, int args)
+{
 	char sCommand[32];
 	GetCmdArg(0, sCommand, sizeof(sCommand));
 	// PrintToServer(sCommand);
@@ -48,4 +52,18 @@ public void OnPluginStart()
 	// 	GetCmdArg(i, sArg, sizeof(sArg));
 	// 	PrintToServer(" - %s", sArg);
 	// }
+
+	if (StrEqual(sCommand, "joinclass", false))
+	{
+		char sClass[32];
+		GetCmdArg(1, sClass, sizeof(sClass));
+
+		if (!StrEqual(sClass, "engineer", false))
+		{
+			FakeClientCommand(client, "joinclass engineer");
+			return Plugin_Stop;
+		}
+	}
+
+	return Plugin_Continue;
 }
