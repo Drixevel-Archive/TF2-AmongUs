@@ -37,7 +37,24 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
+}
 
+public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
+{
+	char sMSG[12];
+	BfReadString(msg, sMSG, sizeof(sMSG));
+
+	//PrintToServer(sMSG);
+
+	if (StrContains(sMSG, "class_", false) == 0)
+	{
+		int client = players[0];
+		FakeClientCommand(client, "joinclass engineer");
+		return Plugin_Stop;
+	}
+	
+	return Plugin_Continue;
 }
 
 public Action OnClientCommand(int client, int args)
