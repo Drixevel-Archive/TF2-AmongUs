@@ -38,4 +38,14 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 
+	char sCommand[32];
+	GetCmdArg(0, sCommand, sizeof(sCommand));
+	// PrintToServer(sCommand);
+
+	// char sArg[32];
+	// for (int i = 1; i <= args; i++)
+	// {
+	// 	GetCmdArg(i, sArg, sizeof(sArg));
+	// 	PrintToServer(" - %s", sArg);
+	// }
 }
