@@ -13,6 +13,11 @@
 //Includes
 #include <sourcemod>
 
+#include "mode/commands.sp"
+#include "mode/events.sp"
+#include "mode/natives.sp"
+#include "mode/stocks.sp"
+
 /*****************************/
 //ConVars
 
