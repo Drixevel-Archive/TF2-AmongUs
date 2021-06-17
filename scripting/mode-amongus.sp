@@ -232,3 +232,14 @@ void AssignColor(int client)
 	// TODO: Make it so it doesn't assign colors other players have already.
 	SetColor(client, GetRandomInt(0, g_TotalColors - 1));
 }
+
+void GetRoleName(Roles role, char[] buffer, int size)
+{
+	switch (role)
+	{
+		case Role_Innocent:
+			strcopy(buffer, size, "Innocent");
+		case Role_Imposter:
+			strcopy(buffer, size, "Imposter");
+	}
+}
