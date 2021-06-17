@@ -23,18 +23,27 @@
 /*****************************/
 //Globals
 
+enum Roles
+{
+	Role_Innocent,
+	Role_Imposter
+};
+
 enum struct Player
 {
 	int color;
+	Roles role;
 
 	void Init()
 	{
 		this.color = NO_COLOR;
+		this.role = Role_Innocent;
 	}
 
 	void Clear()
 	{
 		this.color = NO_COLOR;
+		this.role = Role_Innocent;
 	}
 }
 
