@@ -85,6 +85,8 @@ public void OnPluginStart()
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 
 	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
+	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
+
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 
 	ParseColors();
