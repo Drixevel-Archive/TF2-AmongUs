@@ -12,6 +12,7 @@
 /*****************************/
 //Includes
 #include <sourcemod>
+#include <tf2_stocks>
 
 #include "mode/commands.sp"
 #include "mode/events.sp"
@@ -37,6 +38,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	HookEvent("player_spawn", Event_OnPlayerSpawn);
+
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 }
 
@@ -45,7 +48,7 @@ public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int pl
 	char sMSG[12];
 	BfReadString(msg, sMSG, sizeof(sMSG));
 
-	//PrintToServer(sMSG);
+	// PrintToServer(sMSG);
 
 	if (StrContains(sMSG, "class_", false) == 0)
 	{
