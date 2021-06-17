@@ -9,6 +9,8 @@
 #define PLUGIN_DESCRIPTION "A mode which replicates the Among Us game."
 #define PLUGIN_VERSION "1.0.0"
 
+#define NO_COLOR -1
+
 /*****************************/
 //Includes
 #include <sourcemod>
@@ -25,6 +27,18 @@
 
 /*****************************/
 //Globals
+
+enum struct Player
+{
+	int color;
+
+	void Clear()
+	{
+		this.color = NO_COLOR;
+	}
+}
+
+Player g_Player[MAXPLAYERS + 1];
 
 enum struct Colors
 {
@@ -53,6 +67,7 @@ public void OnPluginStart()
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 
+	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 
 	ParseColors();
@@ -125,4 +140,61 @@ void ParseColors()
 
 	delete kv;
 	LogMessage("Parsed %i colors successfully.", g_TotalColors);
+}
+
+public void OnClientDisconnect_Post(int client)
+{
+	g_Player[client].Clear();
+}
+
+void OpenColorsMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_Colors);
+	menu.SetTitle("Available Colors:");
+
+	menu.AddItem("-1", "No Color");
+
+	char sID[16];
+	for (int i = 0; i < g_TotalColors; i++)
+	{
+		IntToString(i, sID, sizeof(sID));
+		menu.AddItem(sID, g_Colors[i].name);
+	}
+
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int MenuHandler_Colors(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char sID[16];
+			menu.GetItem(param2, sID, sizeof(sID));
+			int color = StringToInt(sID);
+
+			SetColor(param1, color);
+			OpenColorsMenu(param1);
+		}
+
+		case MenuAction_End:
+			delete menu;
+	}
+}
+
+void SetColor(int client, int color)
+{
+	g_Player[client].color = color;
+	
+	if (color != NO_COLOR)
+	{
+		SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+		SetEntityRenderColor(client, g_Colors[color].color[0], g_Colors[color].color[1], g_Colors[color].color[2], g_Colors[color].color[3]);
+	}
+	else
+	{
+		SetEntityRenderMode(client, RENDER_NORMAL);
+		SetEntityRenderColor(client, 255, 255, 255, 255);
+	}
 }
