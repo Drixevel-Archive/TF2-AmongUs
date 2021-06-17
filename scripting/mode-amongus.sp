@@ -25,6 +25,15 @@
 /*****************************/
 //Globals
 
+enum struct Colors
+{
+	char name[32];
+	int color[4];
+}
+
+Colors g_Colors[256];
+int g_TotalColors;
+
 /*****************************/
 //Plugin Info
 public Plugin myinfo = 
@@ -42,6 +51,7 @@ public void OnPluginStart()
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
+	ParseColors();
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
@@ -87,4 +97,28 @@ public Action OnClientCommand(int client, int args)
 	}
 
 	return Plugin_Continue;
+}
+
+void ParseColors()
+{
+	g_TotalColors = 0;
+
+	char sPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, sPath, sizeof(sPath), "configs/amongus/colors.cfg");
+
+	KeyValues kv = new KeyValues("colors");
+
+	if (kv.ImportFromFile(sPath) && kv.GotoFirstSubKey(false))
+	{
+		do
+		{
+			kv.GetSectionName(g_Colors[g_TotalColors].name, sizeof(Colors::name));
+			kv.GetColor4(NULL_STRING, g_Colors[g_TotalColors].color);
+			g_TotalColors++;
+		}
+		while (kv.GotoNextKey(false));
+	}
+
+	delete kv;
+	LogMessage("Parsed %i colors successfully.", g_TotalColors);
 }
