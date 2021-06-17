@@ -27,6 +27,11 @@ enum struct Player
 {
 	int color;
 
+	void Init()
+	{
+		this.color = NO_COLOR;
+	}
+
 	void Clear()
 	{
 		this.color = NO_COLOR;
@@ -74,6 +79,10 @@ public void OnPluginStart()
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 
 	ParseColors();
+
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientConnected(i))
+			OnClientConnected(i);
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
@@ -143,6 +152,11 @@ void ParseColors()
 
 	delete kv;
 	LogMessage("Parsed %i colors successfully.", g_TotalColors);
+}
+
+public void OnClientConnected(int client)
+{
+	g_Player[client].Init();
 }
 
 public void OnClientDisconnect_Post(int client)
