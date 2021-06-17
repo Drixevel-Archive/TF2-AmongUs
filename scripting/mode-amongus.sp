@@ -13,6 +13,7 @@
 //Includes
 #include <sourcemod>
 #include <tf2_stocks>
+#include <colors>
 
 #include "mode/commands.sp"
 #include "mode/events.sp"
@@ -51,6 +52,9 @@ public void OnPluginStart()
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
+
+	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
+
 	ParseColors();
 }
 
