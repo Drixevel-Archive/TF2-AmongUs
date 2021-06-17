@@ -92,6 +92,8 @@ public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int pl
 
 	// PrintToServer(sMSG);
 
+	//Is only called whenever a player joins and then see's the class menu, not while they're already on the server.
+	//We don't want that menu to pop up because there's no point to choosing your class so we return Plugin_Stop here.
 	if (StrContains(sMSG, "class_", false) == 0)
 	{
 		int client = players[0];
@@ -214,4 +216,10 @@ void SetColor(int client, int color)
 		SetEntityRenderMode(client, RENDER_NORMAL);
 		SetEntityRenderColor(client, 255, 255, 255, 255);
 	}
+}
+
+void AssignColor(int client)
+{
+	// TODO: Make it so it doesn't assign colors other players have already.
+	SetColor(client, GetRandomInt(0, g_TotalColors - 1));
 }

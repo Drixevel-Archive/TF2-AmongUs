@@ -11,6 +11,10 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Grenade);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Building);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_PDA);
+
+	//If a player is joining the server and they don't have a color, make sure they do.
+	if (g_Player[client].color == NO_COLOR)
+		AssignColor(client);
 }
 
 public void Event_OnPostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
