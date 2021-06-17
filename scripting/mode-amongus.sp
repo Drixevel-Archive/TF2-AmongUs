@@ -39,6 +39,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
+	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 }
