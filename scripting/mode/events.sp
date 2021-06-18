@@ -25,6 +25,7 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 		if (count < 1)
 		{
 			GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
+			GetGroundCoordinates(origin1, origin1);
 			TeleportEntity(client, origin1, angles, NULL_VECTOR);
 		}
 	}
