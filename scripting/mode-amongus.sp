@@ -44,6 +44,7 @@ task: <task name>
 /*****************************/
 //Includes
 #include <sourcemod>
+#include <sdkhooks>
 #include <tf2_stocks>
 #include <colors>
 
@@ -104,6 +105,7 @@ int g_TotalColors;
 
 #include "mode/commands.sp"
 #include "mode/events.sp"
+#include "mode/hooks.sp"
 #include "mode/gamelogic.sp"
 #include "mode/menus.sp"
 #include "mode/natives.sp"
@@ -156,8 +158,13 @@ public void OnPluginStart()
 	ParseColors();
 
 	for (int i = 1; i <= MaxClients; i++)
+	{
 		if (IsClientConnected(i))
 			OnClientConnected(i);
+
+		if (IsClientInGame(i))
+			OnClientPutInServer(i);
+	}
 	
 	CPrintToChatAll("Mode: Loaded");
 	
@@ -255,6 +262,11 @@ void ParseColors()
 public void OnClientConnected(int client)
 {
 	g_Player[client].Init();
+}
+
+public void OnClientPutInServer(int client)
+{
+	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 }
 
 public void OnClientDisconnect_Post(int client)
