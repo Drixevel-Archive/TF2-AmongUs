@@ -238,7 +238,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	int short = GetGameSetting_Int("short_tasks");
 	int common = GetGameSetting_Int("common_tasks");
 
-	int[] tasks = new int[common];
+	int tasks[256] = {-1, ...};
 	for (int i = 0; i < common; i++)
 		tasks[i] = GetRandomTask(TASK_TYPE_COMMON);
 
@@ -254,7 +254,8 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 			AssignRandomTask(i, TASK_TYPE_SHORT);
 		
 		for (int x = 0; x < common; x++)
-			AssignTask(i, tasks[i]);
+			if (tasks[i] != -1)
+				AssignTask(i, tasks[i]);
 		
 		if (g_Player[i].role != Role_Imposter)
 			g_Match.tasks_goal += (long + short + common);
