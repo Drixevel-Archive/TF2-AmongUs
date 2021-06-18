@@ -170,9 +170,17 @@ public void Timer_OnFinished(const char[] output, int caller, int activator, flo
 public void Timer_OnSetupStart(const char[] output, int caller, int activator, float delay)
 {
 	CPrintToChatAll("Mode: Setup Started");
+
+	//Close and lock the doors during the lobby phase.
+	TriggerRelay(RELAY_LOBBY_DOORS_CLOSE);
+	TriggerRelay(RELAY_LOBBY_DOORS_LOCK);
 }
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
 {
 	CPrintToChatAll("Mode: Setup Finished");
+
+	//Unlock and open the doors whenever the lobby phase is finished.
+	TriggerRelay(RELAY_LOBBY_DOORS_UNLOCK);
+	TriggerRelay(RELAY_LOBBY_DOORS_OPEN);
 }
