@@ -94,6 +94,11 @@ stock void TF2_DisableTimer()
 	AcceptEntityInput(entity, "Disable");
 }
 
+stock bool TF2_IsInSetup()
+{
+	return view_as<bool>(GameRules_GetProp("m_bInSetup"));
+}
+
 /*****************************/
 //Ent Outputs
 
