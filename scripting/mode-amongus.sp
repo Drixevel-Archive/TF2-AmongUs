@@ -947,6 +947,7 @@ public Action Timer_EndVoting(Handle timer)
 
 void EjectPlayer(int client)
 {
+	//Mark the player as ejected.
 	g_Player[client].ejected = true;
 
 	//Temporary coordinates until better logic is setup with the map.

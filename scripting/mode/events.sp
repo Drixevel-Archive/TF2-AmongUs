@@ -5,6 +5,9 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 
+	//Make sure they're not marked as ejected if they spawn or are respawned.
+	g_Player[client].ejected = false;
+
 	if (!IsFakeClient(client))
 		SendHud(client);
 
