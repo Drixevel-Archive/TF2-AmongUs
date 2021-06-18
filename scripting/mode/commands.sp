@@ -22,6 +22,12 @@ public Action Command_Role(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_GameSettings(int client, int args)
+{
+	OpenSettingsMenu(client);
+	return Plugin_Handled;
+}
+
 public Action Command_ReloadColors(int client, int args)
 {
 	ParseColors();

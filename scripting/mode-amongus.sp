@@ -81,6 +81,8 @@ Handle g_Hud;
 StringMap g_GameSettings;
 ArrayList g_CleanEntities;
 
+char g_UpdatingGameSetting[MAXPLAYERS + 1][32];
+
 enum Roles
 {
 	Role_Crewmate,
@@ -198,6 +200,7 @@ public void OnPluginStart()
 
 	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
 	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
+	RegConsoleCmd("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
 
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
@@ -533,4 +536,20 @@ void ParseTasks()
 	}
 
 	LogMessage("Detected %i tasks for this map.", g_TotalTasks);
+}
+
+public void OnClientSayCommand_Post(int client, const char[] command, const char[] sArgs)
+{
+	if (strlen(g_UpdatingGameSetting[client]) > 0)
+	{
+
+		char sValue[32];
+		strcopy(sValue, sizeof(sValue), sArgs);
+		TrimString(sValue);
+
+		SetGameSetting_String(g_UpdatingGameSetting[client], sValue);
+
+		g_UpdatingGameSetting[client][0] = '\0';
+		OpenSettingsMenu(client);
+	}
 }
