@@ -732,3 +732,27 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 		OpenSettingsMenu(client);
 	}
 }
+
+public void OnGameFrame()
+{
+	//Get the current amount of players on a team in the server.
+	int count = GetTotalPlayers();
+
+	//If it's during the round and there's less than 2 players on the server then end the round since this mode requires 3 players to play.
+	if (!TF2_IsInSetup() && count < 2 && !g_BetweenRounds)
+	{
+		g_BetweenRounds = true;
+		TF2_ForceWin(TFTeam_Unassigned);
+	}
+
+	//If there's less than 2 players then make sure the timer's paused and send a hud message saying the mode requires 3 players to play.
+	if (count < 2)
+	{
+		if (!TF2_IsTimerPaused())
+			TF2_PauseTimer();
+		
+		PrintCenterTextAll("3 players required to start.");
+	}
+	else if (count >= 2 && TF2_IsTimerPaused()) //If there's more than 2 players and the timer's paused then unpause it.
+		TF2_ResumeTimer();
+}
