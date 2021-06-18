@@ -309,6 +309,17 @@ public void OnPluginStart()
 			if (IsClientInGame(i) && !IsFakeClient(i))
 				SendHud(i);
 	}
+
+	RegConsoleCmd("sm_respawn", Command_Respawn);
+}
+
+public Action Command_Respawn(int client, int args)
+{
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && !IsPlayerAlive(i))
+			TF2_RespawnPlayer(i);
+	
+	return Plugin_Handled;
 }
 
 public void OnPluginEnd()
