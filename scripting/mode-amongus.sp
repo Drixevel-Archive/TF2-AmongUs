@@ -78,6 +78,7 @@ int g_TotalColors;
 
 #include "mode/commands.sp"
 #include "mode/events.sp"
+#include "mode/gamelogic.sp"
 #include "mode/natives.sp"
 #include "mode/stocks.sp"
 
@@ -260,3 +261,4 @@ void GetRoleName(Roles role, char[] buffer, int size)
 			strcopy(buffer, size, "Imposter");
 	}
 }
+
