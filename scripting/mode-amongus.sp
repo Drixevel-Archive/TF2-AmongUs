@@ -292,6 +292,8 @@ public void OnPluginStart()
 
 	AddCommandListener(Listener_VoiceMenu, "voicemenu");
 
+	HookEntityOutput("logic_relay", "OnTrigger", OnLogicRelayTriggered);
+
 	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
 	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
 	RegConsoleCmd("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
@@ -1077,4 +1079,14 @@ void StopVenting(int client)
 
 	TF2_SetFirstPerson(client);
 	EmitSoundToClient(client, "doors/vent_open2.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+}
+
+public Action OnLogicRelayTriggered(const char[] output, int caller, int activator, float delay)
+{
+	char sName[32];
+	GetEntPropString(caller, Prop_Data, "m_iName", sName, sizeof(sName));
+	//PrintToChatAll("[%s][%i][%i][%.2f]", output, caller, activator, delay);
+
+	if (StrEqual(sName, RELAY_MEETING_BUTTON_OPEN, false) && g_Match.meeting == null)
+		CallMeeting();
 }
