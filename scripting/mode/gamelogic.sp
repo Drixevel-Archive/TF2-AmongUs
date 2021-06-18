@@ -160,6 +160,12 @@ public void Timer_On1SecRemain(const char[] output, int caller, int activator, f
 public void Timer_OnRoundStart(const char[] output, int caller, int activator, float delay)
 {
 	CPrintToChatAll("Mode: Round Started");
+
+	/////
+	//Setup glows for certain map entities.
+
+	//Give tasks a certain glow.
+	TF2_GlowEnts("*", view_as<int>({255, 255, 255, 200}), "task");
 }
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
