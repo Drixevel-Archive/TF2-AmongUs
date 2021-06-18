@@ -345,3 +345,35 @@ stock float GetAngleBetweenVectors(const float vector1[3], const float vector2[3
 
 	return degree;
 }
+
+stock void TF2_SetThirdPerson(int client)
+{
+	SetVariantInt(1);
+	AcceptEntityInput(client, "SetForcedTauntCam");
+}
+
+stock void TF2_SetFirstPerson(int client)
+{
+	SetVariantInt(0);
+	AcceptEntityInput(client, "SetForcedTauntCam");
+}
+
+stock void TF2_HidePlayer(int client)
+{
+	SetEntityRenderMode(client, RENDER_NONE);
+
+	int entity = -1;
+	while((entity = FindEntityByClassname(entity, "tf_*")) != -1)
+		if (HasEntProp(entity, Prop_Send, "m_hOwnerEntity") && GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity") == client)
+			SetEntityRenderMode(entity, RENDER_NONE);
+}
+
+stock void TF2_ShowPlayer(int client)
+{
+	SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+
+	int entity = -1;
+	while((entity = FindEntityByClassname(entity, "tf_*")) != -1)
+		if (HasEntProp(entity, Prop_Send, "m_hOwnerEntity") && GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity") == client)
+			SetEntityRenderMode(entity, RENDER_NORMAL);
+}
