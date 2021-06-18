@@ -277,6 +277,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
 	RegAdminCmd("sm_setowner", Command_SetOwner, ADMFLAG_GENERIC, "Sets a specific player to own the match.");
 	RegAdminCmd("sm_removeowner", Command_RemoveOwner, ADMFLAG_GENERIC, "Removes the current owner if there is one.");
+	RegAdminCmd("sm_respawn", Command_Respawn, ADMFLAG_SLAY, "Respawn all players who are actively dead on teams.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
@@ -316,17 +317,6 @@ public void OnPluginStart()
 			if (IsClientInGame(i) && !IsFakeClient(i))
 				SendHud(i);
 	}
-
-	RegConsoleCmd("sm_respawn", Command_Respawn);
-}
-
-public Action Command_Respawn(int client, int args)
-{
-	for (int i = 1; i <= MaxClients; i++)
-		if (IsClientInGame(i) && !IsPlayerAlive(i))
-			TF2_RespawnPlayer(i);
-	
-	return Plugin_Handled;
 }
 
 public void OnPluginEnd()
