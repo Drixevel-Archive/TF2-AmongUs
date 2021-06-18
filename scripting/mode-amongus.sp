@@ -78,6 +78,7 @@ bool g_Late;
 
 Handle g_Hud;
 
+StringMap g_GameSettings;
 ArrayList g_CleanEntities;
 
 enum Roles
@@ -147,6 +148,7 @@ int g_TotalTasks;
 
 #include "mode/commands.sp"
 #include "mode/events.sp"
+#include "mode/gamesettings.sp"
 #include "mode/hooks.sp"
 #include "mode/gamelogic.sp"
 #include "mode/menus.sp"
@@ -200,6 +202,9 @@ public void OnPluginStart()
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
 
+	//Stores all game settings.
+	g_GameSettings = new StringMap();
+
 	//Entity classnames present in this array will be automatically deleted on creation.
 	g_CleanEntities = new ArrayList(ByteCountToCells(32));
 	g_CleanEntities.PushString("tf_ammo_pack");
@@ -208,6 +213,7 @@ public void OnPluginStart()
 	g_Hud = CreateHudSynchronizer();
 
 	ParseColors();
+	ParseGameSettings();
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
