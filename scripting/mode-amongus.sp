@@ -103,6 +103,9 @@ enum struct Player
 	Roles role;
 	int target;
 
+	bool ejected;
+	Handle ejectedtimer;
+
 	float deathorigin[3];
 	int neardeath;
 
@@ -121,6 +124,9 @@ enum struct Player
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
 		this.target = -1;
+
+		this.ejected = false;
+		this.ejectedtimer = null;
 
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
@@ -144,6 +150,9 @@ enum struct Player
 		this.role = Role_Crewmate;
 		this.target = -1;
 
+		this.ejected = false;
+		StopTimer(this.ejectedtimer);
+
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
@@ -154,7 +163,7 @@ enum struct Player
 		this.neartask = -1;
 
 		this.taskticks = 0;
-		this.doingtask = null;
+		StopTimer(this.doingtask);
 
 		this.voted_for = -1;
 		this.voted_to = 0;
@@ -452,6 +461,20 @@ public void OnClientDisconnect_Post(int client)
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
+	if (IsPlayerAlive(client) && g_Player[client].ejected)
+	{
+		float origin[3];
+		GetClientAbsOrigin(client, origin);
+		origin[0] -= 3.0;
+		origin[2] += 0.1;
+
+		float vecAngles[3];
+		GetClientAbsAngles(client, vecAngles);
+		RotateYaw(vecAngles, 10.0);
+
+		TeleportEntity(client, origin, vecAngles, NULL_VECTOR);
+	}
+
 	switch (g_Player[client].role)
 	{
 		case Role_Crewmate:
@@ -891,8 +914,7 @@ public Action Timer_EndVoting(Handle timer)
 
 		if (GetVotePercent(g_Player[i].voted_to, total) > percentage)
 		{
-			//TODO: Make this spicier.
-			ForcePlayerSuicide(i);
+			EjectPlayer(i);
 
 			if (confirm)
 				CPrintToChatAll("%N has been ejected! He was %san Imposter!", i, g_Player[i].role != Role_Imposter ? "NOT " : "");
@@ -920,4 +942,28 @@ public Action Timer_EndVoting(Handle timer)
 
 	g_Match.meeting = null;
 	return Plugin_Stop;
+}
+
+void EjectPlayer(int client)
+{
+	g_Player[client].ejected = true;
+
+	//Temporary coordinates until better logic is setup with the map.
+	TeleportEntity(client, view_as<float>({640.0, -1500.0, 500.0}), view_as<float>({0.0, 90.0, 0.0}), view_as<float>({0.0, 0.0, 0.0}));
+
+	//Create The timer so we know they're gonna be dead after a bit of being ejected.
+	StopTimer(g_Player[client].ejectedtimer);
+	g_Player[client].ejectedtimer = CreateTimer(10.0, Timer_Suicide, GetClientUserId(client));
+}
+
+public Action Timer_Suicide(Handle timer, any data)
+{
+	int client;
+	if ((client = GetClientOfUserId(data)) > 0)
+	{
+		if (IsClientInGame(client) && IsPlayerAlive(client) && g_Player[client].ejected)
+			ForcePlayerSuicide(client);
+		
+		g_Player[client].ejectedtimer = null;
+	}
 }
