@@ -206,6 +206,7 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 			}
 
 			g_Player[param1].voted_for = target;
+			g_Player[target].voted_to++;
 
 			if (param1 == target)
 				CPrintToChatAll("{H1}%N {default}voted for {H2}Themself!", param1);

@@ -112,6 +112,7 @@ enum struct Player
 	Handle doingtask;
 
 	int voted_for;
+	int voted_to;
 
 	void Init()
 	{
@@ -132,6 +133,7 @@ enum struct Player
 		this.doingtask = null;
 
 		this.voted_for = -1;
+		this.voted_to = 0;
 	}
 
 	void Clear()
@@ -153,6 +155,7 @@ enum struct Player
 		this.doingtask = null;
 
 		this.voted_for = -1;
+		this.voted_to = 0;
 	}
 }
 
@@ -866,15 +869,36 @@ public Action Timer_EndVoting(Handle timer)
 		return Plugin_Continue;
 	}
 
+	int total = GetTotalAlivePlayers();
+	bool confirm = GetGameSetting_Bool("confirm_ejects");
+
 	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || !IsPlayerAlive(i))
+			continue;
+		
 		g_Player[i].voted_for = -1;
 
+		if (GetVotePercent(g_Player[i].voted_to, total) > 0.75)
+		{
+			//TODO: Make this spicier.
+			ForcePlayerSuicide(i);
+
+			if (confirm)
+				CPrintToChatAll("%N has been ejected! He was %san Imposter!", i, g_Player[i].role != Role_Imposter ? "NOT " : "");
+			else
+				CPrintToChatAll("%N has been ejected!", i);
+		}
+		
+		g_Player[i].voted_to = 0;
+	}
 	PrintCenterTextAll("Emergency Meeting: Ended");
 
 	TriggerRelay("meeting_button_unlock");
 
 	TriggerRelay("lobby_doors_unlock");
 	TriggerRelay("lobby_doors_open");
+
 
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && IsPlayerAlive(i))
