@@ -462,6 +462,13 @@ stock bool GetGroundCoordinates(float start[3], float buffer[3], float distance 
 public bool ___TraceEntityFilter_NoPlayers(int entity, int contentsMask, any data)
 {
 	return entity != data && entity > MaxClients;
+}
+
+stock void TF2_PlayDenySound(int client)
+{
+	EmitGameSoundToClient(client, "Player.DenyWeaponSelection");
+}
+
 stock void TF2Attrib_ApplyMoveSpeedBonus(int client, float value)
 {
 	TF2Attrib_SetByName(client, "move speed bonus", 1.0 + value);
