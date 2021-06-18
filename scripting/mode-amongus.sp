@@ -27,7 +27,7 @@ part: <part name>
 #define PLUGIN_VERSION "1.0.0"
 
 //Debug mode to make it easier to work on the mode.
-#define DEBUG
+//#define DEBUG
 
 #define NO_COLOR -1
 
