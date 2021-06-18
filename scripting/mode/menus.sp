@@ -41,6 +41,11 @@ public int MenuHandler_Colors(Menu menu, MenuAction action, int param1, int para
 
 void OpenSettingsMenu(int client)
 {
+	if (!IsAdmin(client) && client != g_GameOwner)
+	{
+		CPrintToChat(client, "You are not currently the game owner, you aren't allowed to change game settings.");
+		return;
+	}
 
 	Menu menu = new Menu(MenuHandler_GameSettings);
 	menu.SetTitle("[Mode] Settings %s", IsAdmin(client) ? "(ADMIN)" : "");
@@ -124,6 +129,11 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 	{
 		case MenuAction_Select:
 		{
+			if (!IsAdmin(param1) && param1 != g_GameOwner)
+			{
+				CPrintToChat(param1, "You are not currently the game owner, you aren't allowed to change game settings.");
+				return;
+			}
 			
 			char sInfo[32];
 			menu.GetItem(param2, sInfo, sizeof(sInfo));

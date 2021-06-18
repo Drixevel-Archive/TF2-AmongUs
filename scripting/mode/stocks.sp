@@ -206,4 +206,7 @@ stock void TF2_GlowEnts(const char[] classname, int color[4], const char[] name 
 
 		TF2_CreateGlow(entity, color);
 	}
+stock bool IsAdmin(int client)
+{
+	return CheckCommandAccess(client, "", ADMFLAG_GENERIC, true);
 }

@@ -81,6 +81,7 @@ Handle g_Hud;
 StringMap g_GameSettings;
 ArrayList g_CleanEntities;
 
+int g_GameOwner = -1;
 char g_UpdatingGameSetting[MAXPLAYERS + 1][32];
 
 enum Roles
@@ -339,6 +340,10 @@ public void OnClientPutInServer(int client)
 public void OnClientDisconnect_Post(int client)
 {
 	g_Player[client].Clear();
+
+	//If the owner of the game disconnects then free up the slot.
+	if (client == g_GameOwner)
+		g_GameOwner = -1;
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
@@ -542,6 +547,11 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 {
 	if (strlen(g_UpdatingGameSetting[client]) > 0)
 	{
+		if (!IsAdmin(client) && client != g_GameOwner)
+		{
+			g_UpdatingGameSetting[client][0] = '\0';
+			return;
+		}
 
 		char sValue[32];
 		strcopy(sValue, sizeof(sValue), sArgs);
