@@ -113,7 +113,9 @@ enum struct Player
 {
 	int color;
 	Roles role;
+
 	int target;
+	float lastkill;
 
 	bool ejected;
 	Handle ejectedtimer;
@@ -140,7 +142,9 @@ enum struct Player
 	{
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
+
 		this.target = -1;
+		this.lastkill = -1.0;
 
 		this.ejected = false;
 		this.ejectedtimer = null;
@@ -170,7 +174,9 @@ enum struct Player
 	{
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
+
 		this.target = -1;
+		this.lastkill = -1.0;
 
 		this.ejected = false;
 		StopTimer(this.ejectedtimer);
@@ -542,7 +548,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					
 					GetClientAbsOrigin(i, targetorigin);
 
-					if (GetVectorDistance(origin, targetorigin) > 100.0)
+					if (GetVectorDistance(origin, targetorigin) > GetGameSetting_Float("kill_distance"))
 					{
 						if (g_Player[client].target == i)
 						{
@@ -798,8 +804,16 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	}
 	else if (g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
 	{
+		if (g_Player[client].lastkill > 0 && g_Player[client].lastkill > GetGameTime())
+		{
+			TF2_PlayDenySound(client);
+			CPrintToChat(client, "You must wait {H1}%.2f {default}seconds before executing another person.", (g_Player[client].lastkill - GetGameTime()));
+			return Plugin_Stop;
+		}
+
 		SDKHooks_TakeDamage(g_Player[client].target, 0, client, 99999.0, DMG_SLASH);
 		g_Player[client].target = -1;
+		g_Player[client].lastkill = GetGameTime() + GetGameSetting_Float("kill_cooldown");
 		PrintCenterText(client, "");
 	}
 	else if (g_Player[client].nearvent != -1)
@@ -978,7 +992,7 @@ void CallMeeting(int client = -1, bool button = false)
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
 			g_Player[i].target = -1;
-			
+
 			TF2_RespawnPlayer(i);
 			SetEntityMoveType(i, MOVETYPE_NONE);
 		}
