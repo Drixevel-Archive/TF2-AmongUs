@@ -38,6 +38,8 @@ task: <task name>
 /*****************************/
 //Globals
 
+bool g_Late;
+
 enum Roles
 {
 	Role_Crewmate,
@@ -97,6 +99,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 {
 	RegPluginLibrary("mode-amongus");
 	
+
+	g_Late = late;
 	return APLRes_Success;
 }
 
@@ -117,6 +121,9 @@ public void OnPluginStart()
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientConnected(i))
 			OnClientConnected(i);
+	if (g_Late)
+	{
+	}
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
