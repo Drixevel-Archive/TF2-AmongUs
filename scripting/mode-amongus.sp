@@ -56,6 +56,8 @@ ConVar convar_Time_Round;
 
 bool g_Late;
 
+Handle g_Hud;
+
 enum Roles
 {
 	Role_Crewmate,
@@ -137,6 +139,8 @@ public void OnPluginStart()
 
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 
+	g_Hud = CreateHudSynchronizer();
+
 	ParseColors();
 
 	for (int i = 1; i <= MaxClients; i++)
@@ -149,12 +153,20 @@ public void OnPluginStart()
 	{
 		CPrintToChatAll("Mode: Setting up Round...");
 		TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
+
+		for (int i = 1; i <= MaxClients; i++)
+			if (IsClientInGame(i) && !IsFakeClient(i))
+				SendHud(i);
 	}
 }
 
 public void OnPluginEnd()
 {
 	CPrintToChatAll("Mode: Unloaded");
+
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && !IsFakeClient(i))
+			ClearSyncHud(i, g_Hud);
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
@@ -307,3 +319,19 @@ void GetRoleName(Roles role, char[] buffer, int size)
 	}
 }
 
+void SendHud(int client)
+{
+	char sHud[255];
+
+	//Mode Name
+	Format(sHud, sizeof(sHud), "%s[Mode] Among Us", sHud);
+
+	//Role
+	char sRole[32];
+	GetRoleName(g_Player[client].role, sRole, sizeof(sRole));
+
+	Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
+
+	SetHudTextParams(-1.0, -1.0, 99999.0, 255, 255, 255, 255);
+	ShowSyncHudText(client, g_Hud, sHud);
+}

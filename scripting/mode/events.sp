@@ -5,6 +5,9 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 
+	if (!IsFakeClient(client))
+		SendHud(client);
+
 	TF2_EquipWeaponSlot(client, TFWeaponSlot_Melee);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Primary);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
