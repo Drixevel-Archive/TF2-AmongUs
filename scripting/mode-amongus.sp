@@ -25,7 +25,7 @@
 
 enum Roles
 {
-	Role_Innocent,
+	Role_Crewmate,
 	Role_Imposter
 };
 
@@ -37,13 +37,13 @@ enum struct Player
 	void Init()
 	{
 		this.color = NO_COLOR;
-		this.role = Role_Innocent;
+		this.role = Role_Crewmate;
 	}
 
 	void Clear()
 	{
 		this.color = NO_COLOR;
-		this.role = Role_Innocent;
+		this.role = Role_Crewmate;
 	}
 }
 
@@ -239,8 +239,8 @@ void GetRoleName(Roles role, char[] buffer, int size)
 {
 	switch (role)
 	{
-		case Role_Innocent:
-			strcopy(buffer, size, "Innocent");
+		case Role_Crewmate:
+			strcopy(buffer, size, "Crewmate");
 		case Role_Imposter:
 			strcopy(buffer, size, "Imposter");
 	}
