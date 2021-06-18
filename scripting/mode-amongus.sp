@@ -977,6 +977,8 @@ void CallMeeting(int client = -1, bool button = false)
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
+			g_Player[i].target = -1;
+			
 			TF2_RespawnPlayer(i);
 			SetEntityMoveType(i, MOVETYPE_NONE);
 		}
