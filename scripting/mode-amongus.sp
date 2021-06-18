@@ -97,8 +97,8 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+	CPrintToChatAll("Mode: Initializing...");
 	RegPluginLibrary("mode-amongus");
-	
 
 	g_Late = late;
 	return APLRes_Success;
@@ -121,9 +121,18 @@ public void OnPluginStart()
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientConnected(i))
 			OnClientConnected(i);
+	
+	CPrintToChatAll("Mode: Loaded");
+	
 	if (g_Late)
 	{
+		CPrintToChatAll("Mode: Setting up Round...");
 	}
+}
+
+public void OnPluginEnd()
+{
+	CPrintToChatAll("Mode: Unloaded");
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 

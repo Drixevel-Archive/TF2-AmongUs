@@ -99,80 +99,80 @@ stock void TF2_DisableTimer()
 
 public void Timer_On5MinRemain(const char[] output, int caller, int activator, float delay)
 {
-
-}
-
-public void Timer_On3MinRemain(const char[] output, int caller, int activator, float delay)
-{
-
+	CPrintToChatAll("Lobby: 5 Minutes Remaining");
 }
 
 public void Timer_On4MinRemain(const char[] output, int caller, int activator, float delay)
 {
+	CPrintToChatAll("Lobby: 4 Minutes Remaining");
+}
 
+public void Timer_On3MinRemain(const char[] output, int caller, int activator, float delay)
+{
+	CPrintToChatAll("Lobby: 3 Minutes Remaining");
 }
 
 public void Timer_On2MinRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 2 Minutes Remaining");
 }
 
 public void Timer_On1MinRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 1 Minute Remaining");
 }
 
 public void Timer_On30SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 30 Seconds Remaining");
 }
 
 public void Timer_On10SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 10 Seconds Remaining");
 }
 
 public void Timer_On5SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 5 Seconds Remaining");
 }
 
 public void Timer_On4SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 4 Seconds Remaining");
 }
 
 public void Timer_On3SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 3 Seconds Remaining");
 }
 
 public void Timer_On2SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 2 Seconds Remaining");
 }
 
 public void Timer_On1SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Lobby: 1 Second Remaining");
 }
 
 public void Timer_OnRoundStart(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Mode: Round Started");
 }
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Mode: Round Finished");
 }
 
 public void Timer_OnSetupStart(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Mode: Setup Started");
 }
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
 {
-
+	CPrintToChatAll("Mode: Setup Finished");
 }
