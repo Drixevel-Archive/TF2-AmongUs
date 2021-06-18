@@ -109,6 +109,10 @@ int g_TotalColors;
 /*****************************/
 //Managed
 
+//Stocks and utility functions should go above the rest so the other files can access them.
+#include "mode/stocks.sp"
+#include "mode/utils.sp"
+
 #include "mode/commands.sp"
 #include "mode/events.sp"
 #include "mode/hooks.sp"
