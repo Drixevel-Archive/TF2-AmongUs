@@ -5,6 +5,7 @@ References:
 https://among-us.fandom.com/wiki/Tasks
 https://www.sportco.io/article/among-us-tasks-list-skeld-map-330951
 https://i.pinimg.com/originals/3e/4e/52/3e4e52a4f1ac53a517af367542abe407.jpg
+https://i.redd.it/tv8ef4iqszh41.png
 
 Task Entities:
 target: task
