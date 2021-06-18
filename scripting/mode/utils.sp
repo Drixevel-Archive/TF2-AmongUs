@@ -58,6 +58,15 @@ Roles GetRoleByName(const char[] name)
 	return view_as<Roles>(-1);
 }
 
+int GetTaskByName(const char[] name)
+{
+	for (int i = 0; i < g_TotalTasks; i++)
+		if (StrEqual(g_Task[i].name, name, false))
+			return i;
+	
+	return -1;
+}
+
 int GetRandomTask(int type)
 {
 	int[] tasks = new int[256];
