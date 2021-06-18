@@ -164,6 +164,9 @@ void CreateVoteMenu(int client)
 		if (!IsPlayerAlive(i))
 			draw = ITEMDRAW_DISABLED;
 		
+		if (g_Player[client].voted_for != -1)
+			draw = ITEMDRAW_DISABLED;
+		
 		for (int x = 1; x <= MaxClients; x++)
 			if (IsClientInGame(x) && IsPlayerAlive(x) && g_Player[x].voted_for == i)
 				votes++;
