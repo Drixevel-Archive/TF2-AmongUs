@@ -51,6 +51,9 @@ task: <task name>
 ConVar convar_Time_Setup;
 ConVar convar_Time_Round;
 
+ConVar convar_Hud_Position;
+ConVar convar_Hud_Color;
+
 /*****************************/
 //Globals
 
@@ -128,6 +131,9 @@ public void OnPluginStart()
 
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "99999", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
+
+	convar_Hud_Position = CreateConVar("sm_mode_amongus_hud_position", "0.0 0.0", "Where should the hud be on screen?", FCVAR_NOTIFY);
+	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
@@ -321,6 +327,38 @@ void GetRoleName(Roles role, char[] buffer, int size)
 
 void SendHud(int client)
 {
+	/////
+	//Parse the position and colors for the hud.
+
+	//Position
+	char sPosition[32];
+	convar_Hud_Position.GetString(sPosition, sizeof(sPosition));
+
+	char sPosPart[2][4];
+	ExplodeString(sPosition, " ", sPosPart, 2, 4);
+
+	float vec2DPos[2];
+	vec2DPos[0] = StringToFloat(sPosPart[0]);
+	vec2DPos[1] = StringToFloat(sPosPart[1]);
+
+	//Color
+	char sColor[32];
+	convar_Hud_Color.GetString(sColor, sizeof(sColor));
+
+	char sColorPart[4][4];
+	ExplodeString(sColor, " ", sColorPart, 4, 4);
+
+	int color[4];
+	color[0] = StringToInt(sColorPart[0]);
+	color[1] = StringToInt(sColorPart[1]);
+	color[2] = StringToInt(sColorPart[2]);
+	color[3] = StringToInt(sColorPart[3]);
+
+	//Set the parameters for the hud.
+	SetHudTextParams(vec2DPos[0], vec2DPos[1], 99999.0, color[0], color[1], color[2], color[3]);
+
+	/////
+	//Fill the buffer of text to send.
 	char sHud[255];
 
 	//Mode Name
@@ -332,6 +370,6 @@ void SendHud(int client)
 
 	Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
 
-	SetHudTextParams(-1.0, -1.0, 99999.0, 255, 255, 255, 255);
+	//Send the Hud.
 	ShowSyncHudText(client, g_Hud, sHud);
 }
