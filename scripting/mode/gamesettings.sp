@@ -68,7 +68,7 @@ stock bool SetGameSetting_String(const char[] setting, const char[] buffer)
 	return g_GameSettings.SetString(setting, buffer);
 }
 
-stock int GetGameSetting_Bool(const char[] setting)
+stock bool GetGameSetting_Bool(const char[] setting)
 {
 	char sValue[32];
 	g_GameSettings.GetString(setting, sValue, sizeof(sValue));
