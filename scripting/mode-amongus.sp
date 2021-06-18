@@ -850,7 +850,7 @@ public Action Timer_StartVoting(Handle timer)
 
 	if (g_Match.meeting_time > 0)
 	{
-		PrintCenterTextAll("Emergency Meeting: Discussion Time (%i)", g_Match.meeting_time);
+		PrintCenterTextAll("Voting Begins In: %i", g_Match.meeting_time);
 		return Plugin_Continue;
 	}
 
@@ -870,7 +870,7 @@ public Action Timer_EndVoting(Handle timer)
 
 	if (g_Match.meeting_time > 0)
 	{
-		PrintCenterTextAll("Emergency Meeting: Voting Time (%i)", g_Match.meeting_time);
+		PrintCenterTextAll("Voting Ends In: %i", g_Match.meeting_time);
 		return Plugin_Continue;
 	}
 
