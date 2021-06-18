@@ -8,8 +8,9 @@ https://i.pinimg.com/originals/3e/4e/52/3e4e52a4f1ac53a517af367542abe407.jpg
 
 Task Entities:
 target: task
-type: common/visual/short/long
 task: <task name>
+type: common/visual/short/long
+part: <part name>
 
  */
 
