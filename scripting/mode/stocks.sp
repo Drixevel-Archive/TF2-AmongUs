@@ -377,3 +377,66 @@ stock void TF2_ShowPlayer(int client)
 		if (HasEntProp(entity, Prop_Send, "m_hOwnerEntity") && GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity") == client)
 			SetEntityRenderMode(entity, RENDER_NORMAL);
 }
+
+stock void TF2_Particle(char[] name, float origin[3], int entity = -1, float angles[3] = {0.0, 0.0, 0.0}, bool resetparticles = false)
+{
+	int tblidx = FindStringTable("ParticleEffectNames");
+
+	char tmp[256];
+	int stridx = INVALID_STRING_INDEX;
+
+	for (int i = 0; i < GetStringTableNumStrings(tblidx); i++)
+	{
+		ReadStringTable(tblidx, i, tmp, sizeof(tmp));
+		if (StrEqual(tmp, name, false))
+		{
+			stridx = i;
+			break;
+		}
+	}
+
+	TE_Start("TFParticleEffect");
+	TE_WriteFloat("m_vecOrigin[0]", origin[0]);
+	TE_WriteFloat("m_vecOrigin[1]", origin[1]);
+	TE_WriteFloat("m_vecOrigin[2]", origin[2]);
+	TE_WriteVector("m_vecAngles", angles);
+	TE_WriteNum("m_iParticleSystemIndex", stridx);
+	TE_WriteNum("entindex", entity);
+	TE_WriteNum("m_iAttachType", 5);
+	TE_WriteNum("m_bResetParticles", resetparticles);
+	TE_SendToAll();
+}
+
+stock int CreateParticle(const char[] name, float origin[3], float time = 0.0, float angles[3] = {0.0, 0.0, 0.0}, float offsets[3] = {0.0, 0.0, 0.0})
+{
+	if (strlen(name) == 0)
+		return -1;
+
+	origin[0] += offsets[0];
+	origin[1] += offsets[1];
+	origin[2] += offsets[2];
+
+	int entity = CreateEntityByName("info_particle_system");
+
+	if (IsValidEntity(entity))
+	{
+		DispatchKeyValueVector(entity, "origin", origin);
+		DispatchKeyValueVector(entity, "angles", angles);
+		DispatchKeyValue(entity, "effect_name", name);
+
+		DispatchSpawn(entity);
+		ActivateEntity(entity);
+		AcceptEntityInput(entity, "Start");
+
+		if (time > 0.0)
+		{
+			char output[64];
+			Format(output, sizeof(output), "OnUser1 !self:kill::%.1f:1", time);
+			SetVariantString(output);
+			AcceptEntityInput(entity, "AddOutput");
+			AcceptEntityInput(entity, "FireUser1");
+		}
+	}
+
+	return entity;
+}
