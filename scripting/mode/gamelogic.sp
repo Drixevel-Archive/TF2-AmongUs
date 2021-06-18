@@ -14,6 +14,8 @@ stock int TF2_GetTimer()
 stock int TF2_CreateTimer(int setup_time, int round_time)
 {
 	int entity = TF2_GetTimer();
+
+	GameRules_SetProp("m_bInSetup", true);
 	
 	HookSingleEntityOutput(entity, "On5MinRemain", Timer_On5MinRemain);
 	HookSingleEntityOutput(entity, "On4MinRemain", Timer_On4MinRemain);
@@ -205,6 +207,13 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 {
 	CPrintToChatAll("{H1}Mode{default}: Round Started");
 
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		g_Player[i].deathorigin[0] = 0.0;
+		g_Player[i].deathorigin[1] = 0.0;
+		g_Player[i].deathorigin[2] = 0.0;
+	}
+
 	g_Match.tasks_current = 0;
 	g_Match.total_meetings = 0;
 
@@ -243,6 +252,8 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	for (int i = 0; i < common; i++)
 		tasks[i] = GetRandomTask(TASK_TYPE_COMMON);
 
+	g_Match.tasks_goal = 0;
+
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i))
@@ -273,12 +284,17 @@ public void Timer_OnFinished(const char[] output, int caller, int activator, flo
 	CPrintToChatAll("{H1}Mode{default}: Round Finished");
 
 	for (int i = 1; i <= MaxClients; i++)
+	{
 		g_Player[i].ejected = false;
+		ClearTasks(i);
+	}
 }
 
 public void Timer_OnSetupStart(const char[] output, int caller, int activator, float delay)
 {
 	CPrintToChatAll("{H1}Mode{default}: Setup Started");
+
+	GameRules_SetProp("m_bInSetup", true);
 
 	//Respawn all players on the map on setup so they're in the lobby.
 	TF2_RespawnAll();
@@ -300,6 +316,8 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
 {
 	CPrintToChatAll("{H1}Mode{default}: Setup Finished");
+
+	GameRules_SetProp("m_bInSetup", false);
 
 	//Unlock and open the doors whenever the lobby phase is finished.
 	TriggerRelay(RELAY_LOBBY_DOORS_UNLOCK);

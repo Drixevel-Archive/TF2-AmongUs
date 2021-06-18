@@ -134,7 +134,7 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 				CPrintToChat(param1, "You are not currently the game owner, you aren't allowed to change game settings.");
 				return;
 			}
-			
+
 			if (!TF2_IsInSetup())
 			{
 				char sInfo[32];
@@ -214,6 +214,9 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 
 			g_Player[param1].voted_for = target;
 			g_Player[target].voted_to++;
+
+			for (int i = 1; i <= MaxClients; i++)
+				
 
 			if (param1 == target)
 				CPrintToChatAll("{H1}%N {default}voted for {H2}Themself!", param1);

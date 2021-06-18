@@ -128,6 +128,12 @@ void AssignTask(int client, int task)
 	g_Player[client].tasks_completed.SetValue(sTask, 0);
 }
 
+void ClearTasks(int client)
+{
+	g_Player[client].tasks.Clear();
+	g_Player[client].tasks_completed.Clear();
+}
+
 void MuteAllClients()
 {
 	for (int client = 1; client <= MaxClients; client++)

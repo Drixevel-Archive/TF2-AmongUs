@@ -70,6 +70,11 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 	//We wait a frame here because it's required for the ragdoll to spawn after a player dies.
 	RequestFrame(NextFrame_CreateDeadBody, event.GetInt("userid"));
 
+	CreateTimer(0.2, Timer_CheckAlivePlayers);
+}
+
+public Action Timer_CheckAlivePlayers(Handle timer)
+{
 	//Get the total amount of crewmates alive.
 	int total_crewmates;
 	for (int i = 1; i <= MaxClients; i++)
@@ -77,8 +82,8 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 			total_crewmates++;
 	
 	//If no crewmates are alive then end the round and make Imposters the winner.
-	//if (total_crewmates < 1)
-	//	TF2_ForceWin(TFTeam_Red);
+	if (total_crewmates < 1)
+		TF2_ForceWin(TFTeam_Red);
 
 	int total_imposters;
 	for (int i = 1; i <= MaxClients; i++)
@@ -86,8 +91,8 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 			total_imposters++;
 	
 	//If no imposters are alive then end the round and make Crewmates the winner.
-	//if (total_imposters < 1)
-	//	TF2_ForceWin(TFTeam_Blue);
+	if (total_imposters < 1)
+		TF2_ForceWin(TFTeam_Blue);
 }
 
 public void NextFrame_CreateDeadBody(any userid)

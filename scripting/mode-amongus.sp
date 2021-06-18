@@ -491,16 +491,33 @@ public void OnClientPutInServer(int client)
 	SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 }
 
-public void OnClientDisconnect_Post(int client)
+public void OnClientDisconnect(int client)
 {
-	g_Player[client].Clear();
-
 	//If the owner of the game disconnects then free up the slot.
 	if (client == g_GameOwner)
 	{
 		g_GameOwner = -1;
 		SendHudToAll();
 	}
+
+	if (!TF2_IsInSetup())
+	{
+		int imposters;
+		for (int i = 1; i <= MaxClients; i++)
+			if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role == Role_Imposter)
+				imposters++;
+		
+		if (imposters < 1)
+		{
+			TF2_ForceWin(TFTeam_Blue);
+			CPrintToChatAll("All imposters have disconnected, Crewmates win!");
+		}
+	}
+}
+
+public void OnClientDisconnect_Post(int client)
+{
+	g_Player[client].Clear();
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
@@ -741,7 +758,7 @@ void SendHud(int client)
 	for (int i = 0; i < g_Player[client].tasks.Length; i++)
 	{
 		int task = g_Player[client].tasks.Get(i);
-		Format(sHud, sizeof(sHud), "%s\n%s %s", sHud, g_Task[task].name, IsTaskCompleted(client, task) ? "(c)" : "");
+		Format(sHud, sizeof(sHud), "%s\n%s(%i) %s", sHud, g_Task[task].name, g_Task[task].part, IsTaskCompleted(client, task) ? "(c)" : "");
 	}
 
 	//Send the Hud.
@@ -953,10 +970,10 @@ public void OnGameFrame()
 	//If there's less than 2 players then make sure the timer's paused and send a hud message saying the mode requires 3 players to play.
 	if (count < 2)
 	{
-		//if (!TF2_IsTimerPaused())
-		//	TF2_PauseTimer();
+		if (!TF2_IsTimerPaused())
+			TF2_PauseTimer();
 		
-		//PrintCenterTextAll("3 players required to start.");
+		PrintCenterTextAll("3 players required to start.");
 	}
 	else if (count >= 2 && TF2_IsTimerPaused()) //If there's more than 2 players and the timer's paused then unpause it.
 		TF2_ResumeTimer();
@@ -966,7 +983,7 @@ public void OnGameFrame()
 	if (g_Match.tasks_goal > 0 && g_Match.tasks_current >= g_Match.tasks_goal && !g_BetweenRounds)
 	{
 		g_BetweenRounds = true;
-		//TF2_ForceWin(TFTeam_Blue);
+		TF2_ForceWin(TFTeam_Blue);
 	}
 }
 
@@ -989,6 +1006,10 @@ void CallMeeting(int client = -1, bool button = false)
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
+		g_Player[i].deathorigin[0] = 0.0;
+		g_Player[i].deathorigin[1] = 0.0;
+		g_Player[i].deathorigin[2] = 0.0;
+
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
 			g_Player[i].target = -1;
