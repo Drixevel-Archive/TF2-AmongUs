@@ -145,5 +145,20 @@ public Action Command_Respawn(int client, int args)
 	CPrintToChatAll("{H1}%N {default}has respawnd all dead players on teams.");
 	return Plugin_Handled;
 }
+
+public Action Command_Eject(int client, int args)
+{
+	if (client == 0)
+		return Plugin_Handled;
+	
+	int target = GetClientAimTarget(client, true);
+
+	if (target < 1)
+	{
+		CReplyToCommand(client, "Target not found, please aim your crosshair at them.");
+		return Plugin_Handled;
+	}
+
+	EjectPlayer(client);
 	return Plugin_Handled;
 }

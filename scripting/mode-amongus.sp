@@ -287,6 +287,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_setowner", Command_SetOwner, ADMFLAG_GENERIC, "Sets a specific player to own the match.");
 	RegAdminCmd("sm_removeowner", Command_RemoveOwner, ADMFLAG_GENERIC, "Removes the current owner if there is one.");
 	RegAdminCmd("sm_respawn", Command_Respawn, ADMFLAG_SLAY, "Respawn all players who are actively dead on teams.");
+	RegAdminCmd("sm_eject", Command_Eject, ADMFLAG_SLAY, "Eject players from the map and out of the match.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
