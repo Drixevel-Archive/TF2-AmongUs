@@ -201,3 +201,30 @@ public Action Command_GiveTask(int client, int args)
 
 	return Plugin_Handled;
 }
+
+public Action Command_ListImposters(int client, int args)
+{
+	char sImposters[255];
+	FormatEx(sImposters, sizeof(sImposters), "Imposters: {H1}");
+
+	bool found; bool first = true;
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && g_Player[i].role == Role_Imposter)
+		{
+			if (first)
+				Format(sImposters, sizeof(sImposters), "%s%N", sImposters, i);
+			else
+				Format(sImposters, sizeof(sImposters), "%s, %N", sImposters, i);
+			
+			found = true;
+			first = false;
+		}
+	}
+
+	if (!found)
+		Format(sImposters, sizeof(sImposters), "%s<None Found>", sImposters);
+
+	CReplyToCommand(client, sImposters);
+	return Plugin_Handled;
+}
