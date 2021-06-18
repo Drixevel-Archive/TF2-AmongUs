@@ -33,10 +33,10 @@ stock int TF2_CreateTimer(int setup_time, int round_time)
 	HookSingleEntityOutput(entity, "OnSetupFinished", Timer_OnSetupFinished);
 	
 	char sSetup[32];
-	IntToString(setup + 1, sSetup, sizeof(sSetup));
+	IntToString(setup_time + 1, sSetup, sizeof(sSetup));
 	
 	char sRound[32];
-	IntToString(round + 1, sRound, sizeof(sRound));
+	IntToString(round_time + 1, sRound, sizeof(sRound));
 	
 	DispatchKeyValue(entity, "reset_time", "1");
 	DispatchKeyValue(entity, "show_time_remaining", "1");
