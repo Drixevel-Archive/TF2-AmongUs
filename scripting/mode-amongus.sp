@@ -356,6 +356,50 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 {
 	switch (g_Player[client].role)
 	{
+		case Role_Crewmate:
+		{
+			if (IsPlayerAlive(client))
+			{
+				int target = GetClientAimTarget(client, false);
+
+				if (target != -1)
+				{
+					float origin[3];
+					GetClientEyePosition(client, origin);
+
+					float origin2[3];
+					GetEntPropVector(target, Prop_Send, "m_vecOrigin", origin2);
+
+					if (GetVectorDistance(origin, origin2) <= 100.0)
+					{
+						char sPart[32];
+						for (int i = 0; i < g_TotalTasks; i++)
+						{
+							if (g_Task[i].entity == target)
+							{
+								g_Player[client].target = target;
+								if (g_Task[i].part > 0)
+									FormatEx(sPart, sizeof(sPart), " (Part %i)", g_Task[i].part);
+								
+								PrintCenterText(client, "%s%s", g_Task[i].name, sPart);
+								break;
+							}
+						}
+					}
+					else if (g_Player[client].target == target)
+					{
+						g_Player[client].target = -1;
+						PrintCenterText(client, "");
+					}
+				}
+				else if (g_Player[client].target != -1)
+				{
+					g_Player[client].target = -1;
+					PrintCenterText(client, "");
+				}
+			}
+		}
+
 		case Role_Imposter:
 		{
 			if (IsPlayerAlive(client) && !TF2_IsInSetup())
@@ -388,18 +432,6 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					}
 				}
 			}
-		}
-	}
-
-	if (IsPlayerAlive(client))
-	{
-		int target = GetClientAimTarget(client, false);
-
-		if (target != -1)
-		{
-			for (int i = 0; i < g_TotalTasks; i++)
-				if (g_Task[i].entity == target)
-					PrintCenterText(client, g_Task[i].name);
 		}
 	}
 
