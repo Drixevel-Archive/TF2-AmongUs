@@ -20,7 +20,7 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 		AssignColor(client);
 }
 
-public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
+public Action Event_OnPlayerDeathPre(Event event, const char[] name, bool dontBroadcast)
 {
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	
@@ -33,6 +33,19 @@ public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroad
 	
 	//Actively hide the feed from this specific client.
 	event.BroadcastDisabled = hidefeed;
+}
+
+public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
+{
+	//We wait a frame here because it's required for the ragdoll to spawn after a player dies.
+	RequestFrame(NextFrame_CreateDeadBody, event.GetInt("userid"));
+}
+
+public void NextFrame_CreateDeadBody(any userid)
+{
+	int client;
+	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client) && IsPlayerAlive(client))
+		TF2_SpawnRagdoll(client, 99999.0, RAG_NOHEAD | RAG_NOTORSO);
 }
 
 public void Event_OnPostInventoryApplication(Event event, const char[] name, bool dontBroadcast)

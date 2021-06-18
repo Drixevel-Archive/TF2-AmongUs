@@ -151,7 +151,8 @@ public void OnPluginStart()
 	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
-	HookEvent("player_death", Event_OnPlayerDeath, EventHookMode_Pre);
+	HookEvent("player_death", Event_OnPlayerDeathPre, EventHookMode_Pre);
+	HookEvent("player_death", Event_OnPlayerDeath);
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
