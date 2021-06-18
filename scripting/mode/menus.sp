@@ -135,11 +135,18 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 				return;
 			}
 			
-			char sInfo[32];
-			menu.GetItem(param2, sInfo, sizeof(sInfo));
-
-			strcopy(g_UpdatingGameSetting[param1], 32, sInfo);
-			CPrintToChat(param1, "Please type in chat the new value for key '%s':", sInfo);
+			if (!TF2_IsInSetup())
+			{
+				char sInfo[32];
+				menu.GetItem(param2, sInfo, sizeof(sInfo));
+				strcopy(g_UpdatingGameSetting[param1], 32, sInfo);
+				CPrintToChat(param1, "Please type in chat the new value for key '%s':", sInfo);
+			}
+			else
+			{
+				CPrintToChat(param1, "You are not allowed to change settings while the match is live.");
+				OpenSettingsMenu(param1);
+			}
 		}
 
 		case MenuAction_End:
