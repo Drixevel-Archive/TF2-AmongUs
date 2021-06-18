@@ -60,6 +60,8 @@ ConVar convar_Time_Round;
 ConVar convar_Hud_Position;
 ConVar convar_Hud_Color;
 
+ConVar convar_Setting_ToggleTaskGlows;
+
 /*****************************/
 //Globals
 
@@ -151,6 +153,8 @@ public void OnPluginStart()
 
 	convar_Hud_Position = CreateConVar("sm_mode_amongus_hud_position", "0.0 0.0", "Where should the hud be on screen?", FCVAR_NOTIFY);
 	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
+
+	convar_Setting_ToggleTaskGlows = CreateConVar("sm_mode_amongus_toggle_task_colors", "1", "Should the glows for tasks be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
 	HookEvent("player_death", Event_OnPlayerDeathPre, EventHookMode_Pre);
