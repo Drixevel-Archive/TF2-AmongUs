@@ -35,6 +35,9 @@ task: <task name>
 /*****************************/
 //ConVars
 
+ConVar convar_Time_Setup;
+ConVar convar_Time_Round;
+
 /*****************************/
 //Globals
 
@@ -106,6 +109,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
+	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "99999", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
+
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 
@@ -127,6 +133,7 @@ public void OnPluginStart()
 	if (g_Late)
 	{
 		CPrintToChatAll("Mode: Setting up Round...");
+		TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
 	}
 }
 
