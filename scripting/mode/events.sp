@@ -46,6 +46,8 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	//If a player is joining the server and they don't have a color, make sure they do.
 	if (g_Player[client].color == NO_COLOR)
 		AssignColor(client);
+	
+	SetPlayerSpeed(client);
 }
 
 public Action Event_OnPlayerDeathPre(Event event, const char[] name, bool dontBroadcast)
