@@ -177,6 +177,11 @@ public void OnPluginStart()
 		if (IsClientInGame(i))
 			OnClientPutInServer(i);
 	}
+
+	int entity = -1; char classname[32];
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
+		if (GetEntityClassname(entity, classname, sizeof(classname)))
+			OnEntityCreated(entity, classname);
 	
 	CPrintToChatAll("Mode: Loaded");
 	
@@ -420,4 +425,12 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	}
 
 	return Plugin_Stop;
+}
+
+public void OnEntityCreated(int entity, const char[] classname)
+{
+	SDKHook(entity, SDKHook_Spawn, OnEntitySpawn);
+
+	if (g_Late)
+		OnEntitySpawn(entity);
 }

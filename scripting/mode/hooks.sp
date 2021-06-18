@@ -13,3 +13,8 @@ public void OnTakeDamagePost(int victim, int attacker, int inflictor, float dama
 {
 
 }
+
+public Action OnEntitySpawn(int entity)
+{
+	return Plugin_Continue;
+}
