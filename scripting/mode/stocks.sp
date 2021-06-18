@@ -25,3 +25,25 @@ stock int TF2_GetActiveSlot(int client)
 
 	return -1;
 }
+
+stock bool TriggerRelay(const char[] name)
+{
+	return TriggerEntity(name, "logic_relay");
+}
+
+stock bool TriggerEntity(const char[] name, const char[] classname)
+{
+	int entity = -1; char sName[256]; bool triggered;
+	while ((entity = FindEntityByClassname(entity, classname)) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+		
+		if (StrEqual(sName, name, false))
+		{
+			AcceptEntityInput(entity, "Trigger");
+			triggered = true;
+		}
+	}
+	
+	return triggered;
+}
