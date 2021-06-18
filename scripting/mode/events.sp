@@ -20,6 +20,21 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 		AssignColor(client);
 }
 
+public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
+{
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	
+	//Defaults to true so the killfeed is OFF.
+	bool hidefeed = true;
+
+	//Doesn't matter if people see the kill feed during the lobby phase or Imposters see the kill feed during the match.
+	if (TF2_IsInSetup() || g_Player[attacker].role == Role_Imposter)
+		hidefeed = false;
+	
+	//Actively hide the feed from this specific client.
+	event.BroadcastDisabled = hidefeed;
+}
+
 public void Event_OnPostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
