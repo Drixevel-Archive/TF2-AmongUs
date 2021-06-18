@@ -96,12 +96,16 @@ enum struct Player
 	int color;
 	Roles role;
 	int target;
+	ArrayList tasks;
+	StringMap tasks_completed;
 
 	void Init()
 	{
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
 		this.target = -1;
+		this.tasks = new ArrayList();
+		this.tasks_completed = new StringMap();
 	}
 
 	void Clear()
@@ -109,6 +113,8 @@ enum struct Player
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
 		this.target = -1;
+		delete this.tasks;
+		delete this.tasks_completed;
 	}
 }
 

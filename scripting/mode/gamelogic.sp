@@ -179,6 +179,51 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	//Give tasks a certain glow.
 	if (convar_Setting_ToggleTaskGlows.BoolValue)
 		TF2_GlowEnts("*", view_as<int>({255, 255, 255, 200}), "task");
+	
+	//Assign random players as Imposter and other roles automatically.
+	int amount = GetGameSetting_Int("imposters");
+	int current;
+	int total = GetTotalPlayers();
+
+	//If there isn't enough players, lets make sure the while look doesn't timeout.
+	if (amount > total)
+		amount = total;
+	
+	while (amount >= current)
+	{
+		int client = GetRandomClient();
+		g_Player[client].role = Role_Imposter;
+		SendHud(client);
+		CPrintToChat(client, "You are an IMPOSTER!");
+		current++;
+	}
+
+	//Assign tasks automatically to players at the start of the round.
+
+	int long = GetGameSetting_Int("long_tasks");
+	int short = GetGameSetting_Int("short_tasks");
+	int common = GetGameSetting_Int("common_tasks");
+
+	int[] tasks = new int[common];
+	for (int i = 0; i < common; i++)
+		tasks[i] = GetRandomTask(TASK_TYPE_COMMON);
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+		
+		for (int x = 0; x < long; x++)
+			AssignRandomTask(i, TASK_TYPE_LONG);
+		
+		for (int x = 0; x < short; x++)
+			AssignRandomTask(i, TASK_TYPE_SHORT);
+		
+		for (int x = 0; x < common; x++)
+			AssignTask(i, tasks[i]);
+		
+		SendHud(i);
+	}
 }
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
@@ -201,7 +246,6 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 	TriggerRelay(RELAY_MEETING_BUTTON_LOCK);
 
 	//Parse the available tasks on the map by parsing entity names and logic.
-	//TODO: Move this somewhere else to be called less.
 	ParseTasks();
 }
 

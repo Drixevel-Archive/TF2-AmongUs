@@ -57,3 +57,32 @@ Roles GetRoleByName(const char[] name)
 	//Return -1 which just means this role wasn't found.
 	return view_as<Roles>(-1);
 }
+
+int GetRandomTask(int type)
+{
+	int[] tasks = new int[256];
+	int amount;
+
+	for (int i = 0; i < g_TotalTasks; i++)
+		if ((g_Task[i].type & type) == type)
+			tasks[amount++] = i;
+	
+	return tasks[GetRandomInt(0, amount - 1)];
+}
+
+void AssignRandomTask(int client, int type)
+{
+	int task = GetRandomTask(type);
+	
+	AssignTask(client, task);
+}
+
+void AssignTask(int client, int task)
+{
+	g_Player[client].tasks.Push(task);
+
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	g_Player[client].tasks_completed.SetValue(sTask, 0);
+}
