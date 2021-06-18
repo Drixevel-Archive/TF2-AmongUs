@@ -515,8 +515,14 @@ void SendHud(int client)
 	//Fill the buffer of text to send.
 	char sHud[255];
 
+	//Owner
+	char[] sOwner = new char[MAX_NAME_LENGTH + 32];
+
+	if (g_GameOwner != -1)
+		FormatEx(sOwner, MAX_NAME_LENGTH + 32, " (Owner: %N)", g_GameOwner);
+
 	//Mode Name
-	Format(sHud, sizeof(sHud), "%s[Mode] Among Us", sHud);
+	Format(sHud, sizeof(sHud), "%s[Mode] Among Us%s", sHud, sOwner);
 
 	//Role
 	char sRole[32];
