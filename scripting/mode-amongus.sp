@@ -29,6 +29,13 @@ task: <task name>
 
 #define NO_COLOR -1
 
+//Types of tasks. (They can have multiple)
+#define TASK_TYPE_LONG (1<<0)
+#define TASK_TYPE_SHORT (1<<1)
+#define TASK_TYPE_COMMON (1<<2)
+#define TASK_TYPE_VISUAL (1<<3)
+#define TASK_TYPE_CUSTOM (1<<4)
+
 /////
 //It's easier to give maps complete control of the plugin by just using relays and firing those when needed.
 
@@ -110,6 +117,25 @@ enum struct Colors
 
 Colors g_Colors[256];
 int g_TotalColors;
+
+enum struct Task
+{
+	char name[32];
+	int type;
+	int part;
+	int entity;
+
+	void Add(const char[] name, int type, int part, int entity)
+	{
+		strcopy(this.name, sizeof(Task::name), name);
+		this.type = type;
+		this.part = part;
+		this.entity = entity;
+	}
+}
+
+Task g_Task[256];
+int g_TotalTasks;
 
 /*****************************/
 //Managed
@@ -446,4 +472,46 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 	if (g_Late)
 		OnEntitySpawn(entity);
+}
+
+void ParseTasks()
+{
+	g_TotalTasks = 0;
+
+	int entity = -1; char sName[32];
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+		if (!StrEqual(sName, "task", false))
+			continue;
+		
+		char sTask[32];
+		if (!GetCustomKeyValue(entity, "task", sTask, sizeof(sTask)))
+			continue;
+		
+		char sType[32];
+		if (!GetCustomKeyValue(entity, "type", sType, sizeof(sType)))
+			continue;
+		
+		int type;
+		if (StrContains(sType, "long", false) != -1)
+			type |= TASK_TYPE_LONG;
+		if (StrContains(sType, "short", false) != -1)
+			type |= TASK_TYPE_SHORT;
+		if (StrContains(sType, "common", false) != -1)
+			type |= TASK_TYPE_COMMON;
+		if (StrContains(sType, "visual", false) != -1)
+			type |= TASK_TYPE_VISUAL;
+		if (StrContains(sType, "custom", false) != -1)
+			type |= TASK_TYPE_CUSTOM;
+		
+		char sPart[32];
+		GetCustomKeyValue(entity, "part", sPart, sizeof(sPart));
+		
+		g_Task[g_TotalTasks].Add(sTask, type, StringToInt(sPart), entity);
+		g_TotalTasks++;
+	}
+
+	LogMessage("Detected %i tasks for this map.", g_TotalTasks);
 }

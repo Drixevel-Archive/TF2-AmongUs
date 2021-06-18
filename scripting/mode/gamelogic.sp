@@ -199,6 +199,10 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 	//Lock the meeting button so it can't be used during the lobby phase.
 	TriggerRelay(RELAY_MEETING_BUTTON_LOCK);
+
+	//Parse the available tasks on the map by parsing entity names and logic.
+	//TODO: Move this somewhere else to be called less.
+	ParseTasks();
 }
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
