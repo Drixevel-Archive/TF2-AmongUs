@@ -44,8 +44,11 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 public void NextFrame_CreateDeadBody(any userid)
 {
 	int client;
-	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client) && IsPlayerAlive(client))
+	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client))
+	{
 		TF2_SpawnRagdoll(client, 99999.0, RAG_NOHEAD | RAG_NOTORSO);
+		GetClientAbsOrigin(client, g_Player[client].deathorigin);
+	}
 }
 
 public void Event_OnPostInventoryApplication(Event event, const char[] name, bool dontBroadcast)

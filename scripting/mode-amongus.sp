@@ -101,6 +101,9 @@ enum struct Player
 	Roles role;
 	int target;
 
+	float deathorigin[3];
+	int neardeath;
+
 	ArrayList tasks;
 	StringMap tasks_completed;
 	int neartask;
@@ -113,6 +116,11 @@ enum struct Player
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
 		this.target = -1;
+
+		this.deathorigin[0] = 0.0;
+		this.deathorigin[0] = 0.0;
+		this.deathorigin[0] = 0.0;
+		this.neardeath = -1;
 
 		this.tasks = new ArrayList();
 		this.tasks_completed = new StringMap();
@@ -127,6 +135,11 @@ enum struct Player
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
 		this.target = -1;
+
+		this.deathorigin[0] = 0.0;
+		this.deathorigin[0] = 0.0;
+		this.deathorigin[0] = 0.0;
+		this.neardeath = -1;
 
 		delete this.tasks;
 		delete this.tasks_completed;
@@ -495,6 +508,26 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				PrintCenterText(client, "%s%s", g_Task[i].name, sPart);
 			}
 		}
+
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (!IsClientInGame(i) || IsPlayerAlive(i))
+				continue;
+			
+			if (GetVectorDistance(origin, g_Player[i].deathorigin) > 100.0)
+			{
+				if (g_Player[client].neardeath == i)
+				{
+					g_Player[client].neardeath = -1;
+					PrintCenterText(client, "");
+				}
+			}
+			else
+			{
+				g_Player[client].neardeath = i;
+				PrintCenterText(client, "Near Dead Body\nInteract with the by by calling for MEDIC!");
+			}
+		}
 	}
 
 	return Plugin_Continue;
@@ -606,7 +639,12 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	if (!StrEqual(sVoice, "0", false) || !StrEqual(sVoice2, "0", false))
 		return Plugin_Continue;
 	
-	if (g_Player[client].neartask != -1 && g_Player[client].doingtask == null && !TF2_IsInSetup())
+	if (g_Player[client].neardeath != -1 && !TF2_IsInSetup())
+	{
+		g_Player[client].neardeath = -1;
+		CallMeeting();
+	}
+	else if (g_Player[client].neartask != -1 && g_Player[client].doingtask == null && !TF2_IsInSetup())
 	{
 		int task = g_Player[client].neartask;
 
@@ -628,8 +666,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		else
 			CPrintToChat(client, "You are not assigned to do this task.");
 	}
-
-	if (g_Player[client].role == Role_Imposter && g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
+	else if (g_Player[client].role == Role_Imposter && g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
 	{
 		SDKHooks_TakeDamage(g_Player[client].target, 0, client, 99999.0, DMG_SLASH);
 		g_Player[client].target = -1;
