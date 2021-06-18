@@ -343,6 +343,11 @@ public void OnMapStart()
 {
 	//Parse the available tasks on the map by parsing entity names and logic.
 	ParseTasks();
+
+	/////
+	//Precache Files
+
+	PrecacheSound ("ambient_mp3/alarms/doomsday_lift_alarm.mp3"); //Used when finding a body for an emergency meeting.
 }
 
 public void OnConVarChange(ConVar convar, const char[] oldValue, const char[] newValue)
