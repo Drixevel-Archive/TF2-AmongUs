@@ -24,6 +24,9 @@
 static bool g_bInit;
 static StringMap g_hColors;
 static char g_sChatPrefix[64];
+static char g_sHighlight[32];
+static char g_sHighlight2[32];
+static char g_sHighlight3[32];
 
 static bool g_bIgnorePrefix;
 static int g_iAuthor;
@@ -41,6 +44,21 @@ static bool g_bSkipPlayers[MAXPLAYERS + 1];
 stock void CSetPrefix(const char[] prefix, any ...)
 {
 	VFormat(g_sChatPrefix, sizeof(g_sChatPrefix), prefix, 2);
+}
+
+stock void CSetHighlight(const char[] highlight, any ...)
+{
+	VFormat(g_sHighlight, sizeof(g_sHighlight), highlight, 2);
+}
+
+stock void CSetHighlight2(const char[] highlight, any ...)
+{
+	VFormat(g_sHighlight2, sizeof(g_sHighlight2), highlight, 2);
+}
+
+stock void CSetHighlight3(const char[] highlight, any ...)
+{
+	VFormat(g_sHighlight3, sizeof(g_sHighlight3), highlight, 2);
 }
 
 /*
@@ -910,6 +928,15 @@ stock void AddPrefixAndDefaultColor(char[] message, int size)
 		Format(message, size, "%s {default}%s", g_sChatPrefix, message);
 	else
 		Format(message, size, "%s", message);
+	
+	if (strlen(g_sHighlight) > 0)
+		ReplaceString(message, size, "{H1}", g_sHighlight);
+	
+	if (strlen(g_sHighlight2) > 0)
+		ReplaceString(message, size, "{H2}", g_sHighlight2);
+	
+	if (strlen(g_sHighlight3) > 0)
+		ReplaceString(message, size, "{H3}", g_sHighlight3);
 }
 
 stock void SendPlayerMessage(int client, char[] message, int author  = 0)
