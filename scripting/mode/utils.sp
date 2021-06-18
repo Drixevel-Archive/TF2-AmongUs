@@ -106,7 +106,9 @@ void MarkTaskComplete(int client, int task)
 	IntToString(task, sTask, sizeof(sTask));
 
 	g_Player[client].tasks_completed.SetValue(sTask, 1);
-	g_Match.tasks_current++;
+
+	if (g_Player[client].role != Role_Imposter)
+		g_Match.tasks_current++;
 }
 
 void AssignRandomTask(int client, int type)
