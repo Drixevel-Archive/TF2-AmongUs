@@ -38,9 +38,14 @@ stock int TF2_CreateGlow(int target, int color[4] = {255, 255, 255, 255})
 	char sClassname[64];
 	GetEntityClassname(target, sClassname, sizeof(sClassname));
 
-	char sTarget[128];
-	Format(sTarget, sizeof(sTarget), "%s%i", sClassname, target);
-	DispatchKeyValue(target, "targetname", sTarget);
+	char sName[128];
+	GetEntPropString(target, Prop_Data, "m_iName", sName, sizeof(sName));
+
+	if (strlen(sName) == 0)
+	{
+		Format(sName, sizeof(sName), "%s%i", sClassname, target);
+		DispatchKeyValue(target, "targetname", sName);
+	}
 
 	int glow = CreateEntityByName("tf_glow");
 
@@ -49,7 +54,7 @@ stock int TF2_CreateGlow(int target, int color[4] = {255, 255, 255, 255})
 		char sGlow[64];
 		Format(sGlow, sizeof(sGlow), "%i %i %i %i", color[0], color[1], color[2], color[3]);
 
-		DispatchKeyValue(glow, "target", sTarget);
+		DispatchKeyValue(glow, "target", sName);
 		DispatchKeyValue(glow, "Mode", "1"); //Mode is currently broken.
 		DispatchKeyValue(glow, "GlowColor", sGlow);
 		DispatchSpawn(glow);
