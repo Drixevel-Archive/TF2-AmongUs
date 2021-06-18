@@ -66,7 +66,8 @@ Handle g_Hud;
 enum Roles
 {
 	Role_Crewmate,
-	Role_Imposter
+	Role_Imposter,
+	Role_Total
 };
 
 enum struct Player
@@ -146,6 +147,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
 
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
+	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
 
 	g_Hud = CreateHudSynchronizer();
 
@@ -325,6 +327,49 @@ void GetRoleName(Roles role, char[] buffer, int size)
 		case Role_Imposter:
 			strcopy(buffer, size, "Imposter");
 	}
+}
+
+bool IsValidRole(const char[] name)
+{
+	char sRole[32];
+	for (Roles i = Role_Crewmate; i < Role_Total; i++)
+	{
+		GetRoleName(i, sRole, sizeof(sRole));
+
+		if (StrEqual(sRole, name, false))
+			return true;
+	}
+
+	return false;
+}
+
+void RoleNamesBuffer(char[] buffer, int size)
+{
+	char sRole[32];
+	for (Roles i = Role_Crewmate; i < Role_Total; i++)
+	{
+		GetRoleName(i, sRole, sizeof(sRole));
+
+		if (i == Role_Crewmate)
+			FormatEx(buffer, size, "%s", sRole);
+		else
+			Format(buffer, size, "%s, %s", buffer, sRole);
+	}
+}
+
+Roles GetRoleByName(const char[] name)
+{
+	char sRole[32];
+	for (Roles i = Role_Crewmate; i < Role_Total; i++)
+	{
+		GetRoleName(i, sRole, sizeof(sRole));
+
+		if (StrEqual(sRole, name, false))
+			return i;
+	}
+
+	//Return -1 which just means this role wasn't found.
+	return view_as<Roles>(-1);
 }
 
 void SendHud(int client)
