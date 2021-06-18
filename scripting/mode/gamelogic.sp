@@ -94,6 +94,20 @@ stock void TF2_DisableTimer()
 	AcceptEntityInput(entity, "Disable");
 }
 
+stock void TF2_SetSetupTime(int value)
+{
+	int entity = TF2_GetTimer();
+	SetVariantInt(value);
+	AcceptEntityInput(entity, "SetSetupTime");
+}
+
+stock void TF2_SetTime(int value)
+{
+	int entity = TF2_GetTimer();
+	SetVariantInt(value);
+	AcceptEntityInput(entity, "SetTime");
+}
+
 stock bool TF2_IsInSetup()
 {
 	//Easy way to test functionality during the lobby phase where usually players shouldn't have access to it.
