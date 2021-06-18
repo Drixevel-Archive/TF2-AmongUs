@@ -116,3 +116,60 @@ void AssignTask(int client, int task)
 
 	g_Player[client].tasks_completed.SetValue(sTask, 0);
 }
+
+void MuteAllClients()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client) || IsFakeClient(client) || TF2_GetClientTeam(client) < TFTeam_Red)
+			continue;
+		
+		for (int target = 1; target <= MaxClients; target++)
+		{
+			if (!IsClientInGame(target) || IsFakeClient(target) || TF2_GetClientTeam(target) < TFTeam_Red)
+				continue;
+			
+			if (!IsPlayerAlive(client) && !IsPlayerAlive(target))
+			{
+				SetListenOverride(client, target, Listen_Yes);
+				SetListenOverride(target, client, Listen_Yes);
+			}
+			else
+			{
+				SetListenOverride(client, target, Listen_No);
+				SetListenOverride(target, client, Listen_No);
+			}
+		}
+	}
+}
+
+void UnmuteAllClients()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client) || IsFakeClient(client) || TF2_GetClientTeam(client) < TFTeam_Red)
+			continue;
+		
+		for (int target = 1; target <= MaxClients; target++)
+		{
+			if (!IsClientInGame(target) || IsFakeClient(target) || TF2_GetClientTeam(target) < TFTeam_Red)
+				continue;
+			
+			if (TF2_IsInSetup() || !IsPlayerAlive(client) && !IsPlayerAlive(target))
+			{
+				SetListenOverride(client, target, Listen_Yes);
+				SetListenOverride(target, client, Listen_Yes);
+			}
+			else if (IsPlayerAlive(client) && !IsPlayerAlive(target))
+			{
+				SetListenOverride(client, target, Listen_No);
+				SetListenOverride(target, client, Listen_Yes);
+			}
+			else if (!IsPlayerAlive(client) && IsPlayerAlive(target))
+			{
+				SetListenOverride(client, target, Listen_Yes);
+				SetListenOverride(target, client, Listen_No);
+			}
+		}
+	}
+}

@@ -261,6 +261,9 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	}
 
 	SendHudToAll();
+
+	//Make sure all clients are muted whenever the round starts.
+	MuteAllClients();
 }
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
@@ -284,6 +287,9 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 	//Parse the available tasks on the map by parsing entity names and logic.
 	ParseTasks();
+
+	//Ensure that all clients are unmuted during the setup phase.
+	UnmuteAllClients();
 }
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
