@@ -156,6 +156,7 @@ public void OnPluginStart()
 	HookEvent("player_death", Event_OnPlayerDeathPre, EventHookMode_Pre);
 	HookEvent("player_death", Event_OnPlayerDeath);
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
+	HookEvent("teamplay_round_start", Event_OnRoundStart);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 

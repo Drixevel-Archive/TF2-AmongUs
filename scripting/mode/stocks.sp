@@ -163,6 +163,11 @@ stock int TF2_SpawnRagdoll(int client, float destruct = 10.0, int flags = 0, flo
 	return ragdoll;
 }
 
+stock bool TF2_IsWaitingForPlayers()
+{
+	return view_as<bool>(GameRules_GetProp("m_bInWaitingForPlayers"));
+}
+
 stock bool TriggerRelay(const char[] name)
 {
 	return TriggerEntity(name, "logic_relay");

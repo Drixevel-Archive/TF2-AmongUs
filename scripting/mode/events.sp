@@ -62,3 +62,26 @@ public void Event_OnPostInventoryApplication(Event event, const char[] name, boo
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Building);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_PDA);
 }
+
+public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcast)
+{
+	//Makes sure the lobby is locked whenever we're waiting for players to join.
+	if (TF2_IsWaitingForPlayers())
+	{
+		//Close and lock the doors during the waiting period.
+		TriggerRelay(RELAY_LOBBY_DOORS_CLOSE);
+		TriggerRelay(RELAY_LOBBY_DOORS_LOCK);
+
+		//Lock the meeting button so it can't be used during the waiting period.
+		TriggerRelay(RELAY_MEETING_BUTTON_LOCK);
+
+		return;
+	}
+
+	CPrintToChatAll("Mode: Setting up Round...");
+	TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
+
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && !IsFakeClient(i))
+			SendHud(i);
+}
