@@ -5,6 +5,30 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 
+	int entity = -1; float origin1[3]; float origin2[3]; float angles[3];
+	while ((entity = FindEntityByClassname(entity, "info_player_teamspawn")) != -1)
+	{
+		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin1);
+
+		int count;
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (IsClientInGame(i) && IsPlayerAlive(i))
+			{
+				GetClientAbsOrigin(i, origin2);
+
+				if (GetVectorDistance(origin1, origin2) <= 50.0)
+					count++;
+			}
+		}
+
+		if (count < 1)
+		{
+			GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
+			TeleportEntity(client, origin1, angles, NULL_VECTOR);
+		}
+	}
+
 	//Make sure they're not marked as ejected if they spawn or are respawned.
 	g_Player[client].ejected = false;
 
