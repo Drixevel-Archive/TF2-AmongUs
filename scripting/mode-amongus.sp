@@ -109,6 +109,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	CSetPrefix("[Among Us]");
+
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "99999", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
 
