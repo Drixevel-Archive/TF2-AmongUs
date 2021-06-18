@@ -211,6 +211,51 @@ stock void TF2_GlowEnts(const char[] classname, int color[4], const char[] name 
 
 		TF2_CreateGlow(entity, color);
 	}
+}
+
+stock int GetRandomClient(bool ingame = true, bool alive = true, bool ignore_bots = true, int team = -1)
+{
+	int[] clients = new int[MaxClients];
+	int amount;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (ingame && !IsClientInGame(i))
+			continue;
+		
+		if (alive && !IsPlayerAlive(i))
+			continue;
+
+		if (ignore_bots && IsFakeClient(i))
+			continue;
+
+		if (team > -1 && team != GetClientTeam(i))
+			continue;
+
+		clients[amount++] = i;
+	}
+	
+	if (amount < 1)
+		return -1;
+
+	return clients[GetRandomInt(0, amount - 1)];
+}
+
+stock int GetTotalPlayers()
+{
+	int count;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+
+		count++;
+	}
+
+	return count;
+}
+
 stock bool IsAdmin(int client)
 {
 	return CheckCommandAccess(client, "", ADMFLAG_GENERIC, true);
