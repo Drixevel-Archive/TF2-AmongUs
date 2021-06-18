@@ -76,6 +76,7 @@ ConVar convar_Setting_ToggleTaskGlows;
 //Globals
 
 bool g_Late;
+bool g_BetweenRounds;
 
 Handle g_Hud;
 
@@ -232,6 +233,7 @@ public void OnPluginStart()
 	HookEvent("player_death", Event_OnPlayerDeath);
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 	HookEvent("teamplay_round_start", Event_OnRoundStart);
+	HookEvent("teamplay_round_win", Event_OnRoundWin);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 

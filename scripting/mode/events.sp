@@ -65,6 +65,8 @@ public void Event_OnPostInventoryApplication(Event event, const char[] name, boo
 
 public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
+	g_BetweenRounds = false;
+
 	//Parse the available tasks on the map by parsing entity names and logic.
 	ParseTasks();
 
@@ -87,4 +89,9 @@ public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcas
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && !IsFakeClient(i))
 			SendHud(i);
+}
+
+public void Event_OnRoundWin(Event event, const char[] name, bool dontBroadcast)
+{
+	g_BetweenRounds = true;
 }
