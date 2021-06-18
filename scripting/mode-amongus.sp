@@ -75,17 +75,20 @@ enum struct Player
 {
 	int color;
 	Roles role;
+	int target;
 
 	void Init()
 	{
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
+		this.target = -1;
 	}
 
 	void Clear()
 	{
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
+		this.target = -1;
 	}
 }
 
@@ -146,6 +149,8 @@ public void OnPluginStart()
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
+
+	AddCommandListener(Listener_VoiceMenu, "voicemenu");
 
 	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
 	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
@@ -275,6 +280,48 @@ public void OnClientDisconnect_Post(int client)
 	g_Player[client].Clear();
 }
 
+public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
+{
+	switch (g_Player[client].role)
+	{
+		case Role_Imposter:
+		{
+			if (IsPlayerAlive(client) /*&& !TF2_IsInSetup()*/)
+			{
+				float origin[3];
+				GetClientAbsOrigin(client, origin);
+
+				float targetorigin[3];
+				for (int i = 1; i <= MaxClients; i++)
+				{
+					if (!IsClientInGame(i) || !IsPlayerAlive(i) || client == i || g_Player[i].role == Role_Imposter)
+						continue;
+					
+					GetClientAbsOrigin(i, targetorigin);
+
+					if (GetVectorDistance(origin, targetorigin) > 100.0)
+					{
+						if (g_Player[client].target == i)
+						{
+							g_Player[client].target = -1;
+							PrintCenterText(client, "");
+						}
+						
+						continue;
+					}
+					else if (g_Player[client].target == -1)
+					{
+						g_Player[client].target = i;
+						PrintCenterText(client, "Current Target: %N", i);
+					}
+				}
+			}
+		}
+	}
+
+	return Plugin_Continue;
+}
+
 void SetColor(int client, int color)
 {
 	g_Player[client].color = color;
@@ -344,4 +391,26 @@ void SendHud(int client)
 
 	//Send the Hud.
 	ShowSyncHudText(client, g_Hud, sHud);
+}
+
+public Action Listener_VoiceMenu(int client, const char[] command, int argc)
+{
+	char sVoice[32];
+	GetCmdArg(1, sVoice, sizeof(sVoice));
+
+	char sVoice2[32];
+	GetCmdArg(2, sVoice2, sizeof(sVoice2));
+	
+	//MEDIC! is called if both of these values are 0.
+	if (!StrEqual(sVoice, "0", false) || !StrEqual(sVoice2, "0", false))
+		return Plugin_Continue;
+	
+	if (g_Player[client].role == Role_Imposter && g_Player[client].target != -1)
+	{
+		SDKHooks_TakeDamage(g_Player[client].target, 0, client, 99999.0, DMG_SLASH);
+		g_Player[client].target = -1;
+		PrintCenterText(client, "");
+	}
+
+	return Plugin_Stop;
 }
