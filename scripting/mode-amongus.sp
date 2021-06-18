@@ -49,6 +49,7 @@ task: <task name>
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
+#include <customkeyvalues>
 #include <colors>
 
 /*****************************/
