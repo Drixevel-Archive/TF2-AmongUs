@@ -63,6 +63,14 @@ stock int TF2_CreateGlow(int target, int color[4] = {255, 255, 255, 255})
 	return glow;
 }
 
+stock void TF2_ForceWin(TFTeam team = TFTeam_Unassigned)
+{
+	int flags = GetCommandFlags("mp_forcewin");
+	SetCommandFlags("mp_forcewin", flags &= ~FCVAR_CHEAT);
+	ServerCommand("mp_forcewin %i", view_as<int>(team));
+	SetCommandFlags("mp_forcewin", flags);
+}
+
 stock bool TriggerRelay(const char[] name)
 {
 	return TriggerEntity(name, "logic_relay");
