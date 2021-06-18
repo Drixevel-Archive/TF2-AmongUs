@@ -70,6 +70,8 @@ ConVar convar_Time_Round;
 ConVar convar_Hud_Position;
 ConVar convar_Hud_Color;
 
+ConVar convar_VotePercentage_Ejections;
+
 ConVar convar_Setting_ToggleTaskGlows;
 
 /*****************************/
@@ -251,6 +253,8 @@ public void OnPluginStart()
 	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
 	convar_Hud_Color.AddChangeHook(OnConVarChange);
 
+	convar_VotePercentage_Ejections = CreateConVar("sm_mode_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	
 	convar_Setting_ToggleTaskGlows = CreateConVar("sm_mode_amongus_toggle_task_colors", "1", "Should the glows for tasks be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
@@ -886,6 +890,7 @@ public Action Timer_EndVoting(Handle timer)
 
 	int total = GetTotalAlivePlayers();
 	bool confirm = GetGameSetting_Bool("confirm_ejects");
+	float percentage = convar_VotePercentage_Ejections.FloatValue;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -894,7 +899,7 @@ public Action Timer_EndVoting(Handle timer)
 		
 		g_Player[i].voted_for = -1;
 
-		if (GetVotePercent(g_Player[i].voted_to, total) > 0.75)
+		if (GetVotePercent(g_Player[i].voted_to, total) > percentage)
 		{
 			//TODO: Make this spicier.
 			ForcePlayerSuicide(i);
