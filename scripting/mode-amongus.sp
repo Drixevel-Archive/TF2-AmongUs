@@ -13,6 +13,17 @@ task: <task name>
 type: common/visual/short/long
 part: <part name>
 
+ * TODO
+ - Add vent indexes for routing.
+ - Add security cameras action.
+ - Update tasks to take into consideration parts and orders.
+ - Add sabotages for Imposters to use.
+ - Update the eject feature to use map logic instead.
+ - Add admin map action.
+ - Add map section names to the hud.
+ - Add automatic game owner commands and features.
+ - Implement MOTD minigames for tasks.
+
  */
 
 /*****************************/
