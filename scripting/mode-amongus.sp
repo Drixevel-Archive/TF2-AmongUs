@@ -370,6 +370,18 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		}
 	}
 
+	if (IsPlayerAlive(client))
+	{
+		int target = GetClientAimTarget(client, false);
+
+		if (target != -1)
+		{
+			for (int i = 0; i < g_TotalTasks; i++)
+				if (g_Task[i].entity == target)
+					PrintCenterText(client, g_Task[i].name);
+		}
+	}
+
 	return Plugin_Continue;
 }
 
