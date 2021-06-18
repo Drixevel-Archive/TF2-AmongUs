@@ -93,6 +93,13 @@ public Plugin myinfo =
 	url = "https://scoutshideaway.com/"
 };
 
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	RegPluginLibrary("mode-amongus");
+	
+	return APLRes_Success;
+}
+
 public void OnPluginStart()
 {
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
