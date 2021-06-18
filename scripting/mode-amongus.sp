@@ -35,9 +35,11 @@ task: <task name>
 #define RELAY_LOBBY_DOORS_LOCK "lobby_doors_lock"	//Is intended to lock all lobby doors.
 #define RELAY_LOBBY_DOORS_UNLOCK "lobby_doors_unlock"	//Is intended to unlock all lobby doors.
 
-#define RELAY_MEETING_BUTTON_OPEN "meeting_button_open"		//Is intended to open the meeting button model, turn the light on and play a sound.
-#define RELAY_MEETING_BUTTON_CLOSE "meeting_button_close"		//Is intended to close the meeting button and turn off the light.
+#define RELAY_MEETING_BUTTON_OPEN "meeting_button_open"	//Is intended to open the meeting button model, turn the light on and play a sound.
+#define RELAY_MEETING_BUTTON_CLOSE "meeting_button_close"	//Is intended to close the meeting button and turn off the light.
 #define RELAY_MEETING_BUTTON_ACTIVATE "meeting_button_activate"	//Is intended to fire the button so a meeting starts.
+#define RELAY_MEETING_BUTTON_LOCK "meeting_button_lock"	//Is intended to lock the meeting button from use.
+#define RELAY_MEETING_BUTTON_UNLOCK "meeting_button_unlock"	//Is intended to unlock the meeting button so it can be used.
 
 /*****************************/
 //Includes

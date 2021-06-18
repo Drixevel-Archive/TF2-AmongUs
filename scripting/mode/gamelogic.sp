@@ -177,6 +177,9 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 	//Close and lock the doors during the lobby phase.
 	TriggerRelay(RELAY_LOBBY_DOORS_CLOSE);
 	TriggerRelay(RELAY_LOBBY_DOORS_LOCK);
+
+	//Lock the meeting button so it can't be used during the lobby phase.
+	TriggerRelay(RELAY_MEETING_BUTTON_LOCK);
 }
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
@@ -186,4 +189,7 @@ public void Timer_OnSetupFinished(const char[] output, int caller, int activator
 	//Unlock and open the doors whenever the lobby phase is finished.
 	TriggerRelay(RELAY_LOBBY_DOORS_UNLOCK);
 	TriggerRelay(RELAY_LOBBY_DOORS_OPEN);
+
+	//Unlock the meeting button so it can be used during the round.
+	TriggerRelay(RELAY_MEETING_BUTTON_UNLOCK);
 }
