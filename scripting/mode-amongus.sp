@@ -190,10 +190,14 @@ public void OnPluginStart()
 	CSetHighlight2("{darkorchid}");
 
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
-	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "99999", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
+	convar_Time_Setup.AddChangeHook(OnConVarChange);
+	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "3600", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
+	convar_Time_Round.AddChangeHook(OnConVarChange);
 
 	convar_Hud_Position = CreateConVar("sm_mode_amongus_hud_position", "0.0 0.0", "Where should the hud be on screen?", FCVAR_NOTIFY);
+	convar_Hud_Position.AddChangeHook(OnConVarChange);
 	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
+	convar_Hud_Color.AddChangeHook(OnConVarChange);
 
 	convar_Setting_ToggleTaskGlows = CreateConVar("sm_mode_amongus_toggle_task_colors", "1", "Should the glows for tasks be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
@@ -270,6 +274,18 @@ public void OnMapStart()
 {
 	//Parse the available tasks on the map by parsing entity names and logic.
 	ParseTasks();
+}
+
+public void OnConVarChange(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	int value = StringToInt(newValue);
+
+	if (convar == convar_Time_Setup)
+		TF2_SetSetupTime(value);
+	else if (convar == convar_Time_Round)
+		TF2_SetTime(value);
+	else if (convar == convar_Hud_Position || convar == convar_Hud_Color)
+		SendHudToAll();
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
