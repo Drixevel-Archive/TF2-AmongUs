@@ -206,6 +206,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	CPrintToChatAll("{H1}Mode{default}: Round Started");
 
 	g_Match.tasks_current = 0;
+	g_Match.total_meetings = 0;
 
 	/////
 	//Setup glows for certain map entities.

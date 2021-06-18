@@ -234,6 +234,8 @@ enum struct Match
 
 	int meeting_time;
 	Handle meeting;
+	int total_meetings;
+	float last_meeting;
 }
 
 Match g_Match;
@@ -956,6 +958,12 @@ public void OnGameFrame()
 
 void CallMeeting()
 {
+	if (g_Match.last_meeting > 0 && g_Match.last_meeting > GetGameTime())
+	{
+		TF2_PlayDenySound(client);
+		CPrintToChat(client, "You must wait {H1}%.2f {default}seconds to call another meeting.", (g_Match.last_meeting - GetGameTime()));
+		return;
+	}
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
@@ -976,6 +984,8 @@ void CallMeeting()
 	g_Match.meeting_time = GetGameSetting_Int("discussion_time");
 	StopTimer(g_Match.meeting);
 	g_Match.meeting = CreateTimer(1.0, Timer_StartVoting, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+	g_Match.total_meetings++;
 }
 
 public Action Timer_StartVoting(Handle timer)
@@ -1039,7 +1049,7 @@ public Action Timer_EndVoting(Handle timer)
 	TriggerRelay("lobby_doors_unlock");
 	TriggerRelay("lobby_doors_open");
 
-
+	g_Match.last_meeting = GetGameTime() + GetGameSetting_Float("emergency_cooldowns");
 
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && IsPlayerAlive(i))
@@ -1107,5 +1117,18 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 	//PrintToChatAll("[%s][%i][%i][%.2f]", output, caller, activator, delay);
 
 	if (StrEqual(sName, RELAY_MEETING_BUTTON_OPEN, false) && g_Match.meeting == null)
-		CallMeeting();
+	{
+		int max = GetGameSetting_Int("emergency_meetings");
+
+		if (max > 0 && g_Match.total_meetings >= max)
+		{
+			TF2_PlayDenySound(activator);
+			CPrintToChat(activator, "Maximum number of emergency meetings reached!");
+			return Plugin_Stop;
+		}
+
+		CallMeeting(activator, true);
+	}
+
+	return Plugin_Continue;
 }
