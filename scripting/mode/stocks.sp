@@ -268,3 +268,15 @@ stock bool IsAdmin(int client)
 {
 	return CheckCommandAccess(client, "", ADMFLAG_GENERIC, true);
 }
+
+stock bool StopTimer(Handle& timer)
+{
+	if (timer != null)
+	{
+		KillTimer(timer);
+		timer = null;
+		return true;
+	}
+
+	return false;
+}

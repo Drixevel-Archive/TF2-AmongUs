@@ -70,10 +70,39 @@ int GetRandomTask(int type)
 	return tasks[GetRandomInt(0, amount - 1)];
 }
 
+bool HasTasks(int client)
+{
+	return g_Player[client].tasks.Length > 0;
+}
+
+bool IsTaskAssigned(int client, int task)
+{
+	return g_Player[client].tasks.FindValue(task) != -1;
+}
+
+bool IsTaskCompleted(int client, int task)
+{
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	bool value;
+	g_Player[client].tasks_completed.GetValue(sTask, value);
+
+	return value;
+}
+
+void MarkTaskComplete(int client, int task)
+{
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	g_Player[client].tasks_completed.SetValue(sTask, 1);
+}
+
 void AssignRandomTask(int client, int type)
 {
 	int task = GetRandomTask(type);
-	
+
 	AssignTask(client, task);
 }
 

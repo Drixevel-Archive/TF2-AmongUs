@@ -99,16 +99,26 @@ enum struct Player
 	int color;
 	Roles role;
 	int target;
+
 	ArrayList tasks;
 	StringMap tasks_completed;
+	int neartask;
+
+	int taskticks;
+	Handle doingtask;
 
 	void Init()
 	{
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
 		this.target = -1;
+
 		this.tasks = new ArrayList();
 		this.tasks_completed = new StringMap();
+		this.neartask = -1;
+
+		this.taskticks = 0;
+		this.doingtask = null;
 	}
 
 	void Clear()
@@ -116,8 +126,13 @@ enum struct Player
 		this.color = NO_COLOR;
 		this.role = Role_Crewmate;
 		this.target = -1;
+
 		delete this.tasks;
 		delete this.tasks_completed;
+		this.neartask = -1;
+
+		this.taskticks = 0;
+		this.doingtask = null;
 	}
 }
 
@@ -396,46 +411,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	{
 		case Role_Crewmate:
 		{
-			if (IsPlayerAlive(client))
-			{
-				int target = GetClientAimTarget(client, false);
 
-				if (target != -1)
-				{
-					float origin[3];
-					GetClientEyePosition(client, origin);
-
-					float origin2[3];
-					GetEntPropVector(target, Prop_Send, "m_vecOrigin", origin2);
-
-					if (GetVectorDistance(origin, origin2) <= 100.0)
-					{
-						char sPart[32];
-						for (int i = 0; i < g_TotalTasks; i++)
-						{
-							if (g_Task[i].entity == target)
-							{
-								g_Player[client].target = target;
-								if (g_Task[i].part > 0)
-									FormatEx(sPart, sizeof(sPart), " (Part %i)", g_Task[i].part);
-								
-								PrintCenterText(client, "%s%s", g_Task[i].name, sPart);
-								break;
-							}
-						}
-					}
-					else if (g_Player[client].target == target)
-					{
-						g_Player[client].target = -1;
-						PrintCenterText(client, "");
-					}
-				}
-				else if (g_Player[client].target != -1)
-				{
-					g_Player[client].target = -1;
-					PrintCenterText(client, "");
-				}
-			}
 		}
 
 		case Role_Imposter:
@@ -469,6 +445,44 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 						PrintCenterText(client, "Current Target: %N\n(Press MEDIC! to kill them)", i);
 					}
 				}
+			}
+		}
+	}
+
+	if (IsPlayerAlive(client))
+	{
+		float origin[3];
+		GetClientEyePosition(client, origin);
+		
+		float origin2[3];
+		for (int i = 0; i < g_TotalTasks; i++)
+		{
+			if (g_Task[i].entity == -1)
+				continue;
+			
+			GetEntPropVector(g_Task[i].entity, Prop_Send, "m_vecOrigin", origin2);
+
+			if (GetVectorDistance(origin, origin2) > 100.0)
+			{
+				if (g_Player[client].neartask == i)
+				{
+					g_Player[client].neartask = -1;
+
+					if (StopTimer(g_Player[client].doingtask))
+						PrintHintText(client, "Task cancelled.");
+
+					PrintCenterText(client, "");
+				}
+			}
+			else
+			{
+				g_Player[client].neartask = i;
+
+				char sPart[32];
+				if (g_Task[i].part > 0)
+					FormatEx(sPart, sizeof(sPart), " (Part %i)", g_Task[i].part);
+				
+				PrintCenterText(client, "%s%s", g_Task[i].name, sPart);
 			}
 		}
 	}
@@ -557,12 +571,13 @@ void SendHud(int client)
 	Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
 
 	//Tasks
-	Format(sHud, sizeof(sHud), "%s\n--Tasks--", sHud);
+	if (HasTasks(client))
+		Format(sHud, sizeof(sHud), "%s\n--%sTasks--", sHud, g_Player[client].role == Role_Imposter ? "Fake " : "");
 
 	for (int i = 0; i < g_Player[client].tasks.Length; i++)
 	{
 		int task = g_Player[client].tasks.Get(i);
-		Format(sHud, sizeof(sHud), "%s\n%s", sHud, g_Task[task].name);
+		Format(sHud, sizeof(sHud), "%s\n%s %s", sHud, g_Task[task].name, IsTaskCompleted(client, task) ? "(c)" : "");
 	}
 
 	//Send the Hud.
@@ -581,13 +596,59 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	if (!StrEqual(sVoice, "0", false) || !StrEqual(sVoice2, "0", false))
 		return Plugin_Continue;
 	
-	if (g_Player[client].role == Role_Imposter && g_Player[client].target != -1)
+	if (g_Player[client].neartask != -1 && g_Player[client].doingtask == null && !TF2_IsInSetup())
+	{
+		int task = g_Player[client].neartask;
+
+		if (IsTaskAssigned(client, task) && !IsTaskCompleted(client, task))
+		{			
+			int time;
+
+			if ((g_Task[task].type & TASK_TYPE_LONG) == TASK_TYPE_LONG)
+				time = 10;
+			else if ((g_Task[task].type & TASK_TYPE_SHORT) == TASK_TYPE_SHORT)
+				time = 5;
+			else if ((g_Task[task].type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
+				time = 5;
+
+			g_Player[client].taskticks = time;
+			StopTimer(g_Player[client].doingtask);
+			g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		}
+		else
+			CPrintToChat(client, "You are not assigned to do this task.");
+	}
+
+	if (g_Player[client].role == Role_Imposter && g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
 	{
 		SDKHooks_TakeDamage(g_Player[client].target, 0, client, 99999.0, DMG_SLASH);
 		g_Player[client].target = -1;
 		PrintCenterText(client, "");
 	}
 
+	return Plugin_Stop;
+}
+
+public Action Timer_DoingTask(Handle timer, any data)
+{
+	int client = data;
+
+	g_Player[client].taskticks--;
+
+	if (g_Player[client].taskticks > 0)
+	{
+		PrintHintText(client, "Doing Task... %i", g_Player[client].taskticks);
+		return Plugin_Continue;
+	}
+
+	int task = g_Player[client].neartask;
+
+	MarkTaskComplete(client, task);
+	SendHud(client);
+
+	PrintHintText(client, "Task Completed.");
+	g_Player[client].doingtask = null;
+	
 	return Plugin_Stop;
 }
 
@@ -608,7 +669,7 @@ void ParseTasks()
 	{
 		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
 
-		if (!StrEqual(sName, "task", false))
+		if (StrContains(sName, "task", false) != 0)
 			continue;
 		
 		char sTask[32];
