@@ -135,3 +135,15 @@ public Action Command_RemoveOwner(int client, int args)
 
 	return Plugin_Handled;
 }
+
+public Action Command_Respawn(int client, int args)
+{
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && !IsPlayerAlive(i))
+			TF2_RespawnPlayer(i);
+	
+	CPrintToChatAll("{H1}%N {default}has respawnd all dead players on teams.");
+	return Plugin_Handled;
+}
+	return Plugin_Handled;
+}
