@@ -119,8 +119,6 @@ int g_TotalColors;
 #include "mode/gamelogic.sp"
 #include "mode/menus.sp"
 #include "mode/natives.sp"
-#include "mode/stocks.sp"
-#include "mode/utils.sp"
 
 /*****************************/
 //Plugin Info
