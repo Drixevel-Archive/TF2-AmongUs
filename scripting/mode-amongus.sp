@@ -70,6 +70,7 @@ part: <part name>
 #include <sdkhooks>
 #include <tf2_stocks>
 #include <customkeyvalues>
+#include <tf2attributes>
 #include <colors>
 
 /*****************************/
