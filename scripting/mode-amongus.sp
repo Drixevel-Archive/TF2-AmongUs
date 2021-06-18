@@ -122,6 +122,8 @@ enum struct Player
 	int voted_for;
 	int voted_to;
 
+	bool scanning;
+
 	void Init()
 	{
 		this.color = NO_COLOR;
@@ -148,6 +150,8 @@ enum struct Player
 
 		this.voted_for = -1;
 		this.voted_to = 0;
+
+		this.scanning = false;
 	}
 
 	void Clear()
@@ -176,6 +180,8 @@ enum struct Player
 
 		this.voted_for = -1;
 		this.voted_to = 0;
+
+		this.scanning = false;
 	}
 }
 
@@ -489,6 +495,13 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		TeleportEntity(client, origin, vecAngles, NULL_VECTOR);
 	}
 
+	if (IsPlayerAlive(client) && g_Player[client].scanning)
+	{
+		float origin[3];
+		GetClientAbsOrigin(client, origin);
+		TF2_Particle("ping_circle", origin);
+	}
+
 	switch (g_Player[client].role)
 	{
 		case Role_Crewmate:
@@ -742,6 +755,21 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 				time = 5;
 			else if ((g_Task[task].type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
 				time = 5;
+			
+			//This is considered a task AND an action so we just do a hacky update.
+			if (StrEqual(g_Task[task].name, "Submit Scan", false))
+			{
+				SetEntityMoveType(client, MOVETYPE_NONE);
+
+				int entity = g_Task[task].entity;
+
+				float origin[3];
+				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+				origin[2] += 5.0;
+				TeleportEntity(client, origin, NULL_VECTOR, NULL_VECTOR);
+
+				g_Player[client].scanning = true;
+			}
 
 			g_Player[client].taskticks = time;
 			StopTimer(g_Player[client].doingtask);
@@ -772,17 +800,29 @@ public Action Timer_DoingTask(Handle timer, any data)
 	int client = data;
 
 	g_Player[client].taskticks--;
+	int task = g_Player[client].neartask;
 
 	if (g_Player[client].taskticks > 0)
 	{
+		if (StrEqual(g_Task[task].name, "Submit Scan", false) && g_Player[client].taskticks == 2)
+		{
+			float origin[3];
+			GetClientAbsOrigin(client, origin);
+			CreateParticle(g_Player[client].role == Role_Imposter ? "teleporter_red_entrance" : "teleporter_blue_entrance", origin, 5.0);
+		}
+
 		PrintHintText(client, "Doing Task... %i", g_Player[client].taskticks);
 		return Plugin_Continue;
 	}
 
-	int task = g_Player[client].neartask;
-
 	MarkTaskComplete(client, task);
 	SendHud(client);
+
+	if (StrEqual(g_Task[task].name, "Submit Scan", false))
+	{
+		g_Player[client].scanning = false;
+		SetEntityMoveType(client, MOVETYPE_ISOMETRIC);
+	}
 
 	PrintHintText(client, "Task Completed.");
 	g_Player[client].doingtask = null;
