@@ -16,5 +16,11 @@ public void OnTakeDamagePost(int victim, int attacker, int inflictor, float dama
 
 public Action OnEntitySpawn(int entity)
 {
+	char classname[32];
+	GetEntityClassname(entity, classname, sizeof(classname));
+
+	if (g_CleanEntities.FindString(classname) != -1)
+		return Plugin_Stop;
+	
 	return Plugin_Continue;
 }

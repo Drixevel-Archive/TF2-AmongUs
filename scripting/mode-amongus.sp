@@ -67,6 +67,8 @@ bool g_Late;
 
 Handle g_Hud;
 
+ArrayList g_CleanEntities;
+
 enum Roles
 {
 	Role_Crewmate,
@@ -164,6 +166,11 @@ public void OnPluginStart()
 
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
+
+	//Entity classnames present in this array will be automatically deleted on creation.
+	g_CleanEntities = new ArrayList(ByteCountToCells(32));
+	g_CleanEntities.PushString("tf_ammo_pack");
+	g_CleanEntities.PushString("halloween_souls_pack");
 
 	g_Hud = CreateHudSynchronizer();
 
