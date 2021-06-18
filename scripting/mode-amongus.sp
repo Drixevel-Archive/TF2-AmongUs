@@ -757,7 +757,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	if (g_Player[client].neardeath != -1 && !TF2_IsInSetup())
 	{
 		g_Player[client].neardeath = -1;
-		CallMeeting();
+		CallMeeting(client);
 	}
 	else if (g_Player[client].neartask != -1 && g_Player[client].doingtask == null && !TF2_IsInSetup())
 	{
@@ -956,7 +956,7 @@ public void OnGameFrame()
 	}
 }
 
-void CallMeeting()
+void CallMeeting(int client = -1, bool button = false)
 {
 	if (g_Match.last_meeting > 0 && g_Match.last_meeting > GetGameTime())
 	{
@@ -964,6 +964,15 @@ void CallMeeting()
 		CPrintToChat(client, "You must wait {H1}%.2f {default}seconds to call another meeting.", (g_Match.last_meeting - GetGameTime()));
 		return;
 	}
+
+	if (client > 0)
+	{
+		if (button)
+			CPrintToChatAll("{H1}%N {default}has called a meeting!", client);
+		else
+			CPrintToChatAll("{H1}%N {default}has found a body!", client);
+	}
+	
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (IsClientInGame(i) && IsPlayerAlive(i))
