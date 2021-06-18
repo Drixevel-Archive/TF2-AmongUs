@@ -1,3 +1,13 @@
+/**
+ * Notes
+
+Task Entities:
+target: task
+type: common/visual/short/long
+task: <task name>
+
+ */
+
 /*****************************/
 //Pragma
 #pragma semicolon 1
