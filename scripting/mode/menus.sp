@@ -221,3 +221,62 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 			delete menu;
 	}
 }
+
+void OpenVentsMenu(int client)
+{
+	if (!g_Player[client].venting)
+		return;
+	
+	Menu menu = new Menu(MenuHandler_Vents);
+	menu.SetTitle("Teleport to a vent:");
+
+	int entity = -1; char sName[32]; char sID[16]; char sDisplay[256];
+	while ((entity = FindEntityByClassname(entity, "prop_dynamic")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+		if (StrContains(sName, "vent", false) != 0)
+			continue;
+		
+		IntToString(EntIndexToEntRef(entity), sID, sizeof(sID));
+		FormatEx(sDisplay, sizeof(sDisplay), "Vent #%i", entity);
+		menu.AddItem(sID, sDisplay);
+	}
+
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int MenuHandler_Vents(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			if (!g_Player[param1].venting)
+				return;
+			
+			char sID[16];
+			menu.GetItem(param2, sID, sizeof(sID));
+
+			int entity = EntRefToEntIndex(StringToInt(sID));
+
+			if (!IsValidEntity(entity))
+			{
+				OpenVentsMenu(param1);
+				return;
+			}
+
+			float origin[3];
+			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+			origin[2] += 20.0;
+
+			TeleportEntity(param1, origin, NULL_VECTOR, NULL_VECTOR);
+			EmitSoundToClient(param1, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+
+			OpenVentsMenu(param1);
+		}
+
+		case MenuAction_End:
+			delete menu;
+	}
+}

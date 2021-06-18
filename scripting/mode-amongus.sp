@@ -109,6 +109,9 @@ enum struct Player
 	float deathorigin[3];
 	int neardeath;
 
+	int nearvent;
+	bool venting;
+
 	ArrayList tasks;
 	StringMap tasks_completed;
 	int neartask;
@@ -132,6 +135,9 @@ enum struct Player
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
 		this.neardeath = -1;
+
+		this.nearvent = -1;
+		this.venting = false;
 
 		this.tasks = new ArrayList();
 		this.tasks_completed = new StringMap();
@@ -157,6 +163,9 @@ enum struct Player
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
 		this.neardeath = -1;
+
+		this.nearvent = -1;
+		this.venting = false;
 
 		delete this.tasks;
 		delete this.tasks_completed;
@@ -352,6 +361,9 @@ public void OnMapStart()
 	//Precache Files
 
 	PrecacheSound ("ambient_mp3/alarms/doomsday_lift_alarm.mp3"); //Used when finding a body for an emergency meeting.
+
+	PrecacheSound("doors/vent_open2.wav");	//Played whenever a player is finished venting.
+	PrecacheSound("doors/vent_open3.wav");	//Played whenever a player starts venting or moves to a different vent.
 }
 
 public void OnConVarChange(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -512,6 +524,31 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					{
 						g_Player[client].target = i;
 						PrintCenterText(client, "Current Target: %N\n(Press MEDIC! to kill them)", i);
+					}
+				}
+
+				int entity = -1; char sName[32];
+				while ((entity = FindEntityByClassname(entity, "prop_dynamic")) != -1)
+				{
+					GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+					if (StrContains(sName, "vent", false) != 0)
+						continue;
+
+					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", targetorigin);
+
+					if (GetVectorDistance(origin, targetorigin) > 100.0)
+					{
+						if (g_Player[client].nearvent == entity)
+						{
+							g_Player[client].nearvent = -1;
+							PrintCenterText(client, "");
+						}
+					}
+					else if (g_Player[client].nearvent == -1)
+					{
+						g_Player[client].nearvent = entity;
+						PrintCenterText(client, "Near Vent\n(Press MEDIC! to vent)");
 					}
 				}
 			}
@@ -712,11 +749,18 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		else
 			CPrintToChat(client, "You are not assigned to do this task.");
 	}
-	else if (g_Player[client].role == Role_Imposter && g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
+	else if (g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
 	{
 		SDKHooks_TakeDamage(g_Player[client].target, 0, client, 99999.0, DMG_SLASH);
 		g_Player[client].target = -1;
 		PrintCenterText(client, "");
+	}
+	else if (g_Player[client].nearvent != -1)
+	{
+		if (g_Player[client].venting)
+			StopVenting(client);
+		else
+			StartVenting(client);
 	}
 
 	return Plugin_Stop;
@@ -968,4 +1012,28 @@ public Action Timer_Suicide(Handle timer, any data)
 		
 		g_Player[client].ejectedtimer = null;
 	}
+}
+
+void StartVenting(int client)
+{
+	g_Player[client].venting = true;
+
+	TF2_HidePlayer(client);
+	SetEntityMoveType(client, MOVETYPE_NONE);
+
+	TF2_SetThirdPerson(client);
+	EmitSoundToClient(client, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+
+	OpenVentsMenu(client);
+}
+
+void StopVenting(int client)
+{
+	g_Player[client].venting = false;
+
+	TF2_ShowPlayer(client);
+	SetEntityMoveType(client, MOVETYPE_ISOMETRIC);
+
+	TF2_SetFirstPerson(client);
+	EmitSoundToClient(client, "doors/vent_open2.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
 }
