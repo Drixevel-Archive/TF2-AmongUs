@@ -26,6 +26,13 @@ stock int TF2_GetActiveSlot(int client)
 	return -1;
 }
 
+stock void TF2_RespawnAll()
+{
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && TF2_GetClientTeam(i) > TFTeam_Spectator)
+			TF2_RespawnPlayer(i);
+}
+
 stock bool TriggerRelay(const char[] name)
 {
 	return TriggerEntity(name, "logic_relay");

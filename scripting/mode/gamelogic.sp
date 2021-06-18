@@ -171,6 +171,9 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 {
 	CPrintToChatAll("Mode: Setup Started");
 
+	//Respawn all players on the map on setup so they're in the lobby.
+	TF2_RespawnAll();
+
 	//Close and lock the doors during the lobby phase.
 	TriggerRelay(RELAY_LOBBY_DOORS_CLOSE);
 	TriggerRelay(RELAY_LOBBY_DOORS_LOCK);
