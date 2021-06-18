@@ -208,9 +208,12 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
 	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
 	RegConsoleCmd("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
+	RegConsoleCmd("sm_owner", Command_Owner, "Displays who the current game owner is in chat.");
 
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
+	RegAdminCmd("sm_setowner", Command_SetOwner, ADMFLAG_GENERIC, "Sets a specific player to own the match.");
+	RegAdminCmd("sm_removeowner", Command_RemoveOwner, ADMFLAG_GENERIC, "Removes the current owner if there is one.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
