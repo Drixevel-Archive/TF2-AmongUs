@@ -291,6 +291,8 @@ public void OnPluginStart()
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 
 	AddCommandListener(Listener_VoiceMenu, "voicemenu");
+	AddCommandListener(Listener_Kill, "kill");
+	AddCommandListener(Listener_Kill, "explode");
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnLogicRelayTriggered);
 
@@ -794,6 +796,11 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			StartVenting(client);
 	}
 
+	return Plugin_Stop;
+}
+
+public Action Listener_Kill(int client, const char[] command, int argc)
+{
 	return Plugin_Stop;
 }
 
