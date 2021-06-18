@@ -264,6 +264,21 @@ stock int GetTotalPlayers()
 	return count;
 }
 
+stock int GetTotalAlivePlayers()
+{
+	int count;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || !IsPlayerAlive(i))
+			continue;
+
+		count++;
+	}
+
+	return count;
+}
+
 stock bool IsAdmin(int client)
 {
 	return CheckCommandAccess(client, "", ADMFLAG_GENERIC, true);
@@ -279,4 +294,9 @@ stock bool StopTimer(Handle& timer)
 	}
 
 	return false;
+}
+
+stock float GetVotePercent(int votes, int totalVotes)
+{
+	return float(votes) / float(totalVotes);
 }
