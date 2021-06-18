@@ -146,3 +146,68 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 			delete menu;
 	}
 }
+
+void CreateVoteMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_Vote);
+	menu.SetTitle("Choose a player to eject:");
+
+	char sID[16]; char sDisplay[256]; int draw; int votes;
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || TF2_GetClientTeam(i) < TFTeam_Red)
+			continue;
+		
+		draw = ITEMDRAW_DEFAULT;
+		votes = 0;
+
+		if (!IsPlayerAlive(i))
+			draw = ITEMDRAW_DISABLED;
+		
+		for (int x = 1; x <= MaxClients; x++)
+			if (IsClientInGame(x) && IsPlayerAlive(x) && g_Player[x].voted_for == i)
+				votes++;
+		
+		IntToString(GetClientUserId(i), sID, sizeof(sID));
+		FormatEx(sDisplay, sizeof(sDisplay), "%N (%i)", i, votes);
+		menu.AddItem(sID, sDisplay, draw);
+	}
+
+	menu.ExitButton = false;
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char sID[16];
+			menu.GetItem(param2, sID, sizeof(sID));
+
+			int target = GetClientOfUserId(StringToInt(sID));
+
+			if (target < 1)
+			{
+				if (g_Match.meeting != null)
+					CreateVoteMenu(param1);
+				
+				return;
+			}
+
+			g_Player[param1].voted_for = target;
+
+			if (param1 == target)
+				CPrintToChatAll("{H1}%N {default}voted for {H2}Themself!", param1);
+			else
+				CPrintToChatAll("{H1}%N {default}voted for {H2}%N!", param1, target);
+
+			if (g_Match.meeting != null)
+				CreateVoteMenu(param1);
+		}
+
+		case MenuAction_End:
+			delete menu;
+	}
+}

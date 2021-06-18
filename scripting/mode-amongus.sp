@@ -111,6 +111,8 @@ enum struct Player
 	int taskticks;
 	Handle doingtask;
 
+	int voted_for;
+
 	void Init()
 	{
 		this.color = NO_COLOR;
@@ -128,6 +130,8 @@ enum struct Player
 
 		this.taskticks = 0;
 		this.doingtask = null;
+
+		this.voted_for = -1;
 	}
 
 	void Clear()
@@ -147,6 +151,8 @@ enum struct Player
 
 		this.taskticks = 0;
 		this.doingtask = null;
+
+		this.voted_for = -1;
 	}
 }
 
@@ -184,6 +190,9 @@ enum struct Match
 {
 	int tasks_current;
 	int tasks_goal;
+
+	int meeting_time;
+	Handle meeting;
 }
 
 Match g_Match;
@@ -439,7 +448,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 
 		case Role_Imposter:
 		{
-			if (IsPlayerAlive(client) && !TF2_IsInSetup())
+			if (IsPlayerAlive(client) && !TF2_IsInSetup() && g_Match.meeting == null)
 			{
 				float origin[3];
 				GetClientAbsOrigin(client, origin);
@@ -472,7 +481,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		}
 	}
 
-	if (IsPlayerAlive(client))
+	if (IsPlayerAlive(client) && g_Match.meeting == null)
 	{
 		float origin[3];
 		GetClientEyePosition(client, origin);
@@ -792,4 +801,76 @@ public void OnGameFrame()
 	}
 	else if (count >= 2 && TF2_IsTimerPaused()) //If there's more than 2 players and the timer's paused then unpause it.
 		TF2_ResumeTimer();
+void CallMeeting()
+{
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && IsPlayerAlive(i))
+		{
+			TF2_RespawnPlayer(i);
+			SetEntityMoveType(i, MOVETYPE_NONE);
+		}
+	}
+
+	EmitSoundToAll("ambient_mp3/alarms/doomsday_lift_alarm.mp3");
+	UnmuteAllClients();
+
+	TriggerRelay("meeting_button_lock");
+
+	TriggerRelay("lobby_doors_close");
+	TriggerRelay("lobby_doors_lock");
+
+	g_Match.meeting_time = GetGameSetting_Int("discussion_time");
+	StopTimer(g_Match.meeting);
+	g_Match.meeting = CreateTimer(1.0, Timer_StartVoting, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action Timer_StartVoting(Handle timer)
+{
+	g_Match.meeting_time--;
+
+	if (g_Match.meeting_time > 0)
+	{
+		PrintCenterTextAll("Emergency Meeting: Discussion Time (%i)", g_Match.meeting_time);
+		return Plugin_Continue;
+	}
+
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i))
+			CreateVoteMenu(i);
+
+	g_Match.meeting_time = GetGameSetting_Int("voting_time");
+	g_Match.meeting = CreateTimer(1.0, Timer_EndVoting, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+	return Plugin_Stop;
+}
+
+public Action Timer_EndVoting(Handle timer)
+{
+	g_Match.meeting_time--;
+
+	if (g_Match.meeting_time > 0)
+	{
+		PrintCenterTextAll("Emergency Meeting: Voting Time (%i)", g_Match.meeting_time);
+		return Plugin_Continue;
+	}
+
+	for (int i = 1; i <= MaxClients; i++)
+		g_Player[i].voted_for = -1;
+
+	PrintCenterTextAll("Emergency Meeting: Ended");
+
+	TriggerRelay("meeting_button_unlock");
+
+	TriggerRelay("lobby_doors_unlock");
+	TriggerRelay("lobby_doors_open");
+
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && IsPlayerAlive(i))
+			SetEntityMoveType(i, MOVETYPE_ISOMETRIC);
+
+	MuteAllClients();
+
+	g_Match.meeting = null;
+	return Plugin_Stop;
 }
