@@ -46,6 +46,11 @@ stock int TF2_CreateGlow(int target, int color[4] = {255, 255, 255, 255})
 		Format(sName, sizeof(sName), "%s%i", sClassname, target);
 		DispatchKeyValue(target, "targetname", sName);
 	}
+	else
+	{
+		Format(sName, sizeof(sName), "%s%i", sName, target);
+		DispatchKeyValue(target, "targetname", sName);
+	}
 
 	int glow = CreateEntityByName("tf_glow");
 
@@ -209,7 +214,10 @@ stock void TF2_GlowEnts(const char[] classname, int color[4], const char[] name 
 				continue;
 		}
 
-		TF2_CreateGlow(entity, color);
+		if (entity > MaxClients && g_GlowEnt[entity] > MaxClients)
+			AcceptEntityInput(g_GlowEnt[entity], "Kill");
+
+		g_GlowEnt[entity] = TF2_CreateGlow(entity, color);
 	}
 }
 
