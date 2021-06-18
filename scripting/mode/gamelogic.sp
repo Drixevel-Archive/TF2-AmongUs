@@ -120,6 +120,24 @@ stock bool TF2_IsInSetup()
 	return view_as<bool>(GameRules_GetProp("m_bInSetup"));
 }
 
+stock bool TF2_IsTimerPaused()
+{
+	int entity = TF2_GetTimer();
+	return view_as<bool>(GetEntProp(entity, Prop_Send, "m_bTimerPaused"));
+}
+
+stock void TF2_PauseTimer()
+{
+	int entity = TF2_GetTimer();
+	AcceptEntityInput(entity, "Pause");
+}
+
+stock void TF2_ResumeTimer()
+{
+	int entity = TF2_GetTimer();
+	AcceptEntityInput(entity, "Resume");
+}
+
 /*****************************/
 //Ent Outputs
 
