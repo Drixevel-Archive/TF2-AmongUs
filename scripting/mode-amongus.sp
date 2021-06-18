@@ -261,6 +261,12 @@ public void OnPluginEnd()
 			ClearSyncHud(i, g_Hud);
 }
 
+public void OnMapStart()
+{
+	//Parse the available tasks on the map by parsing entity names and logic.
+	ParseTasks();
+}
+
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
 {
 	char sMSG[12];

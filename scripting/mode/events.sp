@@ -65,6 +65,9 @@ public void Event_OnPostInventoryApplication(Event event, const char[] name, boo
 
 public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
+	//Parse the available tasks on the map by parsing entity names and logic.
+	ParseTasks();
+	
 	//Makes sure the lobby is locked whenever we're waiting for players to join.
 	if (TF2_IsWaitingForPlayers())
 	{
