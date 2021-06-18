@@ -473,6 +473,15 @@ void SendHud(int client)
 
 	Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
 
+	//Tasks
+	Format(sHud, sizeof(sHud), "%s\n--Tasks--:", sHud);
+
+	for (int i = 0; i < g_Player[client].tasks.Length; i++)
+	{
+		int task = g_Player[client].tasks.Get(i);
+		Format(sHud, sizeof(sHud), "%s\n%s", g_Task[task].name);
+	}
+
 	//Send the Hud.
 	ShowSyncHudText(client, g_Hud, sHud);
 }
