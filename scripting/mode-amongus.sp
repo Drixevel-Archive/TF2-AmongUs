@@ -166,6 +166,14 @@ enum struct Task
 Task g_Task[256];
 int g_TotalTasks;
 
+enum struct Match
+{
+	int tasks_current;
+	int tasks_goal;
+}
+
+Match g_Match;
+
 /*****************************/
 //Managed
 
@@ -572,7 +580,7 @@ void SendHud(int client)
 
 	//Tasks
 	if (HasTasks(client))
-		Format(sHud, sizeof(sHud), "%s\n--%sTasks--", sHud, g_Player[client].role == Role_Imposter ? "Fake " : "");
+		Format(sHud, sizeof(sHud), "%s\n--%sTasks-- (%i/%i)", sHud, g_Player[client].role == Role_Imposter ? "Fake " : "", g_Match.tasks_current, g_Match.tasks_goal);
 
 	for (int i = 0; i < g_Player[client].tasks.Length; i++)
 	{
@@ -648,7 +656,7 @@ public Action Timer_DoingTask(Handle timer, any data)
 
 	PrintHintText(client, "Task Completed.");
 	g_Player[client].doingtask = null;
-	
+
 	return Plugin_Stop;
 }
 

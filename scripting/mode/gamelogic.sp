@@ -187,6 +187,8 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 {
 	CPrintToChatAll("{H1}Mode{default}: Round Started");
 
+	g_Match.tasks_current = 0;
+
 	/////
 	//Setup glows for certain map entities.
 
@@ -236,8 +238,11 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		for (int x = 0; x < common; x++)
 			AssignTask(i, tasks[i]);
 		
-		SendHud(i);
+		if (g_Player[i].role != Role_Imposter)
+			g_Match.tasks_goal += (long + short + common);
 	}
+
+	SendHudToAll();
 }
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
