@@ -358,7 +358,10 @@ public void OnClientDisconnect_Post(int client)
 
 	//If the owner of the game disconnects then free up the slot.
 	if (client == g_GameOwner)
+	{
 		g_GameOwner = -1;
+		SendHudToAll();
+	}
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
@@ -467,6 +470,13 @@ void AssignColor(int client)
 {
 	// TODO: Make it so it doesn't assign colors other players have already.
 	SetColor(client, GetRandomInt(0, g_TotalColors - 1));
+}
+
+void SendHudToAll()
+{
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && !IsFakeClient(i))
+			SendHud(i);
 }
 
 void SendHud(int client)
