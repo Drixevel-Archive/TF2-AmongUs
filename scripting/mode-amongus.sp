@@ -24,6 +24,9 @@ task: <task name>
 #define PLUGIN_DESCRIPTION "A mode which replicates the Among Us game."
 #define PLUGIN_VERSION "1.0.0"
 
+//Debug mode to make it easier to work on the mode.
+#define DEBUG
+
 #define NO_COLOR -1
 
 /////
@@ -286,7 +289,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	{
 		case Role_Imposter:
 		{
-			if (IsPlayerAlive(client) /*&& !TF2_IsInSetup()*/)
+			if (IsPlayerAlive(client) && !TF2_IsInSetup())
 			{
 				float origin[3];
 				GetClientAbsOrigin(client, origin);

@@ -96,6 +96,13 @@ stock void TF2_DisableTimer()
 
 stock bool TF2_IsInSetup()
 {
+	//Easy way to test functionality during the lobby phase where usually players shouldn't have access to it.
+	#if defined DEBUG
+	int fuck = 1; //TODO: Find a better solution to the error that the setup GameProp return can't be reached if debug is active.
+	if (fuck != 0)
+		return false;
+	#endif
+
 	return view_as<bool>(GameRules_GetProp("m_bInSetup"));
 }
 
