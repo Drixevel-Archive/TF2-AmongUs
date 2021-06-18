@@ -300,3 +300,48 @@ stock float GetVotePercent(int votes, int totalVotes)
 {
 	return float(votes) / float(totalVotes);
 }
+
+stock void RotateYaw(float angles[3], float degree)
+{
+	float direction[3], normal[3];
+	GetAngleVectors(angles, direction, NULL_VECTOR, normal);
+
+	float sin = Sine(degree * 0.01745328);     // Pi/180
+	float cos = Cosine(degree * 0.01745328);
+	float a = normal[0] * sin;
+	float b = normal[1] * sin;
+	float c = normal[2] * sin;
+	float x = direction[2] * b + direction[0] * cos - direction[1] * c;
+	float y = direction[0] * c + direction[1] * cos - direction[2] * a;
+	float z = direction[1] * a + direction[2] * cos - direction[0] * b;
+	direction[0] = x; direction[1] = y; direction[2] = z;
+
+	GetVectorAngles(direction, angles);
+
+	float up[3];
+	GetVectorVectors(direction, NULL_VECTOR, up);
+
+	float roll = GetAngleBetweenVectors(up, normal, direction);
+	angles[2] += roll;
+}
+
+stock float GetAngleBetweenVectors(const float vector1[3], const float vector2[3], const float direction[3])
+{
+	float direction_n[3];
+	NormalizeVector(direction, direction_n);
+	
+	float vector1_n[3];
+	NormalizeVector(vector1, vector1_n);
+	
+	float vector2_n[3];
+	NormalizeVector(vector2, vector2_n);
+	float degree = ArcCosine(GetVectorDotProduct(vector1_n, vector2_n)) * 57.29577951;   // 180/Pi
+    
+	float cross[3];
+	GetVectorCrossProduct(vector1_n, vector2_n, cross);
+	
+	if (GetVectorDotProduct(cross, direction_n) < 0.0)
+		degree *= -1.0;
+
+	return degree;
+}
