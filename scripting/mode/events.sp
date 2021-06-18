@@ -67,7 +67,7 @@ public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcas
 {
 	//Parse the available tasks on the map by parsing entity names and logic.
 	ParseTasks();
-	
+
 	//Makes sure the lobby is locked whenever we're waiting for players to join.
 	if (TF2_IsWaitingForPlayers())
 	{
@@ -81,7 +81,7 @@ public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcas
 		return;
 	}
 
-	CPrintToChatAll("Mode: Setting up Round...");
+	CPrintToChatAll("{H1}Mode{default}: Setting up Round...");
 	TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
 
 	for (int i = 1; i <= MaxClients; i++)

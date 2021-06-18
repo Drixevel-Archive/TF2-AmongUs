@@ -111,67 +111,67 @@ stock bool TF2_IsInSetup()
 
 public void Timer_On5MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 5 Minutes Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 5 Minutes Remaining");
 }
 
 public void Timer_On4MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 4 Minutes Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 4 Minutes Remaining");
 }
 
 public void Timer_On3MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 3 Minutes Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 3 Minutes Remaining");
 }
 
 public void Timer_On2MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 2 Minutes Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 2 Minutes Remaining");
 }
 
 public void Timer_On1MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 1 Minute Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 1 Minute Remaining");
 }
 
 public void Timer_On30SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 30 Seconds Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 30 Seconds Remaining");
 }
 
 public void Timer_On10SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 10 Seconds Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 10 Seconds Remaining");
 }
 
 public void Timer_On5SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 5 Seconds Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 5 Seconds Remaining");
 }
 
 public void Timer_On4SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 4 Seconds Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 4 Seconds Remaining");
 }
 
 public void Timer_On3SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 3 Seconds Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 3 Seconds Remaining");
 }
 
 public void Timer_On2SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 2 Seconds Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 2 Seconds Remaining");
 }
 
 public void Timer_On1SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Lobby: 1 Second Remaining");
+	CPrintToChatAll("{H2}Lobby{default}: 1 Second Remaining");
 }
 
 public void Timer_OnRoundStart(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Mode: Round Started");
+	CPrintToChatAll("{H1}Mode{default}: Round Started");
 
 	/////
 	//Setup glows for certain map entities.
@@ -228,12 +228,12 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Mode: Round Finished");
+	CPrintToChatAll("{H1}Mode{default}: Round Finished");
 }
 
 public void Timer_OnSetupStart(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Mode: Setup Started");
+	CPrintToChatAll("{H1}Mode{default}: Setup Started");
 
 	//Respawn all players on the map on setup so they're in the lobby.
 	TF2_RespawnAll();
@@ -251,7 +251,7 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("Mode: Setup Finished");
+	CPrintToChatAll("{H1}Mode{default}: Setup Finished");
 
 	//Unlock and open the doors whenever the lobby phase is finished.
 	TriggerRelay(RELAY_LOBBY_DOORS_UNLOCK);

@@ -176,7 +176,7 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	CPrintToChatAll("Mode: Initializing...");
+	CPrintToChatAll("{H1}Mode{default}: Initializing...");
 	RegPluginLibrary("mode-amongus");
 
 	g_Late = late;
@@ -185,7 +185,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
-	CSetPrefix("[Among Us]");
+	CSetPrefix("{black}[{ghostwhite}Among Us{black}]");
+	CSetHighlight("{crimson}");
+	CSetHighlight2("{darkorchid}");
 
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "99999", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
@@ -242,11 +244,11 @@ public void OnPluginStart()
 		if (GetEntityClassname(entity, classname, sizeof(classname)))
 			OnEntityCreated(entity, classname);
 	
-	CPrintToChatAll("Mode: Loaded");
+	CPrintToChatAll("{H1}Mode{default}: Loaded");
 	
 	if (g_Late)
 	{
-		CPrintToChatAll("Mode: Setting up Round...");
+		CPrintToChatAll("{H1}Mode{default}: Setting up Round...");
 		TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
 
 		for (int i = 1; i <= MaxClients; i++)
@@ -257,7 +259,7 @@ public void OnPluginStart()
 
 public void OnPluginEnd()
 {
-	CPrintToChatAll("Mode: Unloaded");
+	CPrintToChatAll("{H1}Mode{default}: Unloaded");
 
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && !IsFakeClient(i))
