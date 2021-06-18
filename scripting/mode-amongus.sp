@@ -26,6 +26,19 @@ task: <task name>
 
 #define NO_COLOR -1
 
+/////
+//It's easier to give maps complete control of the plugin by just using relays and firing those when needed.
+
+//These control the relays we fire to handle lobby doors.
+#define RELAY_LOBBY_DOORS_OPEN "lobby_doors_open"	//Is intended to open all lobby doors.
+#define RELAY_LOBBY_DOORS_CLOSE "lobby_doors_close"	//Is intended to close all lobby doors.
+#define RELAY_LOBBY_DOORS_LOCK "lobby_doors_lock"	//Is intended to lock all lobby doors.
+#define RELAY_LOBBY_DOORS_UNLOCK "lobby_doors_unlock"	//Is intended to unlock all lobby doors.
+
+#define RELAY_MEETING_BUTTON_OPEN "meeting_button_open"		//Is intended to open the meeting button model, turn the light on and play a sound.
+#define RELAY_MEETING_BUTTON_CLOSE "meeting_button_close"		//Is intended to close the meeting button and turn off the light.
+#define RELAY_MEETING_BUTTON_ACTIVATE "meeting_button_activate"	//Is intended to fire the button so a meeting starts.
+
 /*****************************/
 //Includes
 #include <sourcemod>
