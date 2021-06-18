@@ -267,6 +267,7 @@ public void OnClientConnected(int client)
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 }
 
 public void OnClientDisconnect_Post(int client)
