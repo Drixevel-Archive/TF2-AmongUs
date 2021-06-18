@@ -440,3 +440,26 @@ stock int CreateParticle(const char[] name, float origin[3], float time = 0.0, f
 
 	return entity;
 }
+
+stock bool GetGroundCoordinates(float start[3], float buffer[3], float distance = 0.0, float offset[3] = {0.0, 0.0, 0.0})
+{
+	float vecLook[3] = {90.0, 0.0, 0.0};
+	Handle trace = TR_TraceRayFilterEx(start, vecLook, MASK_SOLID_BRUSHONLY, RayType_Infinite, ___TraceEntityFilter_NoPlayers);
+
+	if (TR_DidHit(trace))
+	{
+		TR_GetEndPosition(buffer, trace);
+		delete trace;
+		
+		buffer[0] += offset[0]; buffer[1] += offset[1]; buffer[2] += offset[2];
+		return (distance > 0.0 && start[2] - buffer[2] > distance);
+	}
+
+	delete trace;
+	return false;
+}
+
+public bool ___TraceEntityFilter_NoPlayers(int entity, int contentsMask, any data)
+{
+	return entity != data && entity > MaxClients;
+}
