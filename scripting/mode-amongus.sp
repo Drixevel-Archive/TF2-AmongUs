@@ -807,19 +807,29 @@ public void OnGameFrame()
 	if (!TF2_IsInSetup() && count < 2 && !g_BetweenRounds)
 	{
 		g_BetweenRounds = true;
-		TF2_ForceWin(TFTeam_Unassigned);
+		//TF2_ForceWin(TFTeam_Unassigned);
 	}
 
 	//If there's less than 2 players then make sure the timer's paused and send a hud message saying the mode requires 3 players to play.
 	if (count < 2)
 	{
-		if (!TF2_IsTimerPaused())
-			TF2_PauseTimer();
+		//if (!TF2_IsTimerPaused())
+		//	TF2_PauseTimer();
 		
-		PrintCenterTextAll("3 players required to start.");
+		//PrintCenterTextAll("3 players required to start.");
 	}
 	else if (count >= 2 && TF2_IsTimerPaused()) //If there's more than 2 players and the timer's paused then unpause it.
 		TF2_ResumeTimer();
+	
+	//Check if the current amount of tasks completed is more than or equal to the goal.
+	//If the current tasks amount has met the tasks goal then end the round and give the victory the the non-imposters.
+	if (g_Match.tasks_goal > 0 && g_Match.tasks_current >= g_Match.tasks_goal && !g_BetweenRounds)
+	{
+		g_BetweenRounds = true;
+		//TF2_ForceWin(TFTeam_Blue);
+	}
+}
+
 void CallMeeting()
 {
 	for (int i = 1; i <= MaxClients; i++)
@@ -897,12 +907,14 @@ public Action Timer_EndVoting(Handle timer)
 		
 		g_Player[i].voted_to = 0;
 	}
+
 	PrintCenterTextAll("Emergency Meeting: Ended");
 
 	TriggerRelay("meeting_button_unlock");
 
 	TriggerRelay("lobby_doors_unlock");
 	TriggerRelay("lobby_doors_open");
+
 
 
 	for (int i = 1; i <= MaxClients; i++)
