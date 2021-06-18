@@ -315,7 +315,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					else if (g_Player[client].target == -1)
 					{
 						g_Player[client].target = i;
-						PrintCenterText(client, "Current Target: %N", i);
+						PrintCenterText(client, "Current Target: %N\n(Press MEDIC! to kill them)", i);
 					}
 				}
 			}
