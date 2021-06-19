@@ -79,6 +79,7 @@ part: <part name>
 ConVar convar_Time_Setup;
 ConVar convar_Time_Round;
 
+ConVar convar_Hud;
 ConVar convar_Hud_Position;
 ConVar convar_Hud_Color;
 
@@ -292,6 +293,8 @@ public void OnPluginStart()
 	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "3600", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Round.AddChangeHook(OnConVarChange);
 
+	convar_Hud = CreateConVar("sm_mode_amongus_hud", "1", "Should the global hud be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_Hud.AddChangeHook(OnConVarChange);
 	convar_Hud_Position = CreateConVar("sm_mode_amongus_hud_position", "0.0 0.0", "Where should the hud be on screen?", FCVAR_NOTIFY);
 	convar_Hud_Position.AddChangeHook(OnConVarChange);
 	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
@@ -408,6 +411,17 @@ public void OnConVarChange(ConVar convar, const char[] oldValue, const char[] ne
 		TF2_SetTime(value);
 	else if (convar == convar_Hud_Position || convar == convar_Hud_Color)
 		SendHudToAll();
+	else if (convar == convar_Hud)
+	{
+		if (StrEqual(newValue, "1", false))
+			SendHudToAll();
+		else
+		{
+			for (int i = 1; i <= MaxClients; i++)
+				if (IsClientInGame(i))
+					ClearSyncHud(i, g_Hud);
+		}
+	}
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
@@ -696,6 +710,9 @@ void AssignColor(int client)
 
 void SendHudToAll()
 {
+	if (!convar_Hud.BoolValue)
+		return;
+	
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && !IsFakeClient(i))
 			SendHud(i);
@@ -703,6 +720,9 @@ void SendHudToAll()
 
 void SendHud(int client)
 {
+	if (!convar_Hud.BoolValue)
+		return;
+	
 	/////
 	//Parse the position and colors for the hud.
 
