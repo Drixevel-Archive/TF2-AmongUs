@@ -157,9 +157,9 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 void CreateVoteMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_Vote);
-	menu.SetTitle("Choose a player to eject:");
+	menu.SetTitle("Choose a player to eject: %s", g_Player[client].voted_for != -1 ? "(Vote Casted)" : "");
 
-	char sID[16]; char sDisplay[256]; int draw; int votes;
+	char sID[16]; char sDisplay[256]; int draw; int votes; char sStatus[32];
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i) || TF2_GetClientTeam(i) < TFTeam_Red)
@@ -167,22 +167,34 @@ void CreateVoteMenu(int client)
 		
 		draw = ITEMDRAW_DEFAULT;
 		votes = 0;
+		sStatus[0] = '\0';
 
+		//Player isn't alive so they can't be voted on.
 		if (!IsPlayerAlive(i))
+		{
 			draw = ITEMDRAW_DISABLED;
+			Format(sStatus, sizeof(sStatus), "%s (Dead)", sStatus);
+		}
 		
+		//Player who owns the menu has voted already, disable all of the voting options.
 		if (g_Player[client].voted_for != -1)
 			draw = ITEMDRAW_DISABLED;
 		
-		for (int x = 1; x <= MaxClients; x++)
-			if (IsClientInGame(x) && IsPlayerAlive(x) && g_Player[x].voted_for == i)
-				votes++;
+		//No status found so lets just display their current amount of votes.
+		if (strlen(sStatus) == 0)
+		{
+			for (int x = 1; x <= MaxClients; x++)
+				if (IsClientInGame(x) && IsPlayerAlive(x) && g_Player[x].voted_for == i)
+					votes++;
+
+			FormatEx(sStatus, sizeof(sStatus), "(%i)", votes);
+		}
 		
 		IntToString(GetClientUserId(i), sID, sizeof(sID));
-		FormatEx(sDisplay, sizeof(sDisplay), "%N (%i)", i, votes);
+		FormatEx(sDisplay, sizeof(sDisplay), "%N %s", i, sStatus);
 		menu.AddItem(sID, sDisplay, draw);
 	}
-
+	
 	menu.AddItem("-1", "Close Menu");
 
 	menu.ExitButton = false;
