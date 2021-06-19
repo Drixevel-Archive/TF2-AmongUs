@@ -223,8 +223,42 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 	//Give tasks a certain glow.
 	if (convar_Setting_ToggleTaskGlows.BoolValue)
-		TF2_GlowEnts("*", view_as<int>({255, 255, 255, 200}), "task");
-	
+	{
+		int color[4];
+		for (int i = 0; i < g_TotalTasks; i++)
+		{
+			int entity = g_Task[i].entity;
+			int type = g_Task[i].type;
+
+			if ((type & TASK_TYPE_LONG) == TASK_TYPE_LONG)
+			{
+				//Red
+				color[0] = 255;
+				color[1] = 0;
+				color[2] = 0;
+				color[3] = 255;
+			}
+			else if ((type & TASK_TYPE_SHORT) == TASK_TYPE_SHORT)
+			{
+				//Green
+				color[0] = 0;
+				color[1] = 255;
+				color[2] = 0;
+				color[3] = 255;
+			}
+			else if ((type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
+			{
+				//Gray/Grey
+				color[0] = 128;
+				color[1] = 128;
+				color[2] = 128;
+				color[3] = 255;
+			}
+
+			TF2_CreateGlow(entity, color);
+		}
+	}
+
 	//Assign random players as Imposter and other roles automatically.
 	int amount = GetGameSetting_Int("imposters");
 	int current;

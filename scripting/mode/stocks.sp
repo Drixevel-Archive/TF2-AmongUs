@@ -201,25 +201,25 @@ stock bool TriggerEntity(const char[] name, const char[] classname)
 }
 
 //TODO: This can be a better name.
-stock void TF2_GlowEnts(const char[] classname, int color[4], const char[] name = "")
-{
-	int entity = -1; char sName[64];
-	while ((entity = FindEntityByClassname(entity, classname)) != -1)
-	{
-		if (strlen(name) > 0)
-		{
-			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+// stock void TF2_GlowEnts(const char[] classname, int color[4], const char[] name = "")
+// {
+// 	int entity = -1; char sName[64];
+// 	while ((entity = FindEntityByClassname(entity, classname)) != -1)
+// 	{
+// 		if (strlen(name) > 0)
+// 		{
+// 			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
 
-			if (StrContains(sName, name, false) == -1)
-				continue;
-		}
+// 			if (StrContains(sName, name, false) == -1)
+// 				continue;
+// 		}
 
-		if (entity > MaxClients && g_GlowEnt[entity] > MaxClients)
-			AcceptEntityInput(g_GlowEnt[entity], "Kill");
+// 		if (entity > MaxClients && g_GlowEnt[entity] > MaxClients)
+// 			AcceptEntityInput(g_GlowEnt[entity], "Kill");
 
-		g_GlowEnt[entity] = TF2_CreateGlow(entity, color);
-	}
-}
+// 		g_GlowEnt[entity] = TF2_CreateGlow(entity, color);
+// 	}
+// }
 
 stock int GetRandomClient(bool ingame = true, bool alive = true, bool ignore_bots = true, int team = -1)
 {
