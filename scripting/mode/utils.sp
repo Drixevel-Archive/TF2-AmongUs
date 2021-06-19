@@ -196,9 +196,14 @@ void SetPlayerSpeed(int client)
 	float speed = GetGameSetting_Float("player_speed");
 	
 	if (speed > 1.0)
+	{
+		speed -= 1.0;
 		TF2Attrib_ApplyMoveSpeedBonus(client, speed);
+	}
 	else if (speed < 1.0)
+	{
 		TF2Attrib_ApplyMoveSpeedPenalty(client, speed);
+	}
 	else
 	{
 		TF2Attrib_RemoveMoveSpeedBonus(client);
