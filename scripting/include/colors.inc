@@ -144,8 +144,10 @@ stock void CPrintToChat(int client, const char[] message, any ...)
 stock void CPrintToChatEx(int client, int author, const char[] message, any ...)
 {
 	CSetNextAuthor(author);
+
 	char buffer[MAX_BUFFER_SIZE];
 	VFormat(buffer, sizeof(buffer), message, 4);
+
 	CPrintToChat(client, buffer);
 }
 
@@ -197,8 +199,10 @@ stock void CPrintToChatAll(const char[] message, any ...)
 stock void CPrintToChatAllEx(int author, const char[] message, any ...)
 {
 	CSetNextAuthor(author);
+
 	char buffer[MAX_BUFFER_SIZE];
 	VFormat(buffer, sizeof(buffer), message, 3);
+
 	CPrintToChatAll(buffer);
 }
 
@@ -250,8 +254,10 @@ stock void CPrintToChatTeam(int team, const char[] message, any ...)
 stock void CPrintToChatTeamEx(int team, int author, const char[] message, any ...)
 {
 	CSetNextAuthor(author);
+
 	char buffer[MAX_BUFFER_SIZE];
 	VFormat(buffer, sizeof(buffer), message, 4);
+
 	CPrintToChatTeam(team, buffer);
 }
 
@@ -311,8 +317,10 @@ stock void CPrintToChatAdmins(int bitflags, const char[] message, any ...)
 stock void CPrintToChatAdminsEx(int bitflags, int author, const char[] message, any ...)
 {
 	CSetNextAuthor(author);
+
 	char buffer[MAX_BUFFER_SIZE];
 	VFormat(buffer, sizeof(buffer), message, 4);
+
 	CPrintToChatTeam(bitflags, buffer);
 }
 
@@ -333,8 +341,9 @@ stock void CReplyToCommand(int client, const char[] message, any ...)
 	if (client != 0 && !IsClientInGame(client))
 		ThrowError("Client %d is not in game", client);
 
-	char buffer[MAX_BUFFER_SIZE];
 	SetGlobalTransTarget(client);
+
+	char buffer[MAX_BUFFER_SIZE];
 	VFormat(buffer, sizeof(buffer), message, 3);
 
 	AddPrefixAndDefaultColor(buffer, sizeof(buffer));
@@ -346,7 +355,13 @@ stock void CReplyToCommand(int client, const char[] message, any ...)
 		PrintToConsole(client, "%s", buffer);
 	}
 	else
-		CPrintToChat(client, "%s", buffer);
+	{
+		CProcessVariables(buffer, sizeof(buffer));
+		CAddWhiteSpace(buffer, sizeof(buffer));
+
+		SendPlayerMessage(client, buffer, g_iAuthor);
+		g_iAuthor = 0;
+	}
 }
 
 /*
