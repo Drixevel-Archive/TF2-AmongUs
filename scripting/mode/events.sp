@@ -101,7 +101,10 @@ public void NextFrame_CreateDeadBody(any userid)
 	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client))
 	{
 		TF2_SpawnRagdoll(client, 99999.0, RAG_NOHEAD | RAG_NOTORSO);
+		
+		//Cache their death location and allow it to be discovered.
 		GetClientAbsOrigin(client, g_Player[client].deathorigin);
+		g_Player[client].showdeath = true;
 	}
 }
 

@@ -121,6 +121,7 @@ enum struct Player
 	bool ejected;
 	Handle ejectedtimer;
 
+	bool showdeath;
 	float deathorigin[3];
 	int neardeath;
 
@@ -150,6 +151,7 @@ enum struct Player
 		this.ejected = false;
 		this.ejectedtimer = null;
 
+		this.showdeath = false;
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
@@ -182,6 +184,7 @@ enum struct Player
 		this.ejected = false;
 		StopTimer(this.ejectedtimer);
 
+		this.showdeath = false;
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
 		this.deathorigin[0] = 0.0;
@@ -664,7 +667,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 
 		for (int i = 1; i <= MaxClients; i++)
 		{
-			if (!IsClientInGame(i) || IsPlayerAlive(i))
+			if (!IsClientInGame(i) || IsPlayerAlive(i) || !g_Player[i].showdeath)
 				continue;
 			
 			if (GetVectorDistance(origin, g_Player[i].deathorigin) > 100.0)
@@ -1027,16 +1030,19 @@ void CallMeeting(int client = -1, bool button = false)
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		g_Player[i].deathorigin[0] = 0.0;
-		g_Player[i].deathorigin[1] = 0.0;
-		g_Player[i].deathorigin[2] = 0.0;
+		if (!IsClientInGame(i))
+			continue;
 
-		if (IsClientInGame(i) && IsPlayerAlive(i))
+		if (IsPlayerAlive(i))
 		{
 			g_Player[i].target = -1;
 
 			TF2_RespawnPlayer(i);
 			SetEntityMoveType(i, MOVETYPE_NONE);
+		}
+		else
+		{
+			g_Player[i].showdeath = false;
 		}
 	}
 

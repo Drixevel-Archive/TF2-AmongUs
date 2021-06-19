@@ -209,6 +209,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
+		g_Player[i].showdeath = false;
 		g_Player[i].deathorigin[0] = 0.0;
 		g_Player[i].deathorigin[1] = 0.0;
 		g_Player[i].deathorigin[2] = 0.0;
