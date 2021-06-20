@@ -139,6 +139,8 @@ enum struct Player
 	StringMap tasks_completed;
 	int neartask;
 
+	int nearaction;
+
 	int taskticks;
 	Handle doingtask;
 
@@ -170,6 +172,8 @@ enum struct Player
 		this.tasks = new ArrayList();
 		this.tasks_completed = new StringMap();
 		this.neartask = -1;
+
+		this.nearaction = -1;
 
 		this.taskticks = 0;
 		this.doingtask = null;
@@ -203,6 +207,8 @@ enum struct Player
 		delete this.tasks;
 		delete this.tasks_completed;
 		this.neartask = -1;
+
+		this.nearaction = -1;
 
 		this.taskticks = 0;
 		StopTimer(this.doingtask);
@@ -728,6 +734,41 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				PrintCenterText(client, "Near Dead Body\nInteract with the by by calling for MEDIC!");
 			}
 		}
+
+		int entity = -1; char sName[32];
+		while ((entity = FindEntityByClassname(entity, "*")) != -1)
+		{
+			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+			if (StrContains(sName, "action", false) != 0)
+				continue;
+			
+			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
+
+			if (GetVectorDistance(origin, origin2) > 100.0)
+			{
+				if (g_Player[client].nearaction == entity)
+				{
+					g_Player[client].nearaction = -1;
+					PrintCenterText(client, "");
+				}
+			}
+			else if (g_Player[client].nearaction == -1)
+			{
+				g_Player[client].nearaction = entity;
+
+				char sDisplay[256];
+				//GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+				//TODO: Add the `display` key to action entities.
+				if (StrContains(sName, "action_map", false) == 0)
+					FormatEx(sDisplay, sizeof(sDisplay), "Map");
+				else if (StrContains(sName, "action_map", false) == 0)
+					FormatEx(sDisplay, sizeof(sDisplay), "Cameras");
+				
+				PrintCenterText(client, "Near Action: %s (Press MEDIC! to interact)", sDisplay);
+			}
+		}
 	}
 
 	return Plugin_Continue;
@@ -911,6 +952,11 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			StopVenting(client);
 		else
 			StartVenting(client, g_Player[client].nearvent);
+	}
+	else if (g_Player[client].nearaction != -1)
+	{
+		TF2_PlayDenySound(client);
+		CPrintToChat(client, "This action is currently disabled, not finished yet.");
 	}
 
 	return Plugin_Stop;
