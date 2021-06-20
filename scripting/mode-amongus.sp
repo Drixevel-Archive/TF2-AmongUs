@@ -1026,7 +1026,7 @@ public Action Timer_DoingTask(Handle timer, any data)
 	if (StrEqual(g_Task[task].name, "Submit Scan", false))
 	{
 		g_Player[client].scanning = false;
-		SetEntityMoveType(client, MOVETYPE_ISOMETRIC);
+		SetEntityMoveType(client, MOVETYPE_WALK);
 	}
 
 	PrintHintText(client, "Task Completed.");
@@ -1256,7 +1256,7 @@ public Action Timer_EndVoting(Handle timer)
 
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && IsPlayerAlive(i))
-			SetEntityMoveType(i, MOVETYPE_ISOMETRIC);
+			SetEntityMoveType(i, MOVETYPE_WALK);
 
 	MuteAllClients();
 
@@ -1307,7 +1307,7 @@ void StopVenting(int client)
 	g_Player[client].venting = false;
 
 	TF2_ShowPlayer(client);
-	SetEntityMoveType(client, MOVETYPE_ISOMETRIC);
+	SetEntityMoveType(client, MOVETYPE_WALK);
 
 	TF2_SetFirstPerson(client);
 	EmitSoundToClient(client, "doors/vent_open2.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
