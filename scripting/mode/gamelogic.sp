@@ -119,7 +119,7 @@ stock bool TF2_IsInSetup()
 		return false;
 	#endif
 
-	return view_as<bool>(GameRules_GetProp("m_bInSetup"));
+	return !view_as<bool>(GameRules_GetProp("m_bInSetup"));
 }
 
 stock bool TF2_IsTimerPaused()
@@ -336,7 +336,6 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H1}Mode{default}: Round Finished");
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -347,7 +346,7 @@ public void Timer_OnFinished(const char[] output, int caller, int activator, flo
 
 public void Timer_OnSetupStart(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H1}Mode{default}: Setup Started");
+	CPrintToChatAll("{H1}Mode{default}: Lobby Started");
 
 	GameRules_SetProp("m_bInSetup", true);
 
@@ -370,7 +369,7 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H1}Mode{default}: Setup Finished");
+	CPrintToChatAll("{H1}Mode{default}: Lobby Finished");
 
 	GameRules_SetProp("m_bInSetup", false);
 
