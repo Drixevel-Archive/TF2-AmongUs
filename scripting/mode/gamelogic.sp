@@ -281,8 +281,21 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		g_Player[client].role = Role_Imposter;
 		SendHud(client);
 		CPrintToChat(client, "You are an IMPOSTER!");
+
+		if (first)
+		{
+			first = false;
+			Format(sImposters, sizeof(sImposters), "%s%N", sImposters, client);
+		}
+		else
+			Format(sImposters, sizeof(sImposters), "%s, %N", sImposters, client);
+
 		current++;
 	}
+
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i) && g_Player[i].role == Role_Imposter)
+			CPrintToChat(i, "Imposters this match: {H1}%s", sImposters);
 
 	//Assign tasks automatically to players at the start of the round.
 
