@@ -3,6 +3,7 @@ plugins
 scripting/compile.dat
 scripting/compile.bat
 scripting/spcomp.exe
+scripting/spcomp64.exe
 scripting/include/admin.inc
 scripting/include/adminmenu.inc
 scripting/include/adt.inc
