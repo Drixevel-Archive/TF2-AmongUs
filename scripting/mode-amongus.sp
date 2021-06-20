@@ -899,8 +899,11 @@ public Action Timer_DoingTask(Handle timer, any data)
 		return Plugin_Continue;
 	}
 
-	MarkTaskComplete(client, task);
-	SendHud(client);
+	if (g_Player[client].role != Role_Imposter)
+	{
+		MarkTaskComplete(client, task);
+		SendHud(client);
+	}
 
 	if (StrEqual(g_Task[task].name, "Submit Scan", false))
 	{
