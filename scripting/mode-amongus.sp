@@ -274,6 +274,18 @@ Match g_Match;
 
 int g_Camera[MAXPLAYERS + 1];
 
+int g_FogController_Crewmates;
+int g_FogController_Imposters;
+float g_FogDistance = 300.0;
+
+int g_DelaySabotage;
+int g_ReactorsTime;
+Handle g_Reactors;
+bool g_LightsOff;
+bool g_DisableCommunications;
+int g_O2Time;
+Handle g_O2;
+
 /*****************************/
 //Managed
 
@@ -400,6 +412,33 @@ public void OnPluginStart()
 			OnEntityCreated(entity, classname);
 	
 	CPrintToChatAll("{H1}Mode{default}: Loaded");
+
+	//Setup the fog controller to control vision.
+	g_FogController_Crewmates = CreateEntityByName("env_fog_controller");
+	
+	DispatchKeyValue(g_FogController_Crewmates, "targetname", "fog_crewmates");
+	DispatchKeyValue(g_FogController_Crewmates, "fogblend", "0");
+	DispatchKeyValue(g_FogController_Crewmates, "fogcolor", "0 0 0");
+	DispatchKeyValue(g_FogController_Crewmates, "fogcolor2", "0 0 0");
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * GetGameSetting_Float("crewmate_vision"));
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("crewmate_vision"));
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogmaxdensity", 1.0);
+	DispatchSpawn(g_FogController_Crewmates);
+
+	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
+
+	g_FogController_Imposters = CreateEntityByName("env_fog_controller");
+	
+	DispatchKeyValue(g_FogController_Imposters, "targetname", "fog_imposters");
+	DispatchKeyValue(g_FogController_Imposters, "fogblend", "0");
+	DispatchKeyValue(g_FogController_Imposters, "fogcolor", "0 0 0");
+	DispatchKeyValue(g_FogController_Imposters, "fogcolor2", "0 0 0");
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogstart", g_FogDistance * GetGameSetting_Float("imposter_vision"));
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("imposter_vision"));
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogmaxdensity", 1.0);
+	DispatchSpawn(g_FogController_Imposters);
+
+	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
 	
 	if (g_Late)
 	{
@@ -424,6 +463,12 @@ public void OnPluginEnd()
 	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 		if (entity > MaxClients && g_GlowEnt[entity] > MaxClients)
 			AcceptEntityInput(g_GlowEnt[entity], "Kill");
+	
+	if (g_FogController_Crewmates > 0)
+		AcceptEntityInput(g_FogController_Crewmates, "Kill");
+	
+	if (g_FogController_Imposters > 0)
+		AcceptEntityInput(g_FogController_Imposters, "Kill");
 }
 
 public void OnMapStart()
@@ -1283,6 +1328,9 @@ void CallMeeting(int client = -1, bool button = false)
 	g_Match.meeting = CreateTimer(1.0, Timer_StartVoting, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
 	g_Match.total_meetings++;
+
+	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
+	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
 }
 
 public Action Timer_StartVoting(Handle timer)
@@ -1353,6 +1401,9 @@ public Action Timer_EndVoting(Handle timer)
 			SetEntityMoveType(i, MOVETYPE_WALK);
 
 	MuteAllClients();
+
+	AcceptEntityInput(g_FogController_Crewmates, "TurnOn");
+	AcceptEntityInput(g_FogController_Imposters, "TurnOn");
 
 	g_Match.meeting = null;
 	return Plugin_Stop;
@@ -1453,6 +1504,8 @@ void OnMatchCompleted()
 		g_Player[i].ejected = false;
 		ClearTasks(i);
 	}
+	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
+	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
 }
 
 void SaveMarks(const char[] map)

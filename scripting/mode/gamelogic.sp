@@ -264,7 +264,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 			char sName[32];
 			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
 
-			if (StrContains(sName, "action", false) == 0)
+			if (StrContains(sName, "action", false) == 0 || StrEqual(sName, "meeting_button_display", false))
 				g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({255, 165, 0, 255}));
 			else if (StrContains(sName, "sabotage", false) == 0)
 				g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({173, 216, 230, 255}));
@@ -339,12 +339,43 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		
 		if (g_Player[i].role != Role_Imposter)
 			g_Match.tasks_goal += (long + short + common);
+		
+		if (g_Player[i].role == Role_Imposter)
+			SetVariantString("fog_imposters");
+		else
+			SetVariantString("fog_crewmates");
+		
+		AcceptEntityInput(i, "SetFogController");
+
 	}
 
 	SendHudToAll();
 
 	//Make sure all clients are muted whenever the round starts.
 	MuteAllClients();
+
+	//Set the fog controllers to have their set distances based on settings.
+	float fog;
+
+	fog = GetGameSetting_Float("crewmate_vision");
+
+	if (fog < 0.1)
+		fog = 0.1;
+	
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * fog);
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * fog);
+
+	fog = GetGameSetting_Float("imposter_vision");
+
+	if (fog < 0.1)
+		fog = 0.1;
+	
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogstart", g_FogDistance * fog);
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogend", (g_FogDistance * 2) * fog);
+
+	//Turn on the fog controllers.
+	AcceptEntityInput(g_FogController_Crewmates, "TurnOn");
+	AcceptEntityInput(g_FogController_Imposters, "TurnOn");
 }
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)

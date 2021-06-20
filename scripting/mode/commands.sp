@@ -86,6 +86,13 @@ public Action Command_SetRole(int client, int args)
 	g_Player[target].role = GetRoleByName(sRole);
 	SendHud(target);
 
+	if (g_Player[target].role == Role_Imposter)
+		SetVariantString("fog_imposters");
+	else
+		SetVariantString("fog_crewmates");
+	
+	AcceptEntityInput(target, "SetFogController");
+
 	if (client == target)
 		CPrintToChat(client, "You have updated your role to: {H1}%s", sRole);
 	else
