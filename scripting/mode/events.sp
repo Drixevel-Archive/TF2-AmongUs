@@ -105,7 +105,12 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 			total_imposters++;
 	
 	//If no imposters are alive then end the round and make Crewmates the winner.
-	if (total_imposters < 1)
+	if (total_crewmates == total_imposters)
+	{
+		ForceWin(true);
+		CPrintToChatAll("There's an equal amount of crewmates to Imposters, Imposters win!");
+	}
+	else if (total_imposters < 1)
 	{
 		ForceWin();
 		CPrintToChatAll("There are no more Imposters alive, Crewmates win!");
