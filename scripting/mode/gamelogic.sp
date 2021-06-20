@@ -412,6 +412,7 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 		if (g_GameOwner != -1)
 		{
+			LoadGameSettings(g_GameOwner);
 			OpenSettingsMenu(g_GameOwner);
 			SendHudToAll();
 		}

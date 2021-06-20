@@ -81,3 +81,58 @@ stock bool SetGameSetting_Bool(const char[] setting, bool value)
 	IntToString(view_as<int>(value), sValue, sizeof(sValue));
 	return g_GameSettings.SetString(setting, sValue);
 }
+
+stock void SaveGameSettings(int client)
+{
+	KeyValues kv = new KeyValues("settings");
+	StringMapSnapshot snap = g_GameSettings.Snapshot();
+
+	for (int i = 0; i < snap.Length; i++)
+	{
+		int size = snap.KeyBufferSize(i);
+
+		char[] sKey = new char[size];
+		snap.GetKey(i, sKey, size);
+
+		char sName[32];
+		g_GameSettings.GetString(sKey, sName, sizeof(sName));
+
+		kv.SetString(sKey, sName);
+	}
+
+	kv.Rewind();
+
+	char sKeyValues[512];
+	kv.ExportToString(sKeyValues, sizeof(sKeyValues));
+
+	delete kv;
+	delete snap;
+
+	g_GameSettingsCookie.Set(client, sKeyValues);
+}
+
+stock void LoadGameSettings(int client)
+{
+	char sKeyValues[512];
+	g_GameSettingsCookie.Get(client, sKeyValues, sizeof(sKeyValues));
+
+	KeyValues kv = new KeyValues("settings");
+	if (kv.ImportFromString(sKeyValues) && kv.GotoFirstSubKey(false))
+	{
+		g_GameSettings.Clear();
+
+		do
+		{
+			char sKey[64];
+			kv.GetSectionName(sKey, sizeof(sKey));
+
+			char sValue[64];
+			kv.GetString(NULL_STRING, sValue, sizeof(sValue));
+
+			g_GameSettings.SetString(sKey, sValue);
+		}
+		while (kv.GotoNextKey(false));
+	}
+	
+	delete kv;
+}

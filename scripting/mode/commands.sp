@@ -126,6 +126,7 @@ public Action Command_SetOwner(int client, int args)
 	}
 
 	g_GameOwner = target;
+	LoadGameSettings(target);
 	OpenSettingsMenu(target);
 	SendHudToAll();
 
@@ -144,6 +145,7 @@ public Action Command_RemoveOwner(int client, int args)
 
 	CPrintToChatAll("{H1}%N {default}has removed game ownership from {H1}%N{default}.", client, g_GameOwner);
 	g_GameOwner = -1;
+	ParseGameSettings();
 	SendHudToAll();
 
 	return Plugin_Handled;

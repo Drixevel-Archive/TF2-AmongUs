@@ -74,6 +74,7 @@ part: <part name>
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
+#include <clientprefs>
 
 #include <customkeyvalues>
 #include <tf2attributes>
@@ -286,6 +287,8 @@ bool g_DisableCommunications;
 int g_O2Time;
 Handle g_O2;
 
+Cookie g_GameSettingsCookie;
+
 /*****************************/
 //Managed
 
@@ -353,6 +356,8 @@ public void OnPluginStart()
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 	HookEvent("teamplay_round_start", Event_OnRoundStart);
 	HookEvent("teamplay_round_win", Event_OnRoundWin);
+
+	g_GameSettingsCookie = new Cookie("amongus_gamesettings", "Your cached game settings for the mode.", CookieAccess_Protected);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 
@@ -642,6 +647,7 @@ public void OnClientDisconnect(int client)
 	if (client == g_GameOwner)
 	{
 		g_GameOwner = -1;
+		ParseGameSettings();
 		SendHudToAll();
 	}
 
@@ -1252,6 +1258,7 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 		TrimString(sValue);
 
 		SetGameSetting_String(g_UpdatingGameSetting[client], sValue);
+		SaveGameSettings(client);
 
 		g_UpdatingGameSetting[client][0] = '\0';
 		OpenSettingsMenu(client);
