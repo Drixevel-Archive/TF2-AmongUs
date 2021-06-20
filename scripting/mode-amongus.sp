@@ -49,6 +49,11 @@ part: <part name>
 #define TASK_TYPE_VISUAL (1<<3)
 #define TASK_TYPE_CUSTOM (1<<4)
 
+#define SABOTAGE_REACTORS 0
+#define SABOTAGE_FIXLIGHTS 1
+#define SABOTAGE_COMMUNICATIONS 2
+#define SABOTAGE_DEPLETION 3
+
 /////
 //It's easier to give maps complete control of the plugin by just using relays and firing those when needed.
 
@@ -499,13 +504,13 @@ public Action OnClientCommand(int client, int args)
 {
 	char sCommand[32];
 	GetCmdArg(0, sCommand, sizeof(sCommand));
-	// PrintToServer(sCommand);
+	// PrintToChat(client, sCommand);
 
 	// char sArg[32];
 	// for (int i = 1; i <= args; i++)
 	// {
 	// 	GetCmdArg(i, sArg, sizeof(sArg));
-	// 	PrintToServer(" - %s", sArg);
+	// 	PrintToChat(client, " - %s", sArg);
 	// }
 
 	if (StrEqual(sCommand, "joinclass", false))
@@ -518,6 +523,30 @@ public Action OnClientCommand(int client, int args)
 			FakeClientCommand(client, "joinclass engineer");
 			return Plugin_Stop;
 		}
+	}
+	else if (StrEqual(sCommand, "build", false) && !TF2_IsInSetup() && g_Player[client].role == Role_Imposter)
+	{
+		char sArg1[16];
+		GetCmdArg(1, sArg1, sizeof(sArg1));
+
+		char sArg2[16];
+		GetCmdArg(2, sArg2, sizeof(sArg2));
+
+		//Sentry
+		if (StrEqual(sArg1, "2", false) && StrEqual(sArg2, "0", false))
+			StartSabotage(client, SABOTAGE_REACTORS);
+
+		//Dispenser
+		if (StrEqual(sArg1, "0", false) && StrEqual(sArg2, "0", false))
+			StartSabotage(client, SABOTAGE_FIXLIGHTS);
+
+		//Entrance
+		if (StrEqual(sArg1, "1", false) && StrEqual(sArg2, "0", false))
+			StartSabotage(client, SABOTAGE_COMMUNICATIONS);
+
+		//Exit
+		if (StrEqual(sArg1, "1", false) && StrEqual(sArg2, "1", false))
+			StartSabotage(client, SABOTAGE_DEPLETION);
 	}
 
 	return Plugin_Continue;
@@ -1379,4 +1408,31 @@ void LoadMarks(const char[] map)
 
 	delete kv;
 	LogMessage("%i marks parsed successfully for map: %s", g_AreaNames.Size, map);
+}
+
+void StartSabotage(int client, int sabotage)
+{
+	if (client) {}
+	switch (sabotage)
+	{
+		case SABOTAGE_REACTORS:
+		{
+			CPrintToChatAll("Reactors are now under meltdown!");
+		}
+
+		case SABOTAGE_FIXLIGHTS:
+		{
+			CPrintToChatAll("Lights are now off!");
+		}
+
+		case SABOTAGE_COMMUNICATIONS:
+		{
+			CPrintToChatAll("Communications have been disabled!");
+		}
+
+		case SABOTAGE_DEPLETION:
+		{
+			CPrintToChatAll("Oxygen is being depleted!");
+		}
+	}
 }
