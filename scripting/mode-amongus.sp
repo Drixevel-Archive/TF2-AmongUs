@@ -73,6 +73,7 @@ part: <part name>
 #include <customkeyvalues>
 #include <tf2attributes>
 #include <navmesh>
+#include <tf2items>
 
 #include <colors>
 
