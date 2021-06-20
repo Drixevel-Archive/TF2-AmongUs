@@ -1392,9 +1392,9 @@ public Action Timer_EndVoting(Handle timer)
 			EjectPlayer(i);
 
 			if (confirm)
-				CPrintToChatAll("%N has been ejected! They were %san Imposter!", i, g_Player[i].role != Role_Imposter ? "NOT " : "");
+				CPrintToChatAll("{H1}%N {default}has been ejected! They were %s{default}an Imposter!", i, g_Player[i].role != Role_Imposter ? "{H2}NOT " : "");
 			else
-				CPrintToChatAll("%N has been ejected!", i);
+				CPrintToChatAll("{H1}%N {default}has been ejected!", i);
 		}
 		
 		g_Player[i].voted_to = 0;
