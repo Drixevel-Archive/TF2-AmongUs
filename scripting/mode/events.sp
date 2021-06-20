@@ -160,4 +160,6 @@ public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcas
 public void Event_OnRoundWin(Event event, const char[] name, bool dontBroadcast)
 {
 	g_BetweenRounds = true;
+
+	OnMatchCompleted();
 }

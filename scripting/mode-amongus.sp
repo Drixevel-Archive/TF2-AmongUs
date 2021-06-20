@@ -1219,3 +1219,18 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 
 	return Plugin_Continue;
 }
+
+void OnMatchCompleted()
+{
+	CPrintToChatAll("{H1}Mode{default}: Match Finished");
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+		
+		g_Player[i].role = Role_Crewmate;
+		g_Player[i].ejected = false;
+		ClearTasks(i);
+	}
+}
