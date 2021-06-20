@@ -5,6 +5,9 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 
+	if (convar_TopDownView.BoolValue)
+		CreateCamera(client);
+
 	int entity = -1; float origin1[3]; float origin2[3]; float angles[3];
 	while ((entity = FindEntityByClassname(entity, "info_player_teamspawn")) != -1)
 	{
@@ -67,6 +70,11 @@ public Action Event_OnPlayerDeathPre(Event event, const char[] name, bool dontBr
 
 public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
+	int client = GetClientOfUserId(event.GetInt("userid"));
+
+	if (convar_TopDownView.BoolValue)
+		DestroyCamera(client);
+	
 	//We wait a frame here because it's required for the ragdoll to spawn after a player dies.
 	RequestFrame(NextFrame_CreateDeadBody, event.GetInt("userid"));
 

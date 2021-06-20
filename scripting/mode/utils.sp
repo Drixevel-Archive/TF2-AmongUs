@@ -275,3 +275,50 @@ void ForceWin(bool imposters = false)
 		TF2_ForceWin(TFTeam_Blue);
 	}
 }
+
+void CreateCamera(int client)
+{
+	if (g_Camera[client] != 0)
+		return;
+	
+	SetEntProp(client, Prop_Send, "m_iObserverMode", 1);
+
+	int entCamera = CreateEntityByName("point_viewcontrol");
+
+	char sWatcher[64];
+	Format(sWatcher, sizeof(sWatcher), "target%i", client);
+
+	DispatchKeyValue(client, "targetname", sWatcher);
+
+	if(IsValidEntity(entCamera))
+	{
+		DispatchKeyValue(entCamera, "targetname", "playercam");
+		DispatchKeyValue(entCamera, "wait", "3600");
+		DispatchSpawn(entCamera);
+
+		TeleportEntity(entCamera, view_as<float>({1600.0, 500.0, 700.0}), view_as<float>({89.9, -89.0, 0.0}), NULL_VECTOR);
+
+		SetVariantString(sWatcher);
+		AcceptEntityInput(entCamera, "Enable", client, entCamera, 0);
+		
+		g_Camera[client] = entCamera;
+	}
+}
+
+void DestroyCamera(int client)
+{
+	if (g_Camera[client] == 0)
+		return;
+	
+	SetClientViewEntity(client, client);
+	SetEntProp(client, Prop_Send, "m_iObserverMode", 0);
+
+	char sWatcher[64];
+	Format(sWatcher, sizeof(sWatcher), "target%i", client);
+
+	SetVariantString(sWatcher);
+	AcceptEntityInput(g_Camera[client], "Disable", client, g_Camera[client], 0);
+
+	RemoveEdict(g_Camera[client]);
+	g_Camera[client] = 0;
+}

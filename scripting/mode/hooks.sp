@@ -19,6 +19,18 @@ public Action OnPreThink(int client)
 	if (!IsClientInGame(client))
 		return Plugin_Continue;
 	
+	if (g_Camera[client] != 0)
+	{
+		float pos[3];
+		GetClientAbsOrigin(client, pos);
+
+		float ceiling[3];
+		ceiling = pos;
+		ceiling[2] += 64;
+		ceiling[2] = GetCeilingCoordinates(client, ceiling);
+		TeleportEntity(g_Camera[client], ceiling, NULL_VECTOR, NULL_VECTOR);
+	}
+	
 	if (IsPlayerAlive(client) && NavMesh_Exists())
 	{
 		float origin[3];

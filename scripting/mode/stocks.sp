@@ -459,6 +459,23 @@ stock bool GetGroundCoordinates(float start[3], float buffer[3], float distance 
 	return false;
 }
 
+float GetCeilingCoordinates(int target, float vecOrigin[3])
+{
+	float vecPos[3];
+	Handle trace = TR_TraceRayFilterEx(vecOrigin, view_as<float>({-90.0, 0.0, 0.0}), CONTENTS_SOLID|CONTENTS_MOVEABLE, RayType_Infinite, TraceEntityFilterPlayer, target);
+
+	if (TR_DidHit(trace))
+		TR_GetEndPosition(vecPos, trace);
+
+	delete trace;
+	return vecPos[2];
+}
+
+public bool TraceEntityFilterPlayer(int entity, int contentsMask, any client)
+{
+    return !(entity == client);
+}
+
 public bool ___TraceEntityFilter_NoPlayers(int entity, int contentsMask, any data)
 {
 	return entity != data && entity > MaxClients;

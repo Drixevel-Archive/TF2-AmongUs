@@ -80,6 +80,7 @@ part: <part name>
 //ConVars
 
 ConVar convar_Required_Players;
+ConVar convar_TopDownView;
 
 ConVar convar_Time_Setup;
 ConVar convar_Time_Round;
@@ -256,6 +257,8 @@ enum struct Match
 
 Match g_Match;
 
+int g_Camera[MAXPLAYERS + 1];
+
 /*****************************/
 //Managed
 
@@ -300,6 +303,8 @@ public void OnPluginStart()
 	CSetHighlight2("{darkorchid}");
 
 	convar_Required_Players = CreateConVar("sm_mode_amongus_required_players", "3", "How many players should be required for the gamemode to start?", FCVAR_NOTIFY, true, 0.0);
+	convar_TopDownView = CreateConVar("sm_mode_amongus_topdownview", "1", "Should players by default be in a top down view?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_TopDownView.AddChangeHook(OnConVarChange);
 
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Setup.AddChangeHook(OnConVarChange);
@@ -448,6 +453,21 @@ public void OnConVarChange(ConVar convar, const char[] oldValue, const char[] ne
 					ClearSyncHud(i, g_Hud);
 		}
 	}
+	else if (convar == convar_TopDownView)
+	{
+		if (StrEqual(newValue, "1", false))
+		{
+			for (int i = 1; i <= MaxClients; i++)
+				if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i))
+					CreateCamera(i);
+		}
+		else
+		{
+			for (int i = 1; i <= MaxClients; i++)
+				if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i))
+					DestroyCamera(i);
+		}
+	}
 }
 
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
@@ -560,6 +580,7 @@ public void OnClientDisconnect(int client)
 public void OnClientDisconnect_Post(int client)
 {
 	g_Player[client].Clear();
+	g_Camera[client] = 0;
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
