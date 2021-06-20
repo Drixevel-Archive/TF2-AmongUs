@@ -69,8 +69,11 @@ part: <part name>
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
+
 #include <customkeyvalues>
 #include <tf2attributes>
+#include <navmesh>
+
 #include <colors>
 
 /*****************************/
