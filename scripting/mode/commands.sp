@@ -164,15 +164,31 @@ public Action Command_Eject(int client, int args)
 	if (client == 0)
 		return Plugin_Handled;
 	
-	int target = GetClientAimTarget(client, true);
+	char sTarget[MAX_TARGET_LENGTH];
+	GetCmdArgString(sTarget, sizeof(sTarget));
+	
 
 	if (target < 1)
 	{
-		CReplyToCommand(client, "Target not found, please aim your crosshair at them.");
+		CReplyToCommand(client, "Target {H1}%s {default}not found, please try again.", sTarget);
 		return Plugin_Handled;
 	}
 
-	EjectPlayer(client);
+	if (!IsClientInGame(target))
+	{
+		CReplyToCommand(client, "Target {H1}%N {default}is not available, please try again.", target);
+		return Plugin_Handled;
+	}
+
+	if (!IsClientInGame(target))
+	{
+		CReplyToCommand(client, "Target {H1}%N {default}is not alive, please try again.", target);
+		return Plugin_Handled;
+	}
+
+	EjectPlayer(target);
+	CPrintToChatAll("{H1}%N {default}has ejected {H1}%N {default}into space!", client, target);
+
 	return Plugin_Handled;
 }
 
