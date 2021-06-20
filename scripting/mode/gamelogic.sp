@@ -255,7 +255,17 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 				color[3] = 255;
 			}
 
-			TF2_CreateGlow(entity, color);
+			g_GlowEnt[entity] = TF2_CreateGlow(entity, color);
+		}
+
+		int entity = -1;
+		while ((entity = FindEntityByClassname(entity, "*")) != -1)
+		{
+			char sName[32];
+			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+			if (StrContains(sName, "action", false) == 0)
+				g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({255, 165, 0, 255}));
 		}
 	}
 
