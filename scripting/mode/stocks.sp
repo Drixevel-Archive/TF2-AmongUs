@@ -492,3 +492,16 @@ stock void TF2Attrib_RemoveMoveSpeedPenalty(int client)
 	TF2Attrib_RemoveByName(client, "move speed penalty");
 	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.0);
 }
+
+stock bool ChangeClientTeam_Alive(int client, int team)
+{
+	if (client == 0 || client > MaxClients || !IsClientInGame(client) || !IsPlayerAlive(client) || team < 2 || team > 3)
+		return false;
+
+	int lifestate = GetEntProp(client, Prop_Send, "m_lifeState");
+	SetEntProp(client, Prop_Send, "m_lifeState", 2);
+	ChangeClientTeam(client, team);
+	SetEntProp(client, Prop_Send, "m_lifeState", lifestate);
+	
+	return true;
+}
