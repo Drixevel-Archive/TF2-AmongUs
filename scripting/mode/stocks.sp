@@ -531,3 +531,20 @@ stock void TF2_SendKey(int client, const char[] buffer, any...)
 	BfWriteString(hint, sBuffer);
 	EndMessage();
 }
+
+stock int GetMenuInt(Menu menu, const char[] id, int defaultvalue = 0)
+{
+	char info[128]; char data[128];
+	for (int i = 0; i < menu.ItemCount; i++)
+		if (menu.GetItem(i, info, sizeof(info), _, data, sizeof(data)) && StrEqual(info, id))
+			return StringToInt(data);
+	
+	return defaultvalue;
+}
+
+stock bool PushMenuInt(Menu menu, const char[] id, int value)
+{
+	char sBuffer[128];
+	IntToString(value, sBuffer, sizeof(sBuffer));
+	return menu.AddItem(id, sBuffer, ITEMDRAW_IGNORE);
+}
