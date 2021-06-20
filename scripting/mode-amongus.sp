@@ -1202,6 +1202,9 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 
 	if (StrEqual(sName, RELAY_MEETING_BUTTON_OPEN, false) && g_Match.meeting == null)
 	{
+		if (g_BetweenRounds)
+			return Plugin_Stop;
+		
 		int max = GetGameSetting_Int("emergency_meetings");
 
 		if (max > 0 && g_Match.total_meetings >= max)
