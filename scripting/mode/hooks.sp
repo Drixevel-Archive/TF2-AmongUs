@@ -16,6 +16,32 @@ public void OnTakeDamagePost(int victim, int attacker, int inflictor, float dama
 
 public Action OnPreThink(int client)
 {
+	if (!IsClientInGame(client))
+		return Plugin_Continue;
+	
+	if (IsPlayerAlive(client) && NavMesh_Exists())
+	{
+		float origin[3];
+		GetClientAbsOrigin(client, origin);
+
+		CNavArea area = NavMesh_GetNearestArea(origin, true, 10000.0, false, true, -2);
+
+		if (area != INVALID_NAV_AREA)
+		{
+			char sID[16];
+			IntToString(area.ID, sID, sizeof(sID));
+
+			char sName[64];
+			g_AreaNames.GetString(sID, sName, sizeof(sName));
+
+			if (strlen(sName) > 0)
+				TF2_SendKey(client, sName);
+		}
+		else
+			TF2_SendKey(client, "Unknown Location");
+	}
+
+	return Plugin_Continue;
 }
 
 public Action OnEntitySpawn(int entity)

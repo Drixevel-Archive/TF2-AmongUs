@@ -102,6 +102,7 @@ Handle g_Hud;
 
 StringMap g_GameSettings;
 ArrayList g_CleanEntities;
+StringMap g_AreaNames;
 
 int g_GameOwner = -1;
 char g_UpdatingGameSetting[MAXPLAYERS + 1][32];
@@ -354,6 +355,9 @@ public void OnPluginStart()
 	g_CleanEntities = new ArrayList(ByteCountToCells(32));
 	g_CleanEntities.PushString("tf_ammo_pack");
 	g_CleanEntities.PushString("halloween_souls_pack");
+
+	//Cache area names to show in the HUD based on Navmesh ID.
+	g_AreaNames = new StringMap();
 
 	g_Hud = CreateHudSynchronizer();
 
