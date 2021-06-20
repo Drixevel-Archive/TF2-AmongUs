@@ -202,9 +202,8 @@ void CreateVoteMenu(int client)
 		menu.AddItem(sID, sDisplay, draw);
 	}
 	
-	menu.AddItem("-1", "Close Menu");
+	menu.AddItem("0", "Vote to Skip");
 
-	menu.ExitButton = false;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -216,20 +215,9 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 		{
 			char sID[16];
 			menu.GetItem(param2, sID, sizeof(sID));
+			
 			int userid = StringToInt(sID);
-
-			if (userid == -1)
-				return;
-
 			int target = GetClientOfUserId(userid);
-
-			if (target < 1)
-			{
-				if (g_Match.meeting != null)
-					CreateVoteMenu(param1);
-				
-				return;
-			}
 
 			g_Player[param1].voted_for = target;
 			g_Player[target].voted_to++;
