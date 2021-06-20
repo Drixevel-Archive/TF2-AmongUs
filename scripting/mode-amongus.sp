@@ -146,6 +146,7 @@ enum struct Player
 	int neartask;
 
 	int nearaction;
+	int nearsabotage;
 
 	int taskticks;
 	Handle doingtask;
@@ -180,6 +181,7 @@ enum struct Player
 		this.neartask = -1;
 
 		this.nearaction = -1;
+		this.nearsabotage = -1;
 
 		this.taskticks = 0;
 		this.doingtask = null;
@@ -215,6 +217,7 @@ enum struct Player
 		this.neartask = -1;
 
 		this.nearaction = -1;
+		this.nearsabotage = -1;
 
 		this.taskticks = 0;
 		StopTimer(this.doingtask);
@@ -641,11 +644,56 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		TF2_Particle("ping_circle", origin);
 	}
 
+	float targetorigin[3];
 	switch (g_Player[client].role)
 	{
 		case Role_Crewmate:
 		{
+			if (IsPlayerAlive(client) && !TF2_IsInSetup() && g_Match.meeting == null)
+			{
+				float origin[3];
+				GetClientAbsOrigin(client, origin);
 
+				int entity = -1; char sName[32];
+				while ((entity = FindEntityByClassname(entity, "prop_dynamic")) != -1)
+				{
+					GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+					if (StrContains(sName, "sabotage", false) != 0)
+						continue;
+
+					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", targetorigin);
+
+					if (GetVectorDistance(origin, targetorigin) > 100.0)
+					{
+						if (g_Player[client].nearsabotage == entity)
+						{
+							g_Player[client].nearsabotage = -1;
+							PrintCenterText(client, "");
+						}
+					}
+					else if (g_Player[client].nearsabotage == -1)
+					{
+						if (StrContains(sName, "sabotage_reactor_meltdown", false) == 0 && g_Reactors == null)
+							continue;
+						
+						if (StrContains(sName, "sabotage_communications_disabled", false) == 0 && !g_DisableCommunications)
+							continue;
+						
+						if (StrContains(sName, "sabotage_oxygen_depletion", false) == 0 && g_O2 == null)
+							continue;
+						
+						char sDisplay[64];
+						GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+						if (StrContains(sDisplay, "Fix Lights", false) == 0 && !g_LightsOff)
+							continue;
+
+						g_Player[client].nearsabotage = entity;
+						PrintCenterText(client, "Interact with MEDIC! to fix this sabotage! (%s)", sDisplay);
+					}
+				}
+			}
 		}
 
 		case Role_Imposter:
@@ -655,7 +703,6 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				float origin[3];
 				GetClientAbsOrigin(client, origin);
 
-				float targetorigin[3];
 				for (int i = 1; i <= MaxClients; i++)
 				{
 					if (!IsClientInGame(i) || !IsPlayerAlive(i) || client == i || g_Player[i].role == Role_Imposter)
@@ -891,13 +938,15 @@ void SendHud(int client)
 	Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
 
 	//Tasks
-	if (HasTasks(client))
+	if (HasTasks(client) && !g_DisableCommunications)
+	{
 		Format(sHud, sizeof(sHud), "%s\n--%sTasks-- (%i/%i)", sHud, g_Player[client].role == Role_Imposter ? "Fake " : "", g_Match.tasks_current, g_Match.tasks_goal);
 
-	for (int i = 0; i < g_Player[client].tasks.Length; i++)
-	{
-		int task = g_Player[client].tasks.Get(i);
-		Format(sHud, sizeof(sHud), "%s\n%s(%i) %s", sHud, g_Task[task].name, g_Task[task].part, IsTaskCompleted(client, task) ? "(c)" : "");
+		for (int i = 0; i < g_Player[client].tasks.Length; i++)
+		{
+			int task = g_Player[client].tasks.Get(i);
+			Format(sHud, sizeof(sHud), "%s\n%s(%i) %s", sHud, g_Task[task].name, g_Task[task].part, IsTaskCompleted(client, task) ? "(c)" : "");
+		}
 	}
 
 	//Send the Hud.
@@ -987,6 +1036,51 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	{
 		TF2_PlayDenySound(client);
 		CPrintToChat(client, "This action is currently disabled, not finished yet.");
+	}
+	else if (g_Player[client].nearsabotage != -1)
+	{
+		int entity = g_Player[client].nearsabotage;
+
+		char sName[64];
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+		if (StrContains(sName, "sabotage_reactor_meltdown", false) == 0 && g_Reactors != null)
+		{
+			g_ReactorsTime = 0;
+			StopTimer(g_Reactors);
+			CPrintToChatAll("{H1}%N {default}has stopped the Reactor meltdown.", client);
+		}
+		
+		if (StrContains(sName, "sabotage_communications_disabled", false) == 0 && g_DisableCommunications)
+		{
+			g_DisableCommunications = false;
+			SendHudToAll();
+			CPrintToChatAll("{H1}%N {default}has fixed communications.", client);
+		}
+		
+		if (StrContains(sName, "sabotage_oxygen_depletion", false) == 0 && g_O2 != null)
+		{
+			g_O2Time = 0;
+			StopTimer(g_O2);
+			CPrintToChatAll("{H1}%N {default}has fixed O2.", client);
+		}
+		
+		char sDisplay[64];
+		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+		if (StrContains(sDisplay, "Fix Lights", false) == 0 && g_LightsOff)
+		{
+			g_LightsOff = false;
+			CPrintToChatAll("{H1}%N {default}has fixed the lights.", client);
+			
+			float fog = GetGameSetting_Float("crewmate_vision");
+
+			if (fog < 0.1)
+				fog = 0.1;
+			
+			DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * fog);
+			DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * fog);
+		}
 	}
 
 	return Plugin_Stop;
@@ -1324,6 +1418,13 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 		if (g_BetweenRounds)
 			return Plugin_Stop;
 		
+		if (g_Reactors != null || g_LightsOff || g_DisableCommunications || g_O2 != null)
+		{
+			TF2_PlayDenySound(activator);
+			CPrintToChat(activator, "You cannot call a meeting while a sabotage is active.");
+			return Plugin_Stop;
+		}
+		
 		int max = GetGameSetting_Int("emergency_meetings");
 
 		if (max > 0 && g_Match.total_meetings >= max)
@@ -1412,27 +1513,90 @@ void LoadMarks(const char[] map)
 
 void StartSabotage(int client, int sabotage)
 {
-	if (client) {}
+	if (client) { }
+
+	if (g_DelaySabotage != -1 && g_DelaySabotage > GetTime())
+		return;
+	
+	g_DelaySabotage = GetTime() + 20;
+
+	EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
+
 	switch (sabotage)
 	{
 		case SABOTAGE_REACTORS:
 		{
 			CPrintToChatAll("Reactors are now under meltdown!");
+
+			g_ReactorsTime = 30;
+			StopTimer(g_Reactors);
+			g_Reactors = CreateTimer(1.0, Timer_ReactorTick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 
 		case SABOTAGE_FIXLIGHTS:
 		{
 			CPrintToChatAll("Lights are now off!");
+			g_LightsOff = true;
+
+			float fog = GetGameSetting_Float("crewmate_vision");
+
+			if (fog < 0.1)
+				fog = 0.1;
+
+			DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", 5.0 * fog);
+			DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (5.0 * 2) * fog);
 		}
 
 		case SABOTAGE_COMMUNICATIONS:
 		{
 			CPrintToChatAll("Communications have been disabled!");
+			g_DisableCommunications = true;
+			SendHudToAll();
 		}
 
 		case SABOTAGE_DEPLETION:
 		{
 			CPrintToChatAll("Oxygen is being depleted!");
+
+			g_O2Time = 30;
+			StopTimer(g_O2);
+			g_O2 = CreateTimer(1.0, Timer_O2Tick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
+}
+
+public Action Timer_ReactorTick(Handle timer, any data)
+{
+	g_ReactorsTime--;
+
+	if (g_ReactorsTime > 0)
+	{
+		PrintHintTextToAll("Reactor Meltdown in %i", g_ReactorsTime);
+		return Plugin_Continue;
+	}
+
+	ForceWin(true);
+
+	g_ReactorsTime = 0;
+	g_Reactors = null;
+
+	return Plugin_Stop;
+}
+
+public Action Timer_O2Tick(Handle timer, any data)
+{
+	g_O2Time--;
+
+	if (g_O2Time > 0)
+	{
+		PrintHintTextToAll("O2 Depletion in %i", g_O2Time);
+		return Plugin_Continue;
+	}
+
+	ForceWin(true);
+
+	g_O2Time = 0;
+	g_O2 = null;
+
+	return Plugin_Stop;
 }
