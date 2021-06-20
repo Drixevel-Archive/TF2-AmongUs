@@ -292,6 +292,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	GameRules_SetProp("m_bInSetup", true);
+
 	CSetPrefix("{black}[{ghostwhite}Among Us{black}]");
 	CSetHighlight("{crimson}");
 	CSetHighlight2("{darkorchid}");
