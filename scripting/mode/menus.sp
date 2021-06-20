@@ -245,6 +245,8 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 
 			if (param1 == target)
 				CPrintToChatAll("{H1}%N {default}voted for {H2}Themself!", param1);
+			else if (target == 0)
+				CPrintToChatAll("{H1}%N {default}voted to Skip!", param1);
 			else
 				CPrintToChatAll("{H1}%N {default}voted for {H2}%N!", param1, target);
 
