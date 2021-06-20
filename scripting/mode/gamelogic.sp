@@ -205,7 +205,7 @@ public void Timer_On1SecRemain(const char[] output, int caller, int activator, f
 
 public void Timer_OnRoundStart(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H1}Mode{default}: Round Started");
+	CPrintToChatAll("{H1}Mode{default}: Match Started");
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
