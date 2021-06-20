@@ -83,6 +83,9 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 
 public Action Timer_CheckAlivePlayers(Handle timer)
 {
+	if (TF2_IsInSetup())
+		return Plugin_Continue;
+	
 	//Get the total amount of crewmates alive.
 	int total_crewmates;
 	for (int i = 1; i <= MaxClients; i++)
@@ -107,6 +110,8 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 		ForceWin();
 		CPrintToChatAll("There are no more Imposters alive, Crewmates win!");
 	}
+
+	return Plugin_Continue;
 }
 
 public void NextFrame_CreateDeadBody(any userid)
