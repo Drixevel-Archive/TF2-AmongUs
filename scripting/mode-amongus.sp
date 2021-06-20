@@ -816,8 +816,8 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	{
 		int task = g_Player[client].neartask;
 
-		if (IsTaskAssigned(client, task) && !IsTaskCompleted(client, task))
-		{			
+		if (IsTaskAssigned(client, task) && !IsTaskCompleted(client, task) && g_Player[client].role != Role_Imposter)
+		{
 			int time;
 
 			if ((g_Task[task].type & TASK_TYPE_LONG) == TASK_TYPE_LONG)
