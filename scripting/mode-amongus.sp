@@ -803,6 +803,10 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	if (!StrEqual(sVoice, "0", false) || !StrEqual(sVoice2, "0", false))
 		return Plugin_Continue;
 	
+	//Make it so you can't interact with anything between rounds.
+	if (g_BetweenRounds)
+		return Plugin_Stop;
+	
 	if (g_Player[client].neardeath != -1 && !TF2_IsInSetup())
 	{
 		g_Player[client].neardeath = -1;
