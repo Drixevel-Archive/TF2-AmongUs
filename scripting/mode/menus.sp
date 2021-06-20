@@ -222,8 +222,26 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 			g_Player[param1].voted_for = target;
 			g_Player[target].voted_to++;
 
+			bool allvoted = true;
 			for (int i = 1; i <= MaxClients; i++)
-				
+			{
+				if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i) && g_Player[i].voted_for == -1)
+				{
+					allvoted = false;
+					break;
+				}
+			}
+			
+			if (allvoted)
+			{
+				g_Match.meeting_time = 0;
+				TriggerTimer(g_Match.meeting);
+			}
+			else
+			{
+				for (int i = 1; i <= MaxClients; i++)
+					CreateVoteMenu(i);
+			}
 
 			if (param1 == target)
 				CPrintToChatAll("{H1}%N {default}voted for {H2}Themself!", param1);
