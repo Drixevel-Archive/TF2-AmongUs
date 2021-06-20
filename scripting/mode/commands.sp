@@ -244,6 +244,12 @@ public Action Command_ListImposters(int client, int args)
 
 public Action Command_Start(int client, int args)
 {
+	if (!CheckCommandAccess(client, "", ADMFLAG_SLAY, true) && client != g_GameOwner)
+	{
+		CPrintToChat(client, "You do not have access to this menu.");
+		return Plugin_Handled;
+	}
+
 	TF2_SetSetupTime(5);
 	CPrintToChatAll("{H1}%N {default}has started the match.", client);
 	return Plugin_Handled;

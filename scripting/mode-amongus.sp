@@ -367,6 +367,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
 	RegConsoleCmd("sm_owner", Command_Owner, "Displays who the current game owner is in chat.");
 	RegConsoleCmd("sm_voting", Command_Voting, "Displays the voting menu during meetings.");
+	RegConsoleCmd("sm_start", Command_Start, "Start the match during the lobby automatically.");
 
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
@@ -376,7 +377,6 @@ public void OnPluginStart()
 	RegAdminCmd("sm_eject", Command_Eject, ADMFLAG_SLAY, "Eject players from the map and out of the match.");
 	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
 	RegAdminCmd("sm_listimposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
-	RegAdminCmd("sm_start", Command_Start, ADMFLAG_SLAY, "Start the match during the lobby automatically.");
 	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
 	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
 	RegAdminCmd("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");

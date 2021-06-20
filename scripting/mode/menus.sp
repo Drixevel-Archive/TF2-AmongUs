@@ -53,6 +53,8 @@ void OpenSettingsMenu(int client)
 	char sInfo[32];
 	char sDisplay[256];
 
+	menu.AddItem("start", "Start Match");
+
 	char sMap[32];
 	GetCurrentMap(sMap, sizeof(sMap));
 
@@ -139,8 +141,17 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 			{
 				char sInfo[32];
 				menu.GetItem(param2, sInfo, sizeof(sInfo));
-				strcopy(g_UpdatingGameSetting[param1], 32, sInfo);
-				CPrintToChat(param1, "Please type in chat the new value for key '%s':", sInfo);
+
+				if (StrEqual(sInfo, "start", false))
+				{
+					TF2_SetSetupTime(5);
+					CPrintToChatAll("{H1}%N {default}has started the match.", param1);
+				}
+				else
+				{
+					strcopy(g_UpdatingGameSetting[param1], 32, sInfo);
+					CPrintToChat(param1, "Please type in chat the new value for key '%s':", sInfo);
+				}
 			}
 			else
 			{
