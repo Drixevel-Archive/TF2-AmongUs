@@ -76,6 +76,8 @@ part: <part name>
 /*****************************/
 //ConVars
 
+ConVar convar_Required_Players;
+
 ConVar convar_Time_Setup;
 ConVar convar_Time_Round;
 
@@ -290,6 +292,8 @@ public void OnPluginStart()
 	CSetPrefix("{black}[{ghostwhite}Among Us{black}]");
 	CSetHighlight("{crimson}");
 	CSetHighlight2("{darkorchid}");
+
+	convar_Required_Players = CreateConVar("sm_mode_amongus_required_players", "3", "How many players should be required for the gamemode to start?", FCVAR_NOTIFY, true, 0.0);
 
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Setup.AddChangeHook(OnConVarChange);
@@ -992,23 +996,24 @@ public void OnGameFrame()
 {
 	//Get the current amount of players on a team in the server.
 	int count = GetTotalPlayers();
+	int required = convar_Required_Players.IntValue;
 
-	//If it's during the round and there's less than 2 players on the server then end the round since this mode requires 3 players to play.
-	if (!TF2_IsInSetup() && count < 2 && !g_BetweenRounds)
+	//If it's during the round and there's less than 2 players on the server then end the round since this mode requires X players to play.
+	if (!TF2_IsInSetup() && count <= required && !g_BetweenRounds)
 	{
 		g_BetweenRounds = true;
 		TF2_ForceWin(TFTeam_Unassigned);
 	}
 
-	//If there's less than 2 players then make sure the timer's paused and send a hud message saying the mode requires 3 players to play.
-	if (count < 2)
+	//If there's less than X players then make sure the timer's paused and send a hud message saying the mode requires X players to play.
+	if (count < required)
 	{
 		if (!TF2_IsTimerPaused())
 			TF2_PauseTimer();
 		
-		PrintCenterTextAll("3 players required to start.");
+		PrintCenterTextAll("%i players required to start.", required);
 	}
-	else if (count >= 2 && TF2_IsTimerPaused()) //If there's more than 2 players and the timer's paused then unpause it.
+	else if (count >= required && TF2_IsTimerPaused()) //If there's more than X players and the timer's paused then unpause it.
 		TF2_ResumeTimer();
 	
 	//Check if the current amount of tasks completed is more than or equal to the goal.
