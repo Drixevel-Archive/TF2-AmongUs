@@ -36,6 +36,8 @@ public Action OnPreThink(int client)
 
 			if (strlen(sName) > 0)
 				TF2_SendKey(client, sName);
+			else
+				TF2_SendKey(client, "Unknown Location");
 		}
 		else
 			TF2_SendKey(client, "Unknown Location");
