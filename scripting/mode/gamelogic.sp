@@ -404,6 +404,18 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 	//Ensure that all clients are unmuted during the setup phase.
 	UnmuteAllClients();
+
+	//Lets find a random owner to start off the lobby.
+	if (g_GameOwner == -1)
+	{
+		g_GameOwner = GetRandomClient();
+
+		if (g_GameOwner != -1)
+		{
+			OpenSettingsMenu(g_GameOwner);
+			SendHudToAll();
+		}
+	}
 }
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
