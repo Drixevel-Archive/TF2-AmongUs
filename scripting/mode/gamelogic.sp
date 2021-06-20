@@ -266,6 +266,8 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 			if (StrContains(sName, "action", false) == 0)
 				g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({255, 165, 0, 255}));
+			else if (StrContains(sName, "sabotage", false) == 0)
+				g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({173, 216, 230, 255}));
 		}
 	}
 
