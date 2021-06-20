@@ -209,6 +209,30 @@ void SetPlayerSpeed(int client)
 		TF2Attrib_RemoveMoveSpeedBonus(client);
 		TF2Attrib_RemoveMoveSpeedPenalty(client);
 	}
+}
+
+int FindNewImposter()
+{
+	int[] clients = new int[MaxClients];
+	int amount;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || !IsPlayerAlive(i) || IsFakeClient(i))
+			continue;
+		
+		if (g_Player[i].role != Role_Crewmate)
+			continue;
+
+		clients[amount++] = i;
+	}
+	
+	if (amount < 1)
+		return -1;
+
+	return clients[GetRandomInt(0, amount - 1)];
+}
+
 /**
  * Easy function to call a round as won for either imposters or crewmates.
  *

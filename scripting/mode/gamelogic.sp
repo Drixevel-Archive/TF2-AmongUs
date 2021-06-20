@@ -268,9 +268,16 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	if (amount > total)
 		amount = total;
 	
-	while (amount >= current)
+	int failsafe; char sImposters[255]; bool first = true;
+	while (amount >= current && failsafe < 50)
 	{
-		int client = GetRandomClient();
+		failsafe++;
+
+		int client = FindNewImposter();
+
+		if (client < 1)
+			continue;
+
 		g_Player[client].role = Role_Imposter;
 		SendHud(client);
 		CPrintToChat(client, "You are an IMPOSTER!");
