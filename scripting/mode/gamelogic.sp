@@ -293,6 +293,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		g_Player[client].role = Role_Imposter;
 		SendHud(client);
 		CPrintToChat(client, "You are an IMPOSTER!");
+		TF2_GiveItem(client, "tf_weapon_pda_engineer_build", 25, TF2Quality_Vintage, 1);
 
 		if (first)
 		{
