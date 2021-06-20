@@ -1224,6 +1224,19 @@ void ParseTasks()
 	LogMessage("Detected %i tasks for this map.", g_TotalTasks);
 }
 
+public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
+{
+	if (TF2_IsInSetup())
+		return Plugin_Continue;
+	
+	if (g_Match.meeting != null)
+		return Plugin_Continue;
+	
+	TF2_PlayDenySound(client);
+	CPrintToChat(client, "You are not allowed to type right now.");
+	return Plugin_Stop;
+}
+
 public void OnClientSayCommand_Post(int client, const char[] command, const char[] sArgs)
 {
 	if (strlen(g_UpdatingGameSetting[client]) > 0)
