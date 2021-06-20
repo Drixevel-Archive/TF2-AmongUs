@@ -910,7 +910,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		if (g_Player[client].venting)
 			StopVenting(client);
 		else
-			StartVenting(client);
+			StartVenting(client, g_Player[client].nearvent);
 	}
 
 	return Plugin_Stop;
@@ -1039,7 +1039,7 @@ public void OnGameFrame()
 	//If it's during the round and there's less than 2 players on the server then end the round since this mode requires X players to play.
 	if (!TF2_IsInSetup() && count <= required && !g_BetweenRounds)
 	{
-		g_BetweenRounds = true;
+		//g_BetweenRounds = true;
 		//TF2_ForceWin(TFTeam_Unassigned);
 	}
 
@@ -1213,7 +1213,7 @@ public Action Timer_Suicide(Handle timer, any data)
 	}
 }
 
-void StartVenting(int client)
+void StartVenting(int client, int vent)
 {
 	g_Player[client].venting = true;
 
@@ -1223,7 +1223,7 @@ void StartVenting(int client)
 	TF2_SetThirdPerson(client);
 	EmitSoundToClient(client, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
 
-	OpenVentsMenu(client);
+	OpenVentsMenu(client, vent);
 }
 
 void StopVenting(int client)

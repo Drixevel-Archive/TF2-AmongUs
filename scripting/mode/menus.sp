@@ -259,10 +259,16 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 	}
 }
 
-void OpenVentsMenu(int client)
+void OpenVentsMenu(int client, int vent)
 {
 	if (!g_Player[client].venting)
 		return;
+
+	char sRoutes[32];
+	GetCustomKeyValue(vent, "routes", sRoutes, sizeof(sRoutes));
+
+	char sPart[32][32];
+	int parts = ExplodeString(sRoutes, ",", sPart, 32, 32);
 	
 	Menu menu = new Menu(MenuHandler_Vents);
 	menu.SetTitle("Teleport to a vent:");
@@ -275,10 +281,22 @@ void OpenVentsMenu(int client)
 		if (StrContains(sName, "vent", false) != 0)
 			continue;
 		
+		ReplaceString(sName, sizeof(sName), "vent_", "");
+		
+		bool routed;
+		for (int x = 0; x < parts; x++)
+			if (StringToInt(sPart[x]) == StringToInt(sName))
+				routed = true;
+		
+		if (!routed)
+			continue;
+		
 		IntToString(EntIndexToEntRef(entity), sID, sizeof(sID));
 		FormatEx(sDisplay, sizeof(sDisplay), "Vent #%i", entity);
 		menu.AddItem(sID, sDisplay);
 	}
+
+	PushMenuInt(menu, "vent", vent);
 
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -292,6 +310,8 @@ public int MenuHandler_Vents(Menu menu, MenuAction action, int param1, int param
 			if (!g_Player[param1].venting)
 				return;
 			
+			int vent = GetMenuInt(menu, "vent");
+			
 			char sID[16];
 			menu.GetItem(param2, sID, sizeof(sID));
 
@@ -299,7 +319,7 @@ public int MenuHandler_Vents(Menu menu, MenuAction action, int param1, int param
 
 			if (!IsValidEntity(entity))
 			{
-				OpenVentsMenu(param1);
+				OpenVentsMenu(param1, vent);
 				return;
 			}
 
@@ -310,7 +330,7 @@ public int MenuHandler_Vents(Menu menu, MenuAction action, int param1, int param
 			TeleportEntity(param1, origin, NULL_VECTOR, NULL_VECTOR);
 			EmitSoundToClient(param1, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
 
-			OpenVentsMenu(param1);
+			OpenVentsMenu(param1, vent);
 		}
 
 		case MenuAction_End:
