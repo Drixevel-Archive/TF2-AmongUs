@@ -326,6 +326,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
 	RegConsoleCmd("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
 	RegConsoleCmd("sm_owner", Command_Owner, "Displays who the current game owner is in chat.");
+	RegConsoleCmd("sm_voting", Command_Voting, "Displays the voting menu during meetings.");
 
 	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
 	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");

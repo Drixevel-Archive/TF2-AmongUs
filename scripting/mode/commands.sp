@@ -38,6 +38,12 @@ public Action Command_Owner(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_Voting(int client, int args)
+{
+	CreateVoteMenu(client);
+	return Plugin_Handled;
+}
+
 public Action Command_ReloadColors(int client, int args)
 {
 	ParseColors();
