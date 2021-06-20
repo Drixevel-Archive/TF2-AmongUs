@@ -529,7 +529,7 @@ public void OnClientDisconnect(int client)
 		
 		if (imposters < 1)
 		{
-			TF2_ForceWin(TFTeam_Blue);
+			ForceWin();
 			CPrintToChatAll("All imposters have disconnected, Crewmates win!");
 		}
 	}
@@ -1009,7 +1009,9 @@ public void OnGameFrame()
 	if (g_Match.tasks_goal > 0 && g_Match.tasks_current >= g_Match.tasks_goal && !g_BetweenRounds)
 	{
 		g_BetweenRounds = true;
-		TF2_ForceWin(TFTeam_Blue);
+
+		ForceWin();
+		CPrintToChatAll("Crewmates have completed all tasks, Crewmates win!");
 	}
 }
 

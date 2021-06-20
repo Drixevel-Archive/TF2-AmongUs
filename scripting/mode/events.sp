@@ -83,7 +83,10 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 	
 	//If no crewmates are alive then end the round and make Imposters the winner.
 	if (total_crewmates < 1)
-		TF2_ForceWin(TFTeam_Red);
+	{
+		ForceWin(true);
+		CPrintToChatAll("Imposters are the only ones left, Imposters win!");
+	}
 
 	int total_imposters;
 	for (int i = 1; i <= MaxClients; i++)
@@ -92,7 +95,10 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 	
 	//If no imposters are alive then end the round and make Crewmates the winner.
 	if (total_imposters < 1)
-		TF2_ForceWin(TFTeam_Blue);
+	{
+		ForceWin();
+		CPrintToChatAll("There are no more Imposters alive, Crewmates win!");
+	}
 }
 
 public void NextFrame_CreateDeadBody(any userid)

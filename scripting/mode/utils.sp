@@ -209,4 +209,45 @@ void SetPlayerSpeed(int client)
 		TF2Attrib_RemoveMoveSpeedBonus(client);
 		TF2Attrib_RemoveMoveSpeedPenalty(client);
 	}
+/**
+ * Easy function to call a round as won for either imposters or crewmates.
+ *
+ * imposters - If true, imposters won otherwise crewmates won.
+ *
+ * @return     N/A
+ */
+void ForceWin(bool imposters = false)
+{
+	//We want to set teams for players based on what role they are right before we end the round so the proper win screen pops up for them.
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+		
+		if (IsPlayerAlive(i))
+		{
+			if (g_Player[i].role == Role_Imposter)
+				ChangeClientTeam_Alive(i, view_as<int>(TFTeam_Red));
+			else
+				ChangeClientTeam_Alive(i, view_as<int>(TFTeam_Blue));
+		}
+		else
+		{
+			if (g_Player[i].role == Role_Imposter)
+				ChangeClientTeam(i, view_as<int>(TFTeam_Red));
+			else
+				ChangeClientTeam(i, view_as<int>(TFTeam_Blue));
+		}
+	}
+	
+	if (imposters)
+	{
+		//Imposters won
+		TF2_ForceWin(TFTeam_Red);
+	}
+	else
+	{
+		//Crewmates won
+		TF2_ForceWin(TFTeam_Blue);
+	}
 }
