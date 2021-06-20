@@ -281,7 +281,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		amount = total;
 	
 	int failsafe; char sImposters[255]; bool first = true;
-	while (amount >= current && failsafe < 50)
+	while (amount > current && failsafe < 50)
 	{
 		failsafe++;
 
