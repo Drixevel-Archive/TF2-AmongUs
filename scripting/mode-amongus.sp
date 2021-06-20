@@ -347,6 +347,8 @@ public void OnPluginStart()
 	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
 	RegAdminCmd("sm_listimposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
 	RegAdminCmd("sm_start", Command_Start, ADMFLAG_SLAY, "Start the match during the lobby automatically.");
+	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
+	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
@@ -409,6 +411,12 @@ public void OnMapStart()
 {
 	//Parse the available tasks on the map by parsing entity names and logic.
 	ParseTasks();
+
+	//Parse the marks for this map on load.
+	char sMap[32];
+	GetCurrentMap(sMap, sizeof(sMap));
+
+	LoadMarks(sMap);
 
 	/////
 	//Precache Files
@@ -1012,7 +1020,7 @@ public void OnGameFrame()
 	if (!TF2_IsInSetup() && count <= required && !g_BetweenRounds)
 	{
 		g_BetweenRounds = true;
-		TF2_ForceWin(TFTeam_Unassigned);
+		//TF2_ForceWin(TFTeam_Unassigned);
 	}
 
 	//If there's less than X players then make sure the timer's paused and send a hud message saying the mode requires X players to play.
@@ -1248,4 +1256,60 @@ void OnMatchCompleted()
 		g_Player[i].ejected = false;
 		ClearTasks(i);
 	}
+}
+
+void SaveMarks(const char[] map)
+{
+	char sPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, sPath, sizeof(sPath), "data/amongus/marks/%s.cfg", map);
+
+	KeyValues kv = new KeyValues("marks");
+	StringMapSnapshot snap = g_AreaNames.Snapshot();
+
+	for (int i = 0; i < snap.Length; i++)
+	{
+		int size = snap.KeyBufferSize(i);
+
+		char[] sKey = new char[size];
+		snap.GetKey(i, sKey, size);
+
+		char sName[32];
+		g_AreaNames.GetString(sKey, sName, sizeof(sName));
+
+		kv.SetString(sKey, sName);
+	}
+
+	kv.Rewind();
+	kv.ExportToFile(sPath);
+
+	delete kv;
+	delete snap;
+}
+
+void LoadMarks(const char[] map)
+{
+	char sPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, sPath, sizeof(sPath), "data/amongus/marks/%s.cfg", map);
+
+	g_AreaNames.Clear();
+
+	KeyValues kv = new KeyValues("marks");
+
+	if (kv.ImportFromFile(sPath) && kv.GotoFirstSubKey(false))
+	{
+		do
+		{
+			char sID[16];
+			kv.GetSectionName(sID, sizeof(sID));
+
+			char sName[32];
+			kv.GetString(NULL_STRING, sName, sizeof(sName));
+
+			g_AreaNames.SetString(sID, sName);
+		}
+		while (kv.GotoNextKey(false));
+	}
+
+	delete kv;
+	LogMessage("%i marks parsed successfully for map: %s", g_AreaNames.Size, map);
 }

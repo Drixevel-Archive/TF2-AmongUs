@@ -241,3 +241,61 @@ public Action Command_Start(int client, int args)
 	CPrintToChatAll("{H1}%N {default}has started the match.", client);
 	return Plugin_Handled;
 }
+
+public Action Command_Mark(int client, int args)
+{
+	if (client == 0)
+	{
+		return Plugin_Handled;
+	}
+
+	if (args < 1)
+	{
+		return Plugin_Handled;
+	}
+
+	if (!IsPlayerAlive(client))
+	{
+		return Plugin_Handled;
+	}
+
+	if (!NavMesh_Exists())
+	{
+		return Plugin_Handled;
+	}
+
+	float origin[3];
+	GetClientAbsOrigin(client, origin);
+
+	CNavArea area = NavMesh_GetNearestArea(origin, true, 10000.0, false, true, -2);
+
+	if (area == INVALID_NAV_AREA)
+	{
+		return Plugin_Handled;
+	}
+
+	int id = area.ID;
+
+	char sName[64];
+	GetCmdArgString(sName, sizeof(sName));
+
+	char sID[16];
+	IntToString(id, sID, sizeof(sID));
+
+	g_AreaNames.SetString(sID, sName);
+
+	CPrintToChat(client, "Name {H1}%s {default}set for Navmesh ID {H2}%i{default}.", sName, id);
+	
+	return Plugin_Handled;
+}
+
+public Action Command_SaveMarks(int client, int args)
+{
+	char sMap[32];
+	GetCurrentMap(sMap, sizeof(sMap));
+
+	SaveMarks(sMap);
+	CReplyToCommand(client, "Marks for map {H1}%s {default}has been saved.", sMap);
+	
+	return Plugin_Handled;
+}
