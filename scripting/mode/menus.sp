@@ -230,6 +230,13 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 				CreateVoteMenu(param1);
 				return;
 			}
+
+			if (g_Match.meeting == null)
+			{
+				CPrintToChat(param1, "No meeting is currently active.");
+				CreateVoteMenu(param1);
+				return;
+			}
 				
 			char sID[16];
 			menu.GetItem(param2, sID, sizeof(sID));
