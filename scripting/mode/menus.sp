@@ -166,6 +166,8 @@ void CreateVoteMenu(int client)
 	Menu menu = new Menu(MenuHandler_Vote);
 	menu.SetTitle("Choose a player to eject: %s", g_Player[client].voted_for != -1 ? "(Vote Casted)" : "");
 
+	menu.AddItem("0", "Vote to Skip", g_Player[client].voted_for != -1 ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+
 	char sID[16]; char sDisplay[256]; int draw; int votes; char sStatus[32];
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -201,8 +203,6 @@ void CreateVoteMenu(int client)
 		FormatEx(sDisplay, sizeof(sDisplay), "%N %s", i, sStatus);
 		menu.AddItem(sID, sDisplay, draw);
 	}
-	
-	menu.AddItem("0", "Vote to Skip");
 
 	menu.Display(client, MENU_TIME_FOREVER);
 }
