@@ -135,7 +135,7 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 				return;
 			}
 
-			if (!TF2_IsInSetup())
+			if (TF2_IsInSetup())
 			{
 				char sInfo[32];
 				menu.GetItem(param2, sInfo, sizeof(sInfo));
@@ -156,6 +156,13 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 
 void CreateVoteMenu(int client)
 {
+	if (g_Match.meeting == null)
+	{
+		TF2_PlayDenySound(client);
+		CPrintToChat(client, "You can only cast votes while a meeting is going on.");
+		return;
+	}
+	
 	Menu menu = new Menu(MenuHandler_Vote);
 	menu.SetTitle("Choose a player to eject: %s", g_Player[client].voted_for != -1 ? "(Vote Casted)" : "");
 
