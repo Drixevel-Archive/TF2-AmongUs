@@ -119,7 +119,7 @@ stock bool TF2_IsInSetup()
 		return false;
 	#endif
 
-	return !view_as<bool>(GameRules_GetProp("m_bInSetup"));
+	return view_as<bool>(GameRules_GetProp("m_bInSetup"));
 }
 
 stock bool TF2_IsTimerPaused()
