@@ -505,3 +505,14 @@ stock bool ChangeClientTeam_Alive(int client, int team)
 	
 	return true;
 }
+
+stock void TF2_SendKey(int client, const char[] buffer, any...)
+{
+	char sBuffer[253];
+	VFormat(sBuffer, sizeof(sBuffer), buffer, 3);
+
+	Handle hint = StartMessageOne("KeyHintText", client);
+	BfWriteByte(hint, 1);
+	BfWriteString(hint, sBuffer);
+	EndMessage();
+}
