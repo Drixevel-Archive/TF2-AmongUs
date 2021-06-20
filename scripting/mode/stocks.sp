@@ -548,3 +548,96 @@ stock bool PushMenuInt(Menu menu, const char[] id, int value)
 	IntToString(value, sBuffer, sizeof(sBuffer));
 	return menu.AddItem(id, sBuffer, ITEMDRAW_IGNORE);
 }
+
+enum TF2Quality {
+	TF2Quality_Normal = 0, // 0
+	TF2Quality_Rarity1,
+	TF2Quality_Genuine = 1,
+	TF2Quality_Rarity2,
+	TF2Quality_Vintage,
+	TF2Quality_Rarity3,
+	TF2Quality_Rarity4,
+	TF2Quality_Unusual = 5,
+	TF2Quality_Unique,
+	TF2Quality_Community,
+	TF2Quality_Developer,
+	TF2Quality_Selfmade,
+	TF2Quality_Customized, // 10
+	TF2Quality_Strange,
+	TF2Quality_Completed,
+	TF2Quality_Haunted,
+	TF2Quality_ToborA
+};
+
+stock int TF2_GiveItem(int client, char[] classname, int index, TF2Quality quality = TF2Quality_Normal, int level = 0, const char[] attributes = "")
+{
+	char sClass[64];
+	strcopy(sClass, sizeof(sClass), classname);
+	
+	if (StrContains(sClass, "saxxy", false) != -1)
+	{
+		switch (TF2_GetPlayerClass(client))
+		{
+			case TFClass_Scout: strcopy(sClass, sizeof(sClass), "tf_weapon_bat");
+			case TFClass_Sniper: strcopy(sClass, sizeof(sClass), "tf_weapon_club");
+			case TFClass_Soldier: strcopy(sClass, sizeof(sClass), "tf_weapon_shovel");
+			case TFClass_DemoMan: strcopy(sClass, sizeof(sClass), "tf_weapon_bottle");
+			case TFClass_Engineer: strcopy(sClass, sizeof(sClass), "tf_weapon_wrench");
+			case TFClass_Pyro: strcopy(sClass, sizeof(sClass), "tf_weapon_fireaxe");
+			case TFClass_Heavy: strcopy(sClass, sizeof(sClass), "tf_weapon_fists");
+			case TFClass_Spy: strcopy(sClass, sizeof(sClass), "tf_weapon_knife");
+			case TFClass_Medic: strcopy(sClass, sizeof(sClass), "tf_weapon_bonesaw");
+		}
+	}
+	else if (StrContains(sClass, "shotgun", false) != -1)
+	{
+		switch (TF2_GetPlayerClass(client))
+		{
+			case TFClass_Soldier: strcopy(sClass, sizeof(sClass), "tf_weapon_shotgun_soldier");
+			case TFClass_Pyro: strcopy(sClass, sizeof(sClass), "tf_weapon_shotgun_pyro");
+			case TFClass_Heavy: strcopy(sClass, sizeof(sClass), "tf_weapon_shotgun_hwg");
+			case TFClass_Engineer: strcopy(sClass, sizeof(sClass), "tf_weapon_shotgun_primary");
+		}
+	}
+	
+	Handle item = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);	//Keep reserve attributes otherwise random issues will occur... including crashes.
+	TF2Items_SetClassname(item, sClass);
+	TF2Items_SetItemIndex(item, index);
+	TF2Items_SetQuality(item, view_as<int>(quality));
+	TF2Items_SetLevel(item, level);
+	
+	char sAttrs[32][32];
+	int count = ExplodeString(attributes, " ; ", sAttrs, 32, 32);
+	
+	if (count > 1)
+	{
+		TF2Items_SetNumAttributes(item, count / 2);
+		
+		int i2;
+		for (int i = 0; i < count; i += 2)
+		{
+			TF2Items_SetAttribute(item, i2, StringToInt(sAttrs[i]), StringToFloat(sAttrs[i + 1]));
+			i2++;
+		}
+	}
+	else
+		TF2Items_SetNumAttributes(item, 0);
+
+	int weapon = TF2Items_GiveNamedItem(client, item);
+	delete item;
+	
+	if (StrEqual(sClass, "tf_weapon_builder", false) || StrEqual(sClass, "tf_weapon_sapper", false))
+	{
+		SetEntProp(weapon, Prop_Send, "m_iObjectType", 3);
+		SetEntProp(weapon, Prop_Data, "m_iSubType", 3);
+		SetEntProp(weapon, Prop_Send, "m_aBuildableObjectTypes", 0, _, 0);
+		SetEntProp(weapon, Prop_Send, "m_aBuildableObjectTypes", 0, _, 1);
+		SetEntProp(weapon, Prop_Send, "m_aBuildableObjectTypes", 0, _, 2);
+		SetEntProp(weapon, Prop_Send, "m_aBuildableObjectTypes", 1, _, 3);
+	}
+	
+	if (StrContains(sClass, "tf_weapon_", false) == 0)
+		EquipPlayerWeapon(client, weapon);
+	
+	return weapon;
+}
