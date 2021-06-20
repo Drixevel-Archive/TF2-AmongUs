@@ -234,3 +234,10 @@ public Action Command_ListImposters(int client, int args)
 	CReplyToCommand(client, sImposters);
 	return Plugin_Handled;
 }
+
+public Action Command_Start(int client, int args)
+{
+	TF2_SetSetupTime(5);
+	CPrintToChatAll("{H1}%N {default}has started the match.", client);
+	return Plugin_Handled;
+}

@@ -336,6 +336,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_eject", Command_Eject, ADMFLAG_SLAY, "Eject players from the map and out of the match.");
 	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
 	RegAdminCmd("sm_listimposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
+	RegAdminCmd("sm_start", Command_Start, ADMFLAG_SLAY, "Start the match during the lobby automatically.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
