@@ -299,3 +299,9 @@ public Action Command_SaveMarks(int client, int args)
 	
 	return Plugin_Handled;
 }
+
+public Action Command_Cameras(int client, int args)
+{
+	OpenCamerasMenu(client);
+	return Plugin_Handled;
+}

@@ -354,6 +354,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_start", Command_Start, ADMFLAG_SLAY, "Start the match during the lobby automatically.");
 	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
 	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
+	RegAdminCmd("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();

@@ -317,4 +317,78 @@ public int MenuHandler_Vents(Menu menu, MenuAction action, int param1, int param
 			delete menu;
 	}
 }
+
+void OpenCamerasMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_Cameras);
+	menu.SetTitle("Cameras:");
+
+	menu.AddItem("no", "no camera");
+
+	int entity = -1; char sID[16]; char sName[64];
+	while ((entity = FindEntityByClassname(entity, "point_viewcontrol")) != -1)
+	{
+		IntToString(entity, sID, sizeof(sID));
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+		if (StrContains(sName, "camera", false) == 0)
+			menu.AddItem(sID, sName);
+	}
+
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int MenuHandler_Cameras(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char sID[16]; char sName[64];
+			menu.GetItem(param2, sID, sizeof(sID), _, sName, sizeof(sName));
+
+			if (StrEqual(sID, "no", false))
+			{
+				SetEntProp(param1, Prop_Send, "m_iObserverMode", 0);
+				SetClientViewEntity(param1, param1);
+				SetEntityMoveType(param1, MOVETYPE_WALK);
+				OpenCamerasMenu(param1);
+				return;
+			}
+
+			int entity = StringToInt(sID);
+
+			char sWatcher[64];
+			Format(sWatcher, sizeof(sWatcher), "target%i", param1);
+			DispatchKeyValue(param1, "targetname", sWatcher);
+
+			SetClientViewEntity(param1, entity);
+			SetEntProp(param1, Prop_Send, "m_iObserverMode", 1);
+			SetEntityMoveType(param1, MOVETYPE_OBSERVER);
+
+			SetVariantString(sWatcher);
+			AcceptEntityInput(entity, "Enable", param1, entity, 0);
+
+			float origin[3];
+			GetEntityAbsOrigin(entity, origin);
+			TeleportEntity(param1, origin, NULL_VECTOR, NULL_VECTOR);
+
+			OpenCamerasMenu(param1);
+		}
+
+		case MenuAction_End:
+			delete menu;
+	}
+}
+
+stock void GetEntityAbsOrigin(int entity, float origin[3])
+{
+	float mins[3]; float maxs[3];
+	GetEntPropVector(entity,Prop_Send,"m_vecOrigin",origin);
+	GetEntPropVector(entity,Prop_Send,"m_vecMins",mins);
+	GetEntPropVector(entity,Prop_Send,"m_vecMaxs",maxs);
+
+	origin[0] += (mins[0] + maxs[0]) * 0.5;
+	origin[1] += (mins[1] + maxs[1]) * 0.5;
+	origin[2] += (mins[2] + maxs[2]) * 0.5;
 }
