@@ -1517,6 +1517,9 @@ void OnMatchCompleted()
 		g_Player[i].ejected = false;
 		ClearTasks(i);
 	}
+
+	StopTimer(g_Match.meeting);
+
 	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
 	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
 }
