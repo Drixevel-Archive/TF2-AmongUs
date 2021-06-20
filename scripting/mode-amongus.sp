@@ -518,6 +518,7 @@ public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+	SDKHook(client, SDKHook_PreThink, OnPreThink);
 }
 
 public void OnClientDisconnect(int client)

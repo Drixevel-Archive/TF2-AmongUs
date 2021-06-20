@@ -14,6 +14,10 @@ public void OnTakeDamagePost(int victim, int attacker, int inflictor, float dama
 
 }
 
+public Action OnPreThink(int client)
+{
+}
+
 public Action OnEntitySpawn(int entity)
 {
 	char classname[32];
