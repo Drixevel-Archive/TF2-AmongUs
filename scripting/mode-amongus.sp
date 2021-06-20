@@ -303,7 +303,7 @@ public void OnPluginStart()
 	CSetHighlight2("{darkorchid}");
 
 	convar_Required_Players = CreateConVar("sm_mode_amongus_required_players", "3", "How many players should be required for the gamemode to start?", FCVAR_NOTIFY, true, 0.0);
-	convar_TopDownView = CreateConVar("sm_mode_amongus_topdownview", "1", "Should players by default be in a top down view?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_TopDownView = CreateConVar("sm_mode_amongus_topdownview", "0", "Should players by default be in a top down view?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	convar_TopDownView.AddChangeHook(OnConVarChange);
 
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
