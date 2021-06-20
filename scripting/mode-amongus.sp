@@ -997,7 +997,7 @@ public void OnGameFrame()
 	if (!TF2_IsInSetup() && count < 2 && !g_BetweenRounds)
 	{
 		g_BetweenRounds = true;
-		//TF2_ForceWin(TFTeam_Unassigned);
+		TF2_ForceWin(TFTeam_Unassigned);
 	}
 
 	//If there's less than 2 players then make sure the timer's paused and send a hud message saying the mode requires 3 players to play.
