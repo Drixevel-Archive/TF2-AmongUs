@@ -167,6 +167,7 @@ public Action Command_Eject(int client, int args)
 	char sTarget[MAX_TARGET_LENGTH];
 	GetCmdArgString(sTarget, sizeof(sTarget));
 	
+	int target = FindTarget(client, sTarget, false, true);
 
 	if (target < 1)
 	{
