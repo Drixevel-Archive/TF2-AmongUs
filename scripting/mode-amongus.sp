@@ -320,6 +320,18 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CPrintToChatAll("{H1}Mode{default}: Initializing...");
 	RegPluginLibrary("mode-amongus");
 
+	CreateNative("GameSettings.Parse", Native_GameSettings_Parse);
+	CreateNative("GameSettings.GetInt", Native_GameSettings_GetInt);
+	CreateNative("GameSettings.SetInt", Native_GameSettings_SetInt);
+	CreateNative("GameSettings.GetFloat", Native_GameSettings_GetFloat);
+	CreateNative("GameSettings.SetFloat", Native_GameSettings_SetFloat);
+	CreateNative("GameSettings.GetString", Native_GameSettings_GetString);
+	CreateNative("GameSettings.SetString", Native_GameSettings_SetString);
+	CreateNative("GameSettings.GetBool", Native_GameSettings_GetBool);
+	CreateNative("GameSettings.SetBool", Native_GameSettings_SetBool);
+	CreateNative("GameSettings.SaveClient", Native_GameSettings_SaveClient);
+	CreateNative("GameSettings.LoadClient", Native_GameSettings_LoadClient);
+
 	g_Late = late;
 	return APLRes_Success;
 }

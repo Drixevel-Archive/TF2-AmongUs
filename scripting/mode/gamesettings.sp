@@ -54,12 +54,11 @@ stock bool SetGameSetting_Float(const char[] setting, float value)
 {
 	char sValue[32];
 	FloatToString(value, sValue, sizeof(sValue));
-	return g_GameSettings.SetString(setting, sValue, sizeof(sValue));
+	return g_GameSettings.SetString(setting, sValue);
 }
 
 stock bool GetGameSetting_String(const char[] setting, char[] buffer, int size)
 {
-	char sValue[32];
 	return g_GameSettings.GetString(setting, buffer, size);
 }
 
