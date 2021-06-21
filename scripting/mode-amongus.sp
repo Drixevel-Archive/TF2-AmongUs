@@ -289,6 +289,10 @@ Handle g_O2;
 
 Cookie g_GameSettingsCookie;
 
+GlobalForward g_Forward_OnGameSettingsLoaded;
+GlobalForward g_Forward_OnGameSettingsSaveClient;
+GlobalForward g_Forward_OnGameSettingsLoadClient;
+
 /*****************************/
 //Managed
 
@@ -320,6 +324,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CPrintToChatAll("{H1}Mode{default}: Initializing...");
 	RegPluginLibrary("mode-amongus");
 
+	//Natives
 	CreateNative("GameSettings.Parse", Native_GameSettings_Parse);
 	CreateNative("GameSettings.GetInt", Native_GameSettings_GetInt);
 	CreateNative("GameSettings.SetInt", Native_GameSettings_SetInt);
@@ -331,6 +336,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("GameSettings.SetBool", Native_GameSettings_SetBool);
 	CreateNative("GameSettings.SaveClient", Native_GameSettings_SaveClient);
 	CreateNative("GameSettings.LoadClient", Native_GameSettings_LoadClient);
+
+	//Forwards
+	g_Forward_OnGameSettingsLoaded = new GlobalForward("GameSettings_OnParsed", ET_Ignore);
+	g_Forward_OnGameSettingsSaveClient = new GlobalForward("GameSettings_OnSaveClient", ET_Ignore);
+	g_Forward_OnGameSettingsLoadClient = new GlobalForward("GameSettings_OnLoadClient", ET_Ignore);
 
 	g_Late = late;
 	return APLRes_Success;

@@ -27,6 +27,9 @@ void ParseGameSettings()
 
 	delete kv;
 	LogMessage("%i game settings loaded.", g_GameSettings.Size);
+
+	Call_StartForward(g_Forward_OnGameSettingsLoaded);
+	Call_Finish();
 }
 
 stock int GetGameSetting_Int(const char[] setting)
@@ -108,6 +111,10 @@ stock void SaveGameSettings(int client)
 	delete snap;
 
 	g_GameSettingsCookie.Set(client, sKeyValues);
+
+	Call_StartForward(g_Forward_OnGameSettingsSaveClient);
+	Call_PushCell(client);
+	Call_Finish();
 }
 
 stock void LoadGameSettings(int client)
@@ -134,4 +141,8 @@ stock void LoadGameSettings(int client)
 	}
 	
 	delete kv;
+
+	Call_StartForward(g_Forward_OnGameSettingsLoadClient);
+	Call_PushCell(client);
+	Call_Finish();
 }

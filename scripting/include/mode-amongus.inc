@@ -3,6 +3,10 @@
 #endif 
 #define _mode_amongus_
 
+forward void GameSettings_OnParsed();
+forward void GameSettings_OnSaveClient(int client);
+forward void GameSettings_OnLoadClient(int client);
+
 methodmap GameSettings
 {
 	public GameSettings()
