@@ -3,7 +3,8 @@
 
 public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
+	int userid = event.GetInt("userid");
+	int client = GetClientOfUserId(userid);
 
 	if (convar_TopDownView.BoolValue)
 		CreateCamera(client);
@@ -36,8 +37,8 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	//Make sure they're not marked as ejected if they spawn or are respawned.
 	g_Player[client].ejected = false;
 
-	if (!IsFakeClient(client))
-		SendHud(client);
+	if (!IsFakeClient(client))	
+		CreateTimer(0.2, Timer_SendHud, userid, TIMER_FLAG_NO_MAPCHANGE);
 
 	TF2_EquipWeaponSlot(client, TFWeaponSlot_Melee);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Primary);
@@ -51,6 +52,13 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 		AssignColor(client);
 	
 	SetPlayerSpeed(client);
+}
+
+public Action Timer_SendHud(Handle timer, any data)
+{
+	int client;
+	if ((client = GetClientOfUserId(data)) > 0 && IsClientInGame(client) && IsPlayerAlive(client) && !IsFakeClient(client))
+		SendHud(client);
 }
 
 public Action Event_OnPlayerDeathPre(Event event, const char[] name, bool dontBroadcast)
