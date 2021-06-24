@@ -1254,6 +1254,9 @@ void ParseTasks()
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
+	if (CheckCommandAccess(client, "", ADMFLAG_GENERIC, true))
+		return Plugin_Continue;
+	
 	if (TF2_IsInSetup())
 		return Plugin_Continue;
 	
