@@ -122,6 +122,13 @@ stock void LoadGameSettings(int client)
 	char sKeyValues[512];
 	g_GameSettingsCookie.Get(client, sKeyValues, sizeof(sKeyValues));
 
+	//If the client hasn't saved any values before, lets give them the default set of values to use.
+	if (strlen(sKeyValues) == 0)
+	{
+		ParseGameSettings();
+		SaveGameSettings(client);
+	}
+
 	KeyValues kv = new KeyValues("settings");
 	if (kv.ImportFromString(sKeyValues) && kv.GotoFirstSubKey(false))
 	{
