@@ -58,6 +58,8 @@ void OpenSettingsMenu(int client)
 	char sMap[32];
 	GetCurrentMap(sMap, sizeof(sMap));
 
+	menu.AddItem("reset", "Reset Settings To Default");
+
 	FormatEx(sInfo, sizeof(sInfo), "map");
 	FormatEx(sDisplay, sizeof(sDisplay), "Map: %s", sMap);
 	menu.AddItem(sInfo, sDisplay);
@@ -142,7 +144,15 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 				char sInfo[32];
 				menu.GetItem(param2, sInfo, sizeof(sInfo));
 
-				if (StrEqual(sInfo, "start", false))
+				if (StrEqual(sInfo, "reset", false))
+				{
+					ParseGameSettings();
+					SaveGameSettings(param1);
+					OpenSettingsMenu(param1);
+					CPrintToChat(param1, "All of your game settings have been reset to default.");
+
+				}
+				else if (StrEqual(sInfo, "start", false))
 				{
 					TF2_SetSetupTime(5);
 					CPrintToChatAll("{H1}%N {default}has started the match.", param1);
