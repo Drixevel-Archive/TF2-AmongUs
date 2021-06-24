@@ -293,6 +293,8 @@ GlobalForward g_Forward_OnGameSettingsLoaded;
 GlobalForward g_Forward_OnGameSettingsSaveClient;
 GlobalForward g_Forward_OnGameSettingsLoadClient;
 
+bool g_IsDead[MAXPLAYERS + 1];
+
 /*****************************/
 //Managed
 
@@ -483,8 +485,15 @@ public void OnPluginEnd()
 	CPrintToChatAll("{H1}Mode{default}: Unloaded");
 
 	for (int i = 1; i <= MaxClients; i++)
-		if (IsClientInGame(i) && !IsFakeClient(i))
+	{
+		if (!IsClientInGame(i))
+			continue;
+		
+		if (!IsFakeClient(i))
 			ClearSyncHud(i, g_Hud);
+
+		RemoveGhost(i);
+	}
 	
 	int entity = -1;
 	while ((entity = FindEntityByClassname(entity, "*")) != -1)
@@ -661,6 +670,7 @@ public void OnClientPutInServer(int client)
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 	SDKHook(client, SDKHook_PreThink, OnPreThink);
+	SDKHook(client, SDKHook_SetTransmit, OnSetTransmit);
 }
 
 public void OnClientDisconnect(int client)
@@ -692,6 +702,7 @@ public void OnClientDisconnect_Post(int client)
 {
 	g_Player[client].Clear();
 	g_Camera[client] = 0;
+	g_IsDead[client] = false;
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
@@ -722,7 +733,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	{
 		case Role_Crewmate:
 		{
-			if (IsPlayerAlive(client) && !TF2_IsInSetup() && g_Match.meeting == null)
+			if (IsPlayerAlive(client) && !TF2_IsInSetup() && g_Match.meeting == null && !g_IsDead[client])
 			{
 				float origin[3];
 				GetClientAbsOrigin(client, origin);
@@ -771,7 +782,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 
 		case Role_Imposter:
 		{
-			if (IsPlayerAlive(client) && !TF2_IsInSetup() && g_Match.meeting == null)
+			if (IsPlayerAlive(client) && !TF2_IsInSetup() && g_Match.meeting == null && !g_IsDead[client])
 			{
 				float origin[3];
 				GetClientAbsOrigin(client, origin);
@@ -865,58 +876,61 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			}
 		}
 
-		for (int i = 1; i <= MaxClients; i++)
+		if (!g_IsDead[client])
 		{
-			if (!IsClientInGame(i) || IsPlayerAlive(i) || !g_Player[i].showdeath)
-				continue;
-			
-			if (GetVectorDistance(origin, g_Player[i].deathorigin) > 100.0)
+			for (int i = 1; i <= MaxClients; i++)
 			{
-				if (g_Player[client].neardeath == i)
-				{
-					g_Player[client].neardeath = -1;
-					PrintCenterText(client, "");
-				}
-			}
-			else
-			{
-				g_Player[client].neardeath = i;
-				PrintCenterText(client, "Near Dead Body\nInteract with the by by calling for MEDIC!");
-			}
-		}
-
-		int entity = -1; char sName[32];
-		while ((entity = FindEntityByClassname(entity, "*")) != -1)
-		{
-			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
-
-			if (StrContains(sName, "action", false) != 0)
-				continue;
-			
-			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
-
-			if (GetVectorDistance(origin, origin2) > 100.0)
-			{
-				if (g_Player[client].nearaction == entity)
-				{
-					g_Player[client].nearaction = -1;
-					PrintCenterText(client, "");
-				}
-			}
-			else if (g_Player[client].nearaction == -1)
-			{
-				g_Player[client].nearaction = entity;
-
-				char sDisplay[256];
-				//GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-
-				//TODO: Add the `display` key to action entities.
-				if (StrContains(sName, "action_map", false) == 0)
-					FormatEx(sDisplay, sizeof(sDisplay), "Map");
-				else if (StrContains(sName, "action_map", false) == 0)
-					FormatEx(sDisplay, sizeof(sDisplay), "Cameras");
+				if (!IsClientInGame(i) || IsPlayerAlive(i) || !g_Player[i].showdeath)
+					continue;
 				
-				PrintCenterText(client, "Near Action: %s (Press MEDIC! to interact)", sDisplay);
+				if (GetVectorDistance(origin, g_Player[i].deathorigin) > 100.0)
+				{
+					if (g_Player[client].neardeath == i)
+					{
+						g_Player[client].neardeath = -1;
+						PrintCenterText(client, "");
+					}
+				}
+				else
+				{
+					g_Player[client].neardeath = i;
+					PrintCenterText(client, "Near Dead Body\nInteract with the by by calling for MEDIC!");
+				}
+			}
+
+			int entity = -1; char sName[32];
+			while ((entity = FindEntityByClassname(entity, "*")) != -1)
+			{
+				GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+				if (StrContains(sName, "action", false) != 0)
+					continue;
+				
+				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
+
+				if (GetVectorDistance(origin, origin2) > 100.0)
+				{
+					if (g_Player[client].nearaction == entity)
+					{
+						g_Player[client].nearaction = -1;
+						PrintCenterText(client, "");
+					}
+				}
+				else if (g_Player[client].nearaction == -1)
+				{
+					g_Player[client].nearaction = entity;
+
+					char sDisplay[256];
+					//GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+					//TODO: Add the `display` key to action entities.
+					if (StrContains(sName, "action_map", false) == 0)
+						FormatEx(sDisplay, sizeof(sDisplay), "Map");
+					else if (StrContains(sName, "action_map", false) == 0)
+						FormatEx(sDisplay, sizeof(sDisplay), "Cameras");
+					
+					PrintCenterText(client, "Near Action: %s (Press MEDIC! to interact)", sDisplay);
+				}
 			}
 		}
 	}
@@ -1548,6 +1562,7 @@ void OnMatchCompleted()
 		g_Player[i].role = Role_Crewmate;
 		g_Player[i].ejected = false;
 		ClearTasks(i);
+		RemoveGhost(i);
 	}
 
 	StopTimer(g_Match.meeting);

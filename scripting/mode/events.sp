@@ -72,15 +72,33 @@ public Action Event_OnPlayerDeathPre(Event event, const char[] name, bool dontBr
 
 public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
+	int userid = event.GetInt("userid");
+	int client = GetClientOfUserId(userid);
 
 	if (convar_TopDownView.BoolValue)
 		DestroyCamera(client);
 	
-	//We wait a frame here because it's required for the ragdoll to spawn after a player dies.
-	RequestFrame(NextFrame_CreateDeadBody, event.GetInt("userid"));
+	//We wait 0.2 seconds here because it's required for the ragdoll to spawn after a player dies.
+	CreateTimer(0.2, Timer_CreateDeadBody, userid, TIMER_FLAG_NO_MAPCHANGE);
 
+	//We wait 0.2 seconds after the player dies to check who's alive and who's dead for round win conditions.
 	CreateTimer(0.2, Timer_CheckAlivePlayers);
+
+	//We respawn the player after a bit so we can set them as a ghost.
+	CreateTimer(0.4, Timer_RespawnPlayer, userid, TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action Timer_CreateDeadBody(Handle timer, any userid)
+{
+	int client;
+	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client))
+	{
+		TF2_SpawnRagdoll(client, 99999.0, RAG_NOHEAD | RAG_NOTORSO);
+		
+		//Cache their death location and allow it to be discovered.
+		GetClientAbsOrigin(client, g_Player[client].deathorigin);
+		g_Player[client].showdeath = true;
+	}
 }
 
 public Action Timer_CheckAlivePlayers(Handle timer)
@@ -121,16 +139,14 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 	return Plugin_Continue;
 }
 
-public void NextFrame_CreateDeadBody(any userid)
+public Action Timer_RespawnPlayer(Handle timer, any data)
 {
 	int client;
-	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client))
+	if ((client = GetClientOfUserId(data)) > 0 && IsClientInGame(client) && !IsPlayerAlive(client))
 	{
-		TF2_SpawnRagdoll(client, 99999.0, RAG_NOHEAD | RAG_NOTORSO);
-		
-		//Cache their death location and allow it to be discovered.
-		GetClientAbsOrigin(client, g_Player[client].deathorigin);
-		g_Player[client].showdeath = true;
+		TF2_RespawnPlayer(client);
+		TeleportEntity(client, g_Player[client].deathorigin, NULL_VECTOR, NULL_VECTOR);
+		SetGhost(client);
 	}
 }
 

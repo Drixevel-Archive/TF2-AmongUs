@@ -58,6 +58,24 @@ public Action OnPreThink(int client)
 	return Plugin_Continue;
 }
 
+public Action OnSetTransmit(int entity, int client)
+{
+	//If both players are dead then let them see each other.
+	if (g_IsDead[entity] && g_IsDead[client])
+		return Plugin_Continue;
+	
+	//If the player seeing the other player isn't dead but the other player is dead then stop the transmission.
+	if (!g_IsDead[entity] && g_IsDead[client])
+		return Plugin_Continue;
+	
+	//If the player seeing the other player is dead and the other player isn't dead then continue the transmission.
+	if (g_IsDead[entity] && !g_IsDead[client])
+		return Plugin_Stop;
+
+	//Make sure if the checks above fail, we still let people be seen otherwise lag could happen.
+	return Plugin_Continue;
+}
+
 public Action OnEntitySpawn(int entity)
 {
 	char classname[32];

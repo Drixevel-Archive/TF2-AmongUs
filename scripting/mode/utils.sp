@@ -322,3 +322,29 @@ void DestroyCamera(int client)
 	RemoveEdict(g_Camera[client]);
 	g_Camera[client] = 0;
 }
+
+void SetGhost(int client)
+{
+	if (g_IsDead[client])
+		return;
+	
+	SetEntProp(client, Prop_Send, "m_lifeState", 2);
+
+	SetEntityRenderMode(client, RENDER_TRANSALPHA);
+	SetEntityRenderColor(client, _, _, _, 70);
+	
+	g_IsDead[client] = true;
+}
+
+void RemoveGhost(int client)
+{
+	if (!g_IsDead[client])
+		return;
+	
+	SetEntProp(client, Prop_Send, "m_lifeState", 0);
+
+	SetEntityRenderMode(client, RENDER_NORMAL);
+	SetEntityRenderColor(client, _, _, _, _);
+	
+	g_IsDead[client] = false;
+}

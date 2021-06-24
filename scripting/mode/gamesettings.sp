@@ -127,6 +127,7 @@ stock void LoadGameSettings(int client)
 	{
 		ParseGameSettings();
 		SaveGameSettings(client);
+		return;
 	}
 
 	KeyValues kv = new KeyValues("settings");
