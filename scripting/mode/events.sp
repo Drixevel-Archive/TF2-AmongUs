@@ -109,7 +109,7 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 	//Get the total amount of crewmates alive.
 	int total_crewmates;
 	for (int i = 1; i <= MaxClients; i++)
-		if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role != Role_Imposter)
+		if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role != Role_Imposter && !g_IsDead[i])
 			total_crewmates++;
 	
 	//If no crewmates are alive then end the round and make Imposters the winner.
@@ -121,7 +121,7 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 
 	int total_imposters;
 	for (int i = 1; i <= MaxClients; i++)
-		if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role == Role_Imposter)
+		if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role == Role_Imposter && !g_IsDead[i])
 			total_imposters++;
 	
 	//If no imposters are alive then end the round and make Crewmates the winner.
