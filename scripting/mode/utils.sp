@@ -102,19 +102,19 @@ bool IsTaskCompleted(int client, int task)
 
 void MarkTaskComplete(int client, int task)
 {
+	if (g_Player[client].role == Role_Imposter)
+		return;
+	
 	char sTask[16];
 	IntToString(task, sTask, sizeof(sTask));
 
 	g_Player[client].tasks_completed.SetValue(sTask, 1);
-
-	if (g_Player[client].role != Role_Imposter)
-		g_Match.tasks_current++;
+	g_Match.tasks_current++;
 }
 
 void AssignRandomTask(int client, int type)
 {
 	int task = GetRandomTask(type);
-
 	AssignTask(client, task);
 }
 
