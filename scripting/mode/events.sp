@@ -54,13 +54,6 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	SetPlayerSpeed(client);
 }
 
-public Action Timer_SendHud(Handle timer, any data)
-{
-	int client;
-	if ((client = GetClientOfUserId(data)) > 0 && IsClientInGame(client) && IsPlayerAlive(client) && !IsFakeClient(client))
-		SendHud(client);
-}
-
 public Action Event_OnPlayerDeathPre(Event event, const char[] name, bool dontBroadcast)
 {	
 	//Defaults to true so the killfeed is OFF.
@@ -86,68 +79,6 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 
 	//We respawn the player after a bit so we can set them as a ghost.
 	CreateTimer(0.4, Timer_RespawnPlayer, userid, TIMER_FLAG_NO_MAPCHANGE);
-}
-
-public Action Timer_CreateDeadBody(Handle timer, any userid)
-{
-	int client;
-	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client))
-	{
-		TF2_SpawnRagdoll(client, 99999.0, RAG_NOHEAD | RAG_NOTORSO);
-		
-		//Cache their death location and allow it to be discovered.
-		GetClientAbsOrigin(client, g_Player[client].deathorigin);
-		g_Player[client].showdeath = true;
-	}
-}
-
-public Action Timer_CheckAlivePlayers(Handle timer)
-{
-	if (TF2_IsInSetup())
-		return Plugin_Continue;
-	
-	//Get the total amount of crewmates alive.
-	int total_crewmates;
-	for (int i = 1; i <= MaxClients; i++)
-		if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role != Role_Imposter && !g_IsDead[i])
-			total_crewmates++;
-	
-	//If no crewmates are alive then end the round and make Imposters the winner.
-	if (total_crewmates < 1)
-	{
-		ForceWin(true);
-		CPrintToChatAll("Imposters are the only ones left, Imposters win!");
-	}
-
-	int total_imposters;
-	for (int i = 1; i <= MaxClients; i++)
-		if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role == Role_Imposter && !g_IsDead[i])
-			total_imposters++;
-	
-	//If no imposters are alive then end the round and make Crewmates the winner.
-	if (total_crewmates == total_imposters)
-	{
-		ForceWin(true);
-		CPrintToChatAll("There's an equal amount of crewmates to Imposters, Imposters win!");
-	}
-	else if (total_imposters < 1)
-	{
-		ForceWin();
-		CPrintToChatAll("There are no more Imposters alive, Crewmates win!");
-	}
-
-	return Plugin_Continue;
-}
-
-public Action Timer_RespawnPlayer(Handle timer, any data)
-{
-	int client;
-	if ((client = GetClientOfUserId(data)) > 0 && IsClientInGame(client) && !IsPlayerAlive(client))
-	{
-		TF2_RespawnPlayer(client);
-		TeleportEntity(client, g_Player[client].deathorigin, NULL_VECTOR, NULL_VECTOR);
-		SetGhost(client);
-	}
 }
 
 public void Event_OnPostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
