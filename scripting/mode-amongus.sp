@@ -283,6 +283,7 @@ int g_FogController_Crewmates;
 int g_FogController_Imposters;
 float g_FogDistance = 300.0;
 
+bool g_IsSabotageActive;
 int g_DelaySabotage;
 int g_ReactorsTime;
 Handle g_Reactors;
@@ -1216,18 +1217,21 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			g_ReactorsTime = 0;
 			StopTimer(g_Reactors);
 			CPrintToChatAll("{H1}%N {default}has stopped the Reactor meltdown.", client);
+			g_IsSabotageActive = false;
 		}
 		else if (StrContains(sDisplay, "Communications Disabled", false) == 0 && g_DisableCommunications)
 		{
 			g_DisableCommunications = false;
 			SendHudToAll();
 			CPrintToChatAll("{H1}%N {default}has fixed communications.", client);
+			g_IsSabotageActive = false;
 		}
 		else if (StrContains(sDisplay, "Oxygen Depletion", false) == 0 && g_O2 != null)
 		{
 			g_O2Time = 0;
 			StopTimer(g_O2);
 			CPrintToChatAll("{H1}%N {default}has fixed O2.", client);
+			g_IsSabotageActive = false;
 		}
 		else if (StrContains(sDisplay, "Fix Lights", false) == 0 && g_LightsOff)
 		{
@@ -1241,6 +1245,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			
 			DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * fog);
 			DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * fog);
+			g_IsSabotageActive = false;
 		}
 	}
 
@@ -1578,12 +1583,17 @@ void LoadMarks(const char[] map)
 
 void StartSabotage(int client, int sabotage)
 {
-	if (client) { }
-
+	if (g_IsSabotageActive)
+	{
+		TF2_PlayDenySound(client);
+		return;
+	}
+	
 	if (g_DelaySabotage != -1 && g_DelaySabotage > GetTime())
 		return;
 	
 	g_DelaySabotage = GetTime() + 20;
+	g_IsSabotageActive = true;
 
 	EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
 

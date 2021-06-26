@@ -9,6 +9,8 @@ public Action Timer_OpenDoors(Handle timer)
 
 	CPrintToChatAll("Doors are now unlocked!");
 	g_LockDoors = null;
+
+	g_IsSabotageActive = false;
 }
 
 public Action Timer_DoingTask(Handle timer, any data)
@@ -154,6 +156,8 @@ public Action Timer_ReactorTick(Handle timer, any data)
 	g_ReactorsTime = 0;
 	g_Reactors = null;
 
+	g_IsSabotageActive = false;
+
 	return Plugin_Stop;
 }
 
@@ -171,6 +175,8 @@ public Action Timer_O2Tick(Handle timer, any data)
 
 	g_O2Time = 0;
 	g_O2 = null;
+
+	g_IsSabotageActive = false;
 
 	return Plugin_Stop;
 }
