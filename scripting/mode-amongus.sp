@@ -42,6 +42,8 @@ part: <part name>
 
 #define NO_COLOR -1
 
+#define MAX_BUTTONS 25
+
 //Types of tasks. (They can have multiple)
 #define TASK_TYPE_LONG (1<<0)
 #define TASK_TYPE_SHORT (1<<1)
@@ -107,6 +109,8 @@ bool g_Late;
 bool g_BetweenRounds;
 
 Handle g_Hud;
+
+int g_LastButtons[MAXPLAYERS + 1];
 
 StringMap g_GameSettings;
 ArrayList g_CleanEntities;
@@ -286,6 +290,7 @@ bool g_LightsOff;
 bool g_DisableCommunications;
 int g_O2Time;
 Handle g_O2;
+Handle g_LockDoors;
 
 Cookie g_GameSettingsCookie;
 
@@ -527,6 +532,11 @@ public void OnMapStart()
 	PrecacheSound("doors/vent_open3.wav");	//Played whenever a player starts venting or moves to a different vent.
 }
 
+public void OnMapEnd()
+{
+	g_LockDoors = null;
+}
+
 public void OnConVarChange(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	int value = StringToInt(newValue);
@@ -703,10 +713,24 @@ public void OnClientDisconnect_Post(int client)
 	g_Player[client].Clear();
 	g_Camera[client] = 0;
 	g_IsDead[client] = false;
+	g_IsDead[client] = false;
+	g_LastButtons[client] = 0;
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
+	int button;
+	for (int i = 0; i < MAX_BUTTONS; i++)
+	{
+		button = (1 << i);
+		
+		if ((buttons & button))
+			if (!(g_LastButtons[client] & button))
+				OnButtonPress(client, button);
+	}
+	
+	g_LastButtons[client] = buttons;
+
 	if (IsPlayerAlive(client) && g_Player[client].ejected)
 	{
 		float origin[3];
@@ -936,6 +960,43 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	}
 
 	return Plugin_Continue;
+}
+
+void OnButtonPress(int client, int button)
+{
+	if ((button & IN_RELOAD) == IN_RELOAD)
+	{
+		if (IsPlayerAlive(client) && g_Player[client].role == Role_Imposter && GetActiveWeaponIndex(client) == 25)
+		{
+			if (g_DelaySabotage != -1 && g_DelaySabotage > GetTime())
+				return;
+			
+			g_DelaySabotage = GetTime() + 20;
+
+			EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
+			CPrintToChatAll("Doors are now locked for 10 seconds!");
+
+			int entity = -1;
+			while ((entity = FindEntityByClassname(entity, "func_door")) != -1)
+			{
+				AcceptEntityInput(entity, "Close");
+				AcceptEntityInput(entity, "Lock");
+			}
+			
+			StopTimer(g_LockDoors);
+			g_LockDoors = CreateTimer(10.0, Timer_OpenDoors, _, TIMER_FLAG_NO_MAPCHANGE);
+		}
+	}
+}
+
+public Action Timer_OpenDoors(Handle timer)
+{
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "func_door")) != -1)
+		AcceptEntityInput(entity, "Unlock");
+
+	CPrintToChatAll("Doors are now unlocked!");
+	g_LockDoors = null;
 }
 
 void SetColor(int client, int color)
@@ -1563,6 +1624,7 @@ void OnMatchCompleted()
 	}
 
 	StopTimer(g_Match.meeting);
+	StopTimer(g_LockDoors);
 
 	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
 	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
