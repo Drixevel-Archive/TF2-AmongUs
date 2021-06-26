@@ -290,8 +290,8 @@ int g_FogController_Imposters;
 float g_FogDistance = 300.0;
 
 bool g_IsSabotageActive;
-int g_DelaySabotage;
-int g_ReactorsTime;
+int g_DelaySabotage = -1;
+int g_ReactorsTime ;
 Handle g_Reactors;
 int g_ReactorStamp = -1;
 int g_ReactorExclude = -1;
@@ -299,7 +299,7 @@ bool g_LightsOff;
 bool g_DisableCommunications;
 int g_O2Time;
 Handle g_O2;
-int g_DelayDoors;
+int g_DelayDoors = -1;
 Handle g_LockDoors;
 
 Cookie g_GameSettingsCookie;
@@ -1570,6 +1570,19 @@ void OnMatchCompleted()
 
 	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
 	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
+
+	g_IsSabotageActive = false;
+	g_DelaySabotage = -1;
+	g_ReactorsTime = 0;
+	StopTimer(g_Reactors);
+	g_ReactorStamp = -1;
+	g_ReactorExclude = -1;
+	g_LightsOff = false;
+	g_DisableCommunications = false;
+	g_O2Time = 0;
+	StopTimer(g_O2);
+	g_DelayDoors = -1;
+	StopTimer(g_LockDoors);
 }
 
 void SaveMarks(const char[] map)
