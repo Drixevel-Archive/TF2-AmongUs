@@ -641,3 +641,16 @@ stock int TF2_GiveItem(int client, char[] classname, int index, TF2Quality quali
 	
 	return weapon;
 }
+
+stock int GetActiveWeaponIndex(int client)
+{
+	if (client == 0 || client > MaxClients || !IsClientInGame(client) || !IsPlayerAlive(client) || !HasEntProp(client, Prop_Send, "m_hActiveWeapon"))
+		return -1;
+	
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	
+	if (!IsValidEntity(weapon))
+		return -1;
+	
+	return GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+}
