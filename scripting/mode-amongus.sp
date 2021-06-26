@@ -8,21 +8,43 @@ https://i.pinimg.com/originals/3e/4e/52/3e4e52a4f1ac53a517af367542abe407.jpg
 https://i.redd.it/tv8ef4iqszh41.png
 
 Task Entities:
-target: task
-task: <task name>
-type: common/visual/short/long
-part: <part name>
+ - Name: task
+ - Key 'task' (Task name to use.)
+ - Key 'type' (common/visual/short/long)
+
+Task Maps:
+ - Name: task_map
+ - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key 'start' (Starting task part for this task map.)
+ - Key 'parts' (Amount of parts to complete this task map.)
+ - Key 'part %i' (Parts in order that go down a list with task part names and formatting rules.)
+ - Key 'type' (The type of task map this is.)
+ - Format * (Lock out the next task part on the list after it's done.)
+ - Format % (Choose a random task part from the list in the next part.)
+ - Format {1:2} (Replace in the string a random number between these two numbers.)
 
  * TODO
- - Add vent indexes for routing.
- - Add security cameras action.
  - Update tasks to take into consideration parts and orders.
- - Add sabotages for Imposters to use.
  - Update the eject feature to use map logic instead.
  - Add admin map action.
- - Add map section names to the hud.
- - Add automatic game owner commands and features.
  - Implement MOTD minigames for tasks.
+ - Implement task maps.
+
+Tasks: (Thanks to Muddy)
+
+well if you look on that map for fill fuel, there's 4 steps to it:
+1) hold a button on the gas can in storage to fill your gas tank
+2) go to an engine and hold a button again to put it into the engine
+3) go back to storage and refill
+4) fill the other engine
+your progress is saved between steps if you die and have to continue them as a ghost or if a meeting is called etc, and in the hud it shows steps (1/4 etc)
+
+divert power is a switch in electrical you turn up and then go flip a breaker in the room that you routed the power to (the room is randomly selected as well, so there are technically as many divert power tasks for each room that has a breaker)
+you won't ever get more than one divert power task but internally they're just separate tasks for each possible divert
+
+empty garbage/empty chute you actually can get both of, you pull a lever to let some trash fall down a compactor/garbage disposal thing and then do it again in a 2nd location, the difference between garbage and chute is that one's first part is in cafeteria but the other's is in O2, and the 2nd part is in storage
+
+upload/download is more similar to divert power, you get a random location to download files from and then go into admin and upload them, and you'll never get more than one download/upload
 
  */
 
@@ -255,14 +277,12 @@ enum struct Task
 {
 	char name[32];
 	int type;
-	int part;
 	int entity;
 
-	void Add(const char[] name, int type, int part, int entity)
+	void Add(const char[] name, int type, int entity)
 	{
 		strcopy(this.name, sizeof(Task::name), name);
 		this.type = type;
-		this.part = part;
 		this.entity = entity;
 	}
 }
@@ -911,8 +931,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				g_Player[client].neartask = i;
 
 				char sPart[32];
-				if (g_Task[i].part > 0)
-					FormatEx(sPart, sizeof(sPart), " (Part %i)", g_Task[i].part);
+				FormatEx(sPart, sizeof(sPart), " (Part %i)", 0);
 				
 				PrintCenterText(client, "%s%s", g_Task[i].name, sPart);
 			}
@@ -1132,7 +1151,7 @@ void SendHud(int client)
 		for (int i = 0; i < g_Player[client].tasks.Length; i++)
 		{
 			int task = g_Player[client].tasks.Get(i);
-			Format(sHud, sizeof(sHud), "%s\n%s(%i) %s", sHud, g_Task[task].name, g_Task[task].part, IsTaskCompleted(client, task) ? "(c)" : "");
+			Format(sHud, sizeof(sHud), "%s\n%s(%i) %s", sHud, g_Task[task].name, 0, IsTaskCompleted(client, task) ? "(c)" : "");
 		}
 	}
 
@@ -1341,10 +1360,7 @@ void ParseTasks()
 		if (StrContains(sType, "custom", false) != -1)
 			type |= TASK_TYPE_CUSTOM;
 		
-		char sPart[32];
-		GetCustomKeyValue(entity, "part", sPart, sizeof(sPart));
-		
-		g_Task[g_TotalTasks].Add(sTask, type, StringToInt(sPart), entity);
+		g_Task[g_TotalTasks].Add(sTask, type, entity);
 		g_TotalTasks++;
 	}
 
