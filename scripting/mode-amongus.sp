@@ -758,17 +758,17 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					}
 					else if (g_Player[client].nearsabotage == -1)
 					{
-						if (StrContains(sName, "sabotage_reactor_meltdown", false) == 0 && g_Reactors == null)
-							continue;
-						
-						if (StrContains(sName, "sabotage_communications_disabled", false) == 0 && !g_DisableCommunications)
-							continue;
-						
-						if (StrContains(sName, "sabotage_oxygen_depletion", false) == 0 && g_O2 == null)
-							continue;
-						
 						char sDisplay[64];
 						GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+						if (StrContains(sDisplay, "Reactor Meltdown", false) == 0 && g_Reactors == null)
+							continue;
+						
+						if (StrContains(sDisplay, "Communications Disabled", false) == 0 && !g_DisableCommunications)
+							continue;
+						
+						if (StrContains(sDisplay, "Oxygen Depletion", false) == 0 && g_O2 == null)
+							continue;
 
 						if (StrContains(sDisplay, "Fix Lights", false) == 0 && !g_LightsOff)
 							continue;
@@ -1128,32 +1128,29 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	{
 		int entity = g_Player[client].nearsabotage;
 
-		char sName[64];
-		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+		char sDisplay[64];
+		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 
-		if (StrContains(sName, "sabotage_reactor_meltdown", false) == 0 && g_Reactors != null)
+		if (StrContains(sDisplay, "Reactor Meltdown", false) == 0 && g_Reactors != null)
 		{
 			g_ReactorsTime = 0;
 			StopTimer(g_Reactors);
 			CPrintToChatAll("{H1}%N {default}has stopped the Reactor meltdown.", client);
 		}
 		
-		if (StrContains(sName, "sabotage_communications_disabled", false) == 0 && g_DisableCommunications)
+		if (StrContains(sDisplay, "Communications Disabled", false) == 0 && g_DisableCommunications)
 		{
 			g_DisableCommunications = false;
 			SendHudToAll();
 			CPrintToChatAll("{H1}%N {default}has fixed communications.", client);
 		}
 		
-		if (StrContains(sName, "sabotage_oxygen_depletion", false) == 0 && g_O2 != null)
+		if (StrContains(sDisplay, "Oxygen Depletion", false) == 0 && g_O2 != null)
 		{
 			g_O2Time = 0;
 			StopTimer(g_O2);
 			CPrintToChatAll("{H1}%N {default}has fixed O2.", client);
 		}
-		
-		char sDisplay[64];
-		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 
 		if (StrContains(sDisplay, "Fix Lights", false) == 0 && g_LightsOff)
 		{
