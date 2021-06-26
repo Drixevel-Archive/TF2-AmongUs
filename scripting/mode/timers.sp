@@ -1,15 +1,23 @@
 /*****************************/
 //Timers
 
-public Action Timer_OpenDoors(Handle timer)
+public Action Timer_OpenDoor(Handle timer, DataPack pack)
 {
+	pack.Reset();
+
+	int locked = pack.ReadCell();
+	int locked2 = pack.ReadCell();
+
 	int entity = -1;
-	while ((entity = FindEntityByClassname(entity, "func_door")) != -1)
+
+	if ((entity = EntRefToEntIndex(locked)) != -1)
+		AcceptEntityInput(entity, "Unlock");
+	
+	entity = -1;
+	if ((entity = EntRefToEntIndex(locked2)) != -1)
 		AcceptEntityInput(entity, "Unlock");
 
-	CPrintToChatAll("Doors are now unlocked!");
 	g_LockDoors = null;
-
 	g_IsSabotageActive = false;
 }
 

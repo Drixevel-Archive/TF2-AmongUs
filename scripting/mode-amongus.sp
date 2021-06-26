@@ -987,20 +987,45 @@ void OnButtonPress(int client, int button)
 				return;
 			}
 			
-			g_DelayDoors = GetTime() + convar_Sabotages_Cooldown_Doors.IntValue;
+			//g_DelayDoors = GetTime() + convar_Sabotages_Cooldown_Doors.IntValue;
 
-			EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
-			CPrintToChatAll("Doors are now locked for 10 seconds!");
+			//EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
+			//CPrintToChat(client, "Door is now locked for 10 seconds!");
 
-			int entity = -1;
+			float origin[3];
+			GetClientAbsOrigin(client, origin);
+
+			int entity = -1; float origin2[3]; int locked = INVALID_ENT_REFERENCE; int locked2 = INVALID_ENT_REFERENCE;
 			while ((entity = FindEntityByClassname(entity, "func_door")) != -1)
 			{
-				AcceptEntityInput(entity, "Close");
-				AcceptEntityInput(entity, "Lock");
+				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
+
+				if (GetVectorDistance(origin, origin2) <= 200.0)
+				{
+					AcceptEntityInput(entity, "Close");
+					AcceptEntityInput(entity, "Lock");
+
+					if (locked == INVALID_ENT_REFERENCE)
+						locked = EntIndexToEntRef(entity);
+					else if (locked2 == INVALID_ENT_REFERENCE)
+						locked2 = EntIndexToEntRef(entity);
+					
+					if (locked != INVALID_ENT_REFERENCE && locked2 != INVALID_ENT_REFERENCE)
+						break;
+				}
 			}
 			
-			StopTimer(g_LockDoors);
-			g_LockDoors = CreateTimer(10.0, Timer_OpenDoors, _, TIMER_FLAG_NO_MAPCHANGE);
+			if (locked != INVALID_ENT_REFERENCE && locked2 != INVALID_ENT_REFERENCE)
+			{
+				g_DelayDoors = GetTime() + convar_Sabotages_Cooldown_Doors.IntValue;
+				CPrintToChat(client, "Door is now locked for 10 seconds!");
+				StopTimer(g_LockDoors);
+
+				DataPack pack;
+				g_LockDoors = CreateDataTimer(10.0, Timer_OpenDoor, pack, TIMER_FLAG_NO_MAPCHANGE);
+				pack.WriteCell(locked);
+				pack.WriteCell(locked2);
+			}
 		}
 	}
 }
