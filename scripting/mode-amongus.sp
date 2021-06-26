@@ -90,6 +90,7 @@ part: <part name>
 
 ConVar convar_Required_Players;
 ConVar convar_TopDownView;
+ConVar convar_Chat_Gag;
 
 ConVar convar_Time_Setup;
 ConVar convar_Time_Round;
@@ -370,6 +371,7 @@ public void OnPluginStart()
 	convar_Required_Players = CreateConVar("sm_mode_amongus_required_players", "3", "How many players should be required for the gamemode to start?", FCVAR_NOTIFY, true, 0.0);
 	convar_TopDownView = CreateConVar("sm_mode_amongus_topdownview", "0", "Should players by default be in a top down view?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	convar_TopDownView.AddChangeHook(OnConVarChange);
+	convar_Chat_Gag = CreateConVar("sm_mode_amongus_chat_gag", "0", "Should players be gagged during the match outside of meetings?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Setup.AddChangeHook(OnConVarChange);
@@ -1345,6 +1347,9 @@ void ParseTasks()
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
+	if (!convar_Chat_Gag.BoolValue)
+		return Plugin_Continue;
+	
 	if (CheckCommandAccess(client, "", ADMFLAG_GENERIC, true))
 		return Plugin_Continue;
 	
