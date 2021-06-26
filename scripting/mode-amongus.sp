@@ -98,6 +98,9 @@ ConVar convar_Hud;
 ConVar convar_Hud_Position;
 ConVar convar_Hud_Color;
 
+ConVar convar_Sabotages_Cooldown;
+ConVar convar_Sabotages_Cooldown_Doors;
+
 ConVar convar_VotePercentage_Ejections;
 
 ConVar convar_Setting_ToggleTaskGlows;
@@ -293,6 +296,7 @@ bool g_LightsOff;
 bool g_DisableCommunications;
 int g_O2Time;
 Handle g_O2;
+int g_DelayDoors;
 Handle g_LockDoors;
 
 Cookie g_GameSettingsCookie;
@@ -379,6 +383,9 @@ public void OnPluginStart()
 	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
 	convar_Hud_Color.AddChangeHook(OnConVarChange);
 
+	convar_Sabotages_Cooldown = CreateConVar("sm_mode_amongus_sabotages_cooldown", "30", "How long in seconds should Sabotages be on cooldown?", FCVAR_NOTIFY, true, 0.0);
+	convar_Sabotages_Cooldown_Doors = CreateConVar("sm_mode_amongus_sabotages_cooldown_doors", "16", "How long in seconds should the Doors Sabotage be on cooldown?", FCVAR_NOTIFY, true, 0.0);
+	
 	convar_VotePercentage_Ejections = CreateConVar("sm_mode_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	
 	convar_Setting_ToggleTaskGlows = CreateConVar("sm_mode_amongus_toggle_task_colors", "1", "Should the glows for tasks be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
@@ -973,10 +980,14 @@ void OnButtonPress(int client, int button)
 	{
 		if (IsPlayerAlive(client) && g_Player[client].role == Role_Imposter && GetActiveWeaponIndex(client) == 25)
 		{
-			if (g_DelaySabotage != -1 && g_DelaySabotage > GetTime())
+			if (g_DelayDoors != -1 && g_DelayDoors > GetTime())
+			{
+				TF2_PlayDenySound(client);
+				CPrintToChat(client, "Please wait {H2}%i {default}seconds before locking all doors again.", (g_DelayDoors - GetTime()));
 				return;
+			}
 			
-			g_DelaySabotage = GetTime() + 20;
+			g_DelayDoors = GetTime() + convar_Sabotages_Cooldown_Doors.IntValue;
 
 			EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
 			CPrintToChatAll("Doors are now locked for 10 seconds!");
@@ -1590,10 +1601,14 @@ void StartSabotage(int client, int sabotage)
 	}
 	
 	if (g_DelaySabotage != -1 && g_DelaySabotage > GetTime())
+	{
+		TF2_PlayDenySound(client);
+		CPrintToChat(client, "Please wait {H2}%i {default}seconds before using another sabotage.", (g_DelaySabotage - GetTime()));
 		return;
+	}
 	
-	g_DelaySabotage = GetTime() + 20;
 	g_IsSabotageActive = true;
+	g_DelaySabotage = GetTime() + convar_Sabotages_Cooldown.IntValue;
 
 	EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
 
