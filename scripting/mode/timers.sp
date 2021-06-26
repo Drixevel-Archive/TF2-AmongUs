@@ -149,6 +149,8 @@ public Action Timer_ReactorTick(Handle timer, any data)
 
 	ForceWin(true);
 
+	g_ReactorStamp = -1;
+	g_ReactorExclude = -1;
 	g_ReactorsTime = 0;
 	g_Reactors = null;
 

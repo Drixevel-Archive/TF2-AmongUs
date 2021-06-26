@@ -286,6 +286,8 @@ float g_FogDistance = 300.0;
 int g_DelaySabotage;
 int g_ReactorsTime;
 Handle g_Reactors;
+int g_ReactorStamp = -1;
+int g_ReactorExclude = -1;
 bool g_LightsOff;
 bool g_DisableCommunications;
 int g_O2Time;
@@ -1184,28 +1186,50 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		char sDisplay[64];
 		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 
+		//char sPart[16];
+		//GetCustomKeyValue(entity, "part", sPart, sizeof(sPart));
+		//int part = StringToInt(sPart);
+
 		if (StrContains(sDisplay, "Reactor Meltdown", false) == 0 && g_Reactors != null)
 		{
+			int time = GetTime();
+
+			//Neither reactor has been accessed.
+			if (g_ReactorStamp == -1)
+			{
+				g_ReactorStamp = time + 2;	//Save a timestamp and increment 2 seconds to check for the other.
+				g_ReactorExclude = client;	//Save the current client so they can't just spam interacting with 1 terminal to fix it.
+				return Plugin_Stop;
+			}
+			else if (g_ReactorExclude == client) //Stop the client from interacting again unless the timestamp is reset.
+				return Plugin_Stop;
+			else if (g_ReactorStamp < time) //A new client has accessed the other terminal but it's too late so reset.
+			{
+				g_ReactorStamp = -1;
+				g_ReactorExclude = -1;
+				TF2_PlayDenySound(client);
+				return Plugin_Stop;
+			}
+
+			g_ReactorStamp = -1;
+			g_ReactorExclude = -1;
 			g_ReactorsTime = 0;
 			StopTimer(g_Reactors);
 			CPrintToChatAll("{H1}%N {default}has stopped the Reactor meltdown.", client);
 		}
-		
-		if (StrContains(sDisplay, "Communications Disabled", false) == 0 && g_DisableCommunications)
+		else if (StrContains(sDisplay, "Communications Disabled", false) == 0 && g_DisableCommunications)
 		{
 			g_DisableCommunications = false;
 			SendHudToAll();
 			CPrintToChatAll("{H1}%N {default}has fixed communications.", client);
 		}
-		
-		if (StrContains(sDisplay, "Oxygen Depletion", false) == 0 && g_O2 != null)
+		else if (StrContains(sDisplay, "Oxygen Depletion", false) == 0 && g_O2 != null)
 		{
 			g_O2Time = 0;
 			StopTimer(g_O2);
 			CPrintToChatAll("{H1}%N {default}has fixed O2.", client);
 		}
-
-		if (StrContains(sDisplay, "Fix Lights", false) == 0 && g_LightsOff)
+		else if (StrContains(sDisplay, "Fix Lights", false) == 0 && g_LightsOff)
 		{
 			g_LightsOff = false;
 			CPrintToChatAll("{H1}%N {default}has fixed the lights.", client);

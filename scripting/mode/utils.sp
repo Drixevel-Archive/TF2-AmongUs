@@ -265,15 +265,9 @@ void ForceWin(bool imposters = false)
 	}
 	
 	if (imposters)
-	{
-		//Imposters won
-		TF2_ForceWin(TFTeam_Red);
-	}
+		TF2_ForceWin(TFTeam_Red); //Imposters won
 	else
-	{
-		//Crewmates won
-		TF2_ForceWin(TFTeam_Blue);
-	}
+		TF2_ForceWin(TFTeam_Blue); //Crewmates won
 }
 
 void CreateCamera(int client)
