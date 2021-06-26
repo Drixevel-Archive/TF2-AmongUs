@@ -93,6 +93,14 @@ public Action Command_SetRole(int client, int args)
 	
 	AcceptEntityInput(target, "SetFogController");
 
+	if (g_Player[target].role == Role_Imposter)
+		TF2_GiveItem(target, "tf_weapon_pda_engineer_build", 25, TF2Quality_Vintage, 1);
+	else
+	{
+		TF2_EquipWeaponSlot(target, TFWeaponSlot_Melee);
+		TF2_RemoveWeaponSlot(target, TFWeaponSlot_Grenade);
+	}
+
 	if (client == target)
 		CPrintToChat(client, "You have updated your role to: {H1}%s", sRole);
 	else
