@@ -411,6 +411,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_respawn", Command_Respawn, ADMFLAG_SLAY, "Respawn all players who are actively dead on teams.");
 	RegAdminCmd("sm_eject", Command_Eject, ADMFLAG_SLAY, "Eject players from the map and out of the match.");
 	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
+	RegAdminCmd("sm_imposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
 	RegAdminCmd("sm_listimposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
 	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
 	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
