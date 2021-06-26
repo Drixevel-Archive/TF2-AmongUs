@@ -417,6 +417,8 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 			SendHudToAll();
 		}
 	}
+
+	convar_Engine_RespawnWaveTime.IntValue = 1;
 }
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
@@ -431,4 +433,6 @@ public void Timer_OnSetupFinished(const char[] output, int caller, int activator
 
 	//Unlock the meeting button so it can be used during the round.
 	TriggerRelay(RELAY_MEETING_BUTTON_UNLOCK);
+
+	convar_Engine_RespawnWaveTime.IntValue = 999999;
 }

@@ -106,6 +106,8 @@ ConVar convar_VotePercentage_Ejections;
 
 ConVar convar_Setting_ToggleTaskGlows;
 
+ConVar convar_Engine_RespawnWaveTime;
+
 /*****************************/
 //Globals
 
@@ -391,6 +393,8 @@ public void OnPluginStart()
 	convar_VotePercentage_Ejections = CreateConVar("sm_mode_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	
 	convar_Setting_ToggleTaskGlows = CreateConVar("sm_mode_amongus_toggle_task_colors", "1", "Should the glows for tasks be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+
+	convar_Engine_RespawnWaveTime = FindConVar("mp_respawnwavetime");
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
 	HookEvent("player_death", Event_OnPlayerDeathPre, EventHookMode_Pre);
@@ -1027,6 +1031,8 @@ void OnButtonPress(int client, int button)
 				g_LockDoors = CreateDataTimer(10.0, Timer_OpenDoor, pack, TIMER_FLAG_NO_MAPCHANGE);
 				pack.WriteCell(locked);
 				pack.WriteCell(locked2);
+
+				TF2_EquipWeaponSlot(client, TFWeaponSlot_Melee);
 			}
 		}
 	}
@@ -1683,6 +1689,8 @@ void StartSabotage(int client, int sabotage)
 			g_O2 = CreateTimer(1.0, Timer_O2Tick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
+
+	TF2_EquipWeaponSlot(client, TFWeaponSlot_Melee);
 }
 
 public void TF2_OnWaitingForPlayersEnd()
