@@ -1604,3 +1604,10 @@ void StartSabotage(int client, int sabotage)
 		}
 	}
 }
+
+public void TF2_OnWaitingForPlayersEnd()
+{
+	//Auto start the setup timer on waiting for players end.
+	if (GetTotalPlayers() > 0)
+		TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
+}
