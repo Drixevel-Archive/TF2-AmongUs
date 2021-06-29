@@ -484,33 +484,6 @@ public void OnPluginStart()
 			OnEntityCreated(entity, classname);
 	
 	CPrintToChatAll("{H1}Mode{default}: Loaded");
-
-	//Setup the fog controller to control vision.
-	g_FogController_Crewmates = CreateEntityByName("env_fog_controller");
-	
-	DispatchKeyValue(g_FogController_Crewmates, "targetname", "fog_crewmates");
-	DispatchKeyValue(g_FogController_Crewmates, "fogblend", "0");
-	DispatchKeyValue(g_FogController_Crewmates, "fogcolor", "0 0 0");
-	DispatchKeyValue(g_FogController_Crewmates, "fogcolor2", "0 0 0");
-	DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * GetGameSetting_Float("crewmate_vision"));
-	DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("crewmate_vision"));
-	DispatchKeyValueFloat(g_FogController_Crewmates, "fogmaxdensity", 1.0);
-	DispatchSpawn(g_FogController_Crewmates);
-
-	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
-
-	g_FogController_Imposters = CreateEntityByName("env_fog_controller");
-	
-	DispatchKeyValue(g_FogController_Imposters, "targetname", "fog_imposters");
-	DispatchKeyValue(g_FogController_Imposters, "fogblend", "0");
-	DispatchKeyValue(g_FogController_Imposters, "fogcolor", "0 0 0");
-	DispatchKeyValue(g_FogController_Imposters, "fogcolor2", "0 0 0");
-	DispatchKeyValueFloat(g_FogController_Imposters, "fogstart", g_FogDistance * GetGameSetting_Float("imposter_vision"));
-	DispatchKeyValueFloat(g_FogController_Imposters, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("imposter_vision"));
-	DispatchKeyValueFloat(g_FogController_Imposters, "fogmaxdensity", 1.0);
-	DispatchSpawn(g_FogController_Imposters);
-
-	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
 	
 	if (g_Late)
 	{
@@ -568,6 +541,36 @@ public void OnMapStart()
 
 	PrecacheSound("doors/vent_open2.wav");	//Played whenever a player is finished venting.
 	PrecacheSound("doors/vent_open3.wav");	//Played whenever a player starts venting or moves to a different vent.
+
+	/////
+	//Fog Controllers
+
+	//Setup the fog controller to control vision.
+	g_FogController_Crewmates = CreateEntityByName("env_fog_controller");
+	
+	DispatchKeyValue(g_FogController_Crewmates, "targetname", "fog_crewmates");
+	DispatchKeyValue(g_FogController_Crewmates, "fogblend", "0");
+	DispatchKeyValue(g_FogController_Crewmates, "fogcolor", "0 0 0");
+	DispatchKeyValue(g_FogController_Crewmates, "fogcolor2", "0 0 0");
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * GetGameSetting_Float("crewmate_vision"));
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("crewmate_vision"));
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogmaxdensity", 1.0);
+	DispatchSpawn(g_FogController_Crewmates);
+
+	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
+
+	g_FogController_Imposters = CreateEntityByName("env_fog_controller");
+	
+	DispatchKeyValue(g_FogController_Imposters, "targetname", "fog_imposters");
+	DispatchKeyValue(g_FogController_Imposters, "fogblend", "0");
+	DispatchKeyValue(g_FogController_Imposters, "fogcolor", "0 0 0");
+	DispatchKeyValue(g_FogController_Imposters, "fogcolor2", "0 0 0");
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogstart", g_FogDistance * GetGameSetting_Float("imposter_vision"));
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("imposter_vision"));
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogmaxdensity", 1.0);
+	DispatchSpawn(g_FogController_Imposters);
+
+	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
 }
 
 public void OnMapEnd()
