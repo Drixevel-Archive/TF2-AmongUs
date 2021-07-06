@@ -773,27 +773,6 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	
 	g_LastButtons[client] = buttons;
 
-	if (IsPlayerAlive(client) && g_Player[client].ejected)
-	{
-		float origin[3];
-		GetClientAbsOrigin(client, origin);
-		origin[0] -= 3.0;
-		origin[2] += 0.1;
-
-		float vecAngles[3];
-		GetClientAbsAngles(client, vecAngles);
-		RotateYaw(vecAngles, 10.0);
-
-		TeleportEntity(client, origin, vecAngles, NULL_VECTOR);
-	}
-
-	if (IsPlayerAlive(client) && g_Player[client].scanning)
-	{
-		float origin[3];
-		GetClientAbsOrigin(client, origin);
-		TF2_Particle("ping_circle", origin);
-	}
-
 	float targetorigin[3];
 	switch (g_Player[client].role)
 	{

@@ -54,6 +54,30 @@ public Action OnPreThink(int client)
 		else
 			TF2_SendKey(client, "Unknown Location");
 	}
+	
+	//Handle the ejection moving logic.
+	//TODO: Make this use the actual map logic.
+	if (g_Player[client].ejected)
+	{
+		float origin[3];
+		GetClientAbsOrigin(client, origin);
+		origin[0] -= 3.0;
+		origin[2] += 0.1;
+
+		float vecAngles[3];
+		GetClientAbsAngles(client, vecAngles);
+		RotateYaw(vecAngles, 10.0);
+
+		TeleportEntity(client, origin, vecAngles, NULL_VECTOR);
+	}
+
+	//While scanning, we want to display a circle around them.
+	if (g_Player[client].scanning)
+	{
+		float origin[3];
+		GetClientAbsOrigin(client, origin);
+		TF2_Particle("ping_circle", origin);
+	}
 
 	return Plugin_Continue;
 }
