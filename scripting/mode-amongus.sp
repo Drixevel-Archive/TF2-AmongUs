@@ -970,7 +970,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					//TODO: Add the `display` key to action entities.
 					if (StrContains(sName, "action_map", false) == 0)
 						FormatEx(sDisplay, sizeof(sDisplay), "Map");
-					else if (StrContains(sName, "action_map", false) == 0)
+					else if (StrContains(sName, "action_cameras", false) == 0)
 						FormatEx(sDisplay, sizeof(sDisplay), "Cameras");
 					
 					PrintCenterText(client, "Near Action: %s (Press MEDIC! to interact)", sDisplay);
