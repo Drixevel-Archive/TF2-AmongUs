@@ -16,9 +16,10 @@ public void OnTakeDamagePost(int victim, int attacker, int inflictor, float dama
 
 public Action OnPreThink(int client)
 {
-	if (!IsClientInGame(client))
+	if (!IsClientInGame(client) || !IsPlayerAlive(client))
 		return Plugin_Continue;
 	
+	//Moves the camera for the player as they move if top down view is on.
 	if (g_Camera[client] != 0)
 	{
 		float pos[3];
@@ -31,7 +32,8 @@ public Action OnPreThink(int client)
 		TeleportEntity(g_Camera[client], ceiling, NULL_VECTOR, NULL_VECTOR);
 	}
 	
-	if (IsPlayerAlive(client) && NavMesh_Exists())
+	//Displays the location of the player in a hud element.
+	if (NavMesh_Exists())
 	{
 		float origin[3];
 		GetClientAbsOrigin(client, origin);
