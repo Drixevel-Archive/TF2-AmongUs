@@ -452,6 +452,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
 	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
 	RegAdminCmd("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");
+	RegAdminCmd("sm_assigntask", Command_AssignTask, ADMFLAG_SLAY, "Assign certain tasks to players.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();

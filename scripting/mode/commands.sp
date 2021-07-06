@@ -345,3 +345,9 @@ public Action Command_Cameras(int client, int args)
 	OpenCamerasMenu(client);
 	return Plugin_Handled;
 }
+
+public Action Command_AssignTask(int client, int args)
+{
+	OpenAssignTaskMenu(client);
+	return Plugin_Handled;
+}
