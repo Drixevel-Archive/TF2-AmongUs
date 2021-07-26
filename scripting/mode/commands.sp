@@ -203,45 +203,6 @@ public Action Command_Eject(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_GiveTask(int client, int args)
-{
-	if (args < 2)
-	{
-		char sCommand[32];
-		GetCmdArg(0, sCommand, sizeof(sCommand));
-		CReplyToCommand(client, "Usage: {H2}%s {H1}<target> <task>", sCommand);
-		return Plugin_Handled;
-	}
-
-	char sTarget[MAX_TARGET_LENGTH];
-	GetCmdArg(1, sTarget, sizeof(sTarget));
-	int target = FindTarget(client, sTarget, true, false);
-
-	if (target < 1)
-	{
-		CReplyToCommand(client, "Target {H1}%s {default}not found, please try again.", sTarget);
-		return Plugin_Handled;
-	}
-
-	char sTask[32];
-	GetCmdArg(2, sTask, sizeof(sTask));
-	int task = GetTaskByName(sTask);
-
-	if (task == -1)
-	{
-		CReplyToCommand(client, "Invalid task specified, please try again.");
-		return Plugin_Handled;
-	}
-
-	AssignTask(target, task);
-	SendHud(target);
-
-	CReplyToCommand(client, "You have assigned task {H1}%s {default} to {H2}%N{default}.", sTask, target);
-	CPrintToChat(target, "{H2}%N {default}has assigned you the task: {H1}%s", client, sTask);
-
-	return Plugin_Handled;
-}
-
 public Action Command_ListImposters(int client, int args)
 {
 	char sImposters[255];
@@ -343,11 +304,5 @@ public Action Command_SaveMarks(int client, int args)
 public Action Command_Cameras(int client, int args)
 {
 	OpenCamerasMenu(client);
-	return Plugin_Handled;
-}
-
-public Action Command_AssignTask(int client, int args)
-{
-	OpenAssignTaskMenu(client);
 	return Plugin_Handled;
 }

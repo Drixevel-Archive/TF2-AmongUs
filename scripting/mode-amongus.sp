@@ -7,21 +7,26 @@ https://www.sportco.io/article/among-us-tasks-list-skeld-map-330951
 https://i.pinimg.com/originals/3e/4e/52/3e4e52a4f1ac53a517af367542abe407.jpg
 https://i.redd.it/tv8ef4iqszh41.png
 
-Task Entities:
+Tasks:
  - Name: task
- - Key 'task' (Task name to use.)
- - Key 'type' (common/visual/short/long)
+ - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key 'type' (common/visual/short/long/custom)
 
 Task Maps:
  - Name: task_map
  - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key 'type' (common/visual/short/long/custom)
  - Key 'start' (Starting task part for this task map.)
  - Key 'parts' (Amount of parts to complete this task map.)
  - Key 'part %i' (Parts in order that go down a list with task part names and formatting rules.)
- - Key 'type' (The type of task map this is.)
  - Format * (Lock out the next task part on the list after it's done.)
  - Format % (Choose a random task part from the list in the next part.)
  - Format {1:2} (Replace in the string a random number between these two numbers.)
+
+Task Parts:
+ - Name: task_part
+ - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key 'link' (Reference for task maps to use.)
 
  * TODO
  - Update tasks to take into consideration parts and orders.
@@ -65,13 +70,6 @@ upload/download is more similar to divert power, you get a random location to do
 #define NO_COLOR -1
 
 #define MAX_BUTTONS 25
-
-//Types of tasks. (They can have multiple)
-#define TASK_TYPE_LONG (1<<0)
-#define TASK_TYPE_SHORT (1<<1)
-#define TASK_TYPE_COMMON (1<<2)
-#define TASK_TYPE_VISUAL (1<<3)
-#define TASK_TYPE_CUSTOM (1<<4)
 
 #define SABOTAGE_REACTORS 0
 #define SABOTAGE_FIXLIGHTS 1
@@ -126,8 +124,6 @@ ConVar convar_Sabotages_Cooldown_Doors;
 
 ConVar convar_VotePercentage_Ejections;
 
-ConVar convar_Setting_ToggleTaskGlows;
-
 ConVar convar_Engine_RespawnWaveTime;
 
 /*****************************/
@@ -174,15 +170,8 @@ enum struct Player
 	int nearvent;
 	bool venting;
 
-	ArrayList tasks;
-	StringMap tasks_completed;
-	int neartask;
-
 	int nearaction;
 	int nearsabotage;
-
-	int taskticks;
-	Handle doingtask;
 
 	int voted_for;
 	int voted_to;
@@ -209,15 +198,8 @@ enum struct Player
 		this.nearvent = -1;
 		this.venting = false;
 
-		this.tasks = new ArrayList();
-		this.tasks_completed = new StringMap();
-		this.neartask = -1;
-
 		this.nearaction = -1;
 		this.nearsabotage = -1;
-
-		this.taskticks = 0;
-		this.doingtask = null;
 
 		this.voted_for = -1;
 		this.voted_to = 0;
@@ -245,15 +227,8 @@ enum struct Player
 		this.nearvent = -1;
 		this.venting = false;
 
-		delete this.tasks;
-		delete this.tasks_completed;
-		this.neartask = -1;
-
 		this.nearaction = -1;
 		this.nearsabotage = -1;
-
-		this.taskticks = 0;
-		StopTimer(this.doingtask);
 
 		this.voted_for = -1;
 		this.voted_to = 0;
@@ -273,28 +248,8 @@ enum struct Colors
 Colors g_Colors[256];
 int g_TotalColors;
 
-enum struct Task
-{
-	char name[32];
-	int type;
-	int entity;
-
-	void Add(const char[] name, int type, int entity)
-	{
-		strcopy(this.name, sizeof(Task::name), name);
-		this.type = type;
-		this.entity = entity;
-	}
-}
-
-Task g_Task[256];
-int g_TotalTasks;
-
 enum struct Match
 {
-	int tasks_current;
-	int tasks_goal;
-
 	int meeting_time;
 	Handle meeting;
 	int total_meetings;
@@ -412,8 +367,6 @@ public void OnPluginStart()
 	
 	convar_VotePercentage_Ejections = CreateConVar("sm_mode_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	
-	convar_Setting_ToggleTaskGlows = CreateConVar("sm_mode_amongus_toggle_task_colors", "1", "Should the glows for tasks be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-
 	convar_Engine_RespawnWaveTime = FindConVar("mp_respawnwavetime");
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
@@ -446,13 +399,11 @@ public void OnPluginStart()
 	RegAdminCmd("sm_removeowner", Command_RemoveOwner, ADMFLAG_GENERIC, "Removes the current owner if there is one.");
 	RegAdminCmd("sm_respawn", Command_Respawn, ADMFLAG_SLAY, "Respawn all players who are actively dead on teams.");
 	RegAdminCmd("sm_eject", Command_Eject, ADMFLAG_SLAY, "Eject players from the map and out of the match.");
-	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
 	RegAdminCmd("sm_imposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
 	RegAdminCmd("sm_listimposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
 	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
 	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
 	RegAdminCmd("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");
-	RegAdminCmd("sm_assigntask", Command_AssignTask, ADMFLAG_SLAY, "Assign certain tasks to players.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
@@ -526,9 +477,6 @@ public void OnPluginEnd()
 
 public void OnMapStart()
 {
-	//Parse the available tasks on the map by parsing entity names and logic.
-	ParseTasks();
-
 	//Parse the marks for this map on load.
 	char sMap[32];
 	GetCurrentMap(sMap, sizeof(sMap));
@@ -888,37 +836,8 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	{
 		float origin[3];
 		GetClientEyePosition(client, origin);
-		
+
 		float origin2[3];
-		for (int i = 0; i < g_TotalTasks; i++)
-		{
-			if (g_Task[i].entity == -1)
-				continue;
-			
-			GetEntPropVector(g_Task[i].entity, Prop_Send, "m_vecOrigin", origin2);
-
-			if (GetVectorDistance(origin, origin2) > 100.0)
-			{
-				if (g_Player[client].neartask == i)
-				{
-					g_Player[client].neartask = -1;
-
-					if (StopTimer(g_Player[client].doingtask))
-						PrintHintText(client, "Task cancelled.");
-
-					PrintCenterText(client, "");
-				}
-			}
-			else
-			{
-				g_Player[client].neartask = i;
-
-				char sPart[32];
-				FormatEx(sPart, sizeof(sPart), " (Part %i)", 0);
-				
-				PrintCenterText(client, "%s%s", g_Task[i].name, sPart);
-			}
-		}
 
 		if (!g_IsDead[client])
 		{
@@ -1126,18 +1045,6 @@ void SendHud(int client)
 
 	Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
 
-	//Tasks
-	if (HasTasks(client) && !g_DisableCommunications)
-	{
-		Format(sHud, sizeof(sHud), "%s\n--%sTasks-- (%i/%i)", sHud, g_Player[client].role == Role_Imposter ? "Fake " : "", g_Match.tasks_current, g_Match.tasks_goal);
-
-		for (int i = 0; i < g_Player[client].tasks.Length; i++)
-		{
-			int task = g_Player[client].tasks.Get(i);
-			Format(sHud, sizeof(sHud), "%s\n%s(%i) %s", sHud, g_Task[task].name, 0, IsTaskCompleted(client, task) ? "(c)" : "");
-		}
-	}
-
 	//Send the Hud.
 	ShowSyncHudText(client, g_Hud, sHud);
 }
@@ -1162,43 +1069,6 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	{
 		g_Player[client].neardeath = -1;
 		CallMeeting(client);
-	}
-	else if (g_Player[client].neartask != -1 && g_Player[client].doingtask == null && !TF2_IsInSetup())
-	{
-		int task = g_Player[client].neartask;
-
-		if (IsTaskAssigned(client, task) && !IsTaskCompleted(client, task) && g_Player[client].role != Role_Imposter)
-		{
-			int time;
-
-			if ((g_Task[task].type & TASK_TYPE_LONG) == TASK_TYPE_LONG)
-				time = 10;
-			else if ((g_Task[task].type & TASK_TYPE_SHORT) == TASK_TYPE_SHORT)
-				time = 5;
-			else if ((g_Task[task].type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
-				time = 5;
-			
-			//This is considered a task AND an action so we just do a hacky update.
-			if (StrEqual(g_Task[task].name, "Submit Scan", false))
-			{
-				SetEntityMoveType(client, MOVETYPE_NONE);
-
-				int entity = g_Task[task].entity;
-
-				float origin[3];
-				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
-				origin[2] += 5.0;
-				TeleportEntity(client, origin, NULL_VECTOR, NULL_VECTOR);
-
-				g_Player[client].scanning = true;
-			}
-
-			g_Player[client].taskticks = time;
-			StopTimer(g_Player[client].doingtask);
-			g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
-		}
-		else
-			CPrintToChat(client, "You are not assigned to do this task.");
 	}
 	else if (g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
 	{
@@ -1311,45 +1181,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 		OnEntitySpawn(entity);
 }
 
-void ParseTasks()
-{
-	g_TotalTasks = 0;
-
-	int entity = -1; char sName[32];
-	while ((entity = FindEntityByClassname(entity, "*")) != -1)
-	{
-		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
-
-		if (StrContains(sName, "task", false) != 0)
-			continue;
-		
-		char sTask[32];
-		if (!GetCustomKeyValue(entity, "task", sTask, sizeof(sTask)))
-			continue;
-		
-		char sType[32];
-		if (!GetCustomKeyValue(entity, "type", sType, sizeof(sType)))
-			continue;
-		
-		int type;
-		if (StrContains(sType, "long", false) != -1)
-			type |= TASK_TYPE_LONG;
-		if (StrContains(sType, "short", false) != -1)
-			type |= TASK_TYPE_SHORT;
-		if (StrContains(sType, "common", false) != -1)
-			type |= TASK_TYPE_COMMON;
-		if (StrContains(sType, "visual", false) != -1)
-			type |= TASK_TYPE_VISUAL;
-		if (StrContains(sType, "custom", false) != -1)
-			type |= TASK_TYPE_CUSTOM;
-		
-		g_Task[g_TotalTasks].Add(sTask, type, entity);
-		g_TotalTasks++;
-	}
-
-	LogMessage("Detected %i tasks for this map.", g_TotalTasks);
-}
-
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
 	if (!convar_Chat_Gag.BoolValue)
@@ -1410,20 +1241,10 @@ public void OnGameFrame()
 		if (!TF2_IsTimerPaused())
 			TF2_PauseTimer();
 		
-		PrintCenterTextAll("%i players required to start.", required);
+		//PrintCenterTextAll("%i players required to start.", required);
 	}
 	else if (count >= required && TF2_IsTimerPaused()) //If there's more than X players and the timer's paused then unpause it.
 		TF2_ResumeTimer();
-	
-	//Check if the current amount of tasks completed is more than or equal to the goal.
-	//If the current tasks amount has met the tasks goal then end the round and give the victory the the non-imposters.
-	if (g_Match.tasks_goal > 0 && g_Match.tasks_current >= g_Match.tasks_goal && !g_BetweenRounds)
-	{
-		g_BetweenRounds = true;
-
-		ForceWin();
-		CPrintToChatAll("Crewmates have completed all tasks, Crewmates win!");
-	}
 }
 
 void CallMeeting(int client = -1, bool button = false)
@@ -1560,7 +1381,6 @@ void OnMatchCompleted()
 		
 		g_Player[i].role = Role_Crewmate;
 		g_Player[i].ejected = false;
-		ClearTasks(i);
 		RemoveGhost(i);
 	}
 

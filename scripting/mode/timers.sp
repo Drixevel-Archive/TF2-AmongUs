@@ -21,44 +21,6 @@ public Action Timer_OpenDoor(Handle timer, DataPack pack)
 	g_IsSabotageActive = false;
 }
 
-public Action Timer_DoingTask(Handle timer, any data)
-{
-	int client = data;
-
-	g_Player[client].taskticks--;
-	int task = g_Player[client].neartask;
-
-	if (g_Player[client].taskticks > 0)
-	{
-		if (StrEqual(g_Task[task].name, "Submit Scan", false) && g_Player[client].taskticks == 2)
-		{
-			float origin[3];
-			GetClientAbsOrigin(client, origin);
-			CreateParticle(g_Player[client].role == Role_Imposter ? "teleporter_red_entrance" : "teleporter_blue_entrance", origin, 5.0);
-		}
-
-		PrintHintText(client, "Doing Task... %i", g_Player[client].taskticks);
-		return Plugin_Continue;
-	}
-
-	if (g_Player[client].role != Role_Imposter)
-	{
-		MarkTaskComplete(client, task);
-		SendHud(client);
-	}
-
-	if (StrEqual(g_Task[task].name, "Submit Scan", false))
-	{
-		g_Player[client].scanning = false;
-		SetEntityMoveType(client, MOVETYPE_WALK);
-	}
-
-	PrintHintText(client, "Task Completed.");
-	g_Player[client].doingtask = null;
-
-	return Plugin_Stop;
-}
-
 public Action Timer_StartVoting(Handle timer)
 {
 	g_Match.meeting_time--;

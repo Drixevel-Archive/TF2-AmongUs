@@ -215,60 +215,22 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		g_Player[i].deathorigin[2] = 0.0;
 	}
 
-	g_Match.tasks_current = 0;
 	g_Match.total_meetings = 0;
 
 	/////
 	//Setup glows for certain map entities.
 
-	//Give tasks a certain glow.
-	if (convar_Setting_ToggleTaskGlows.BoolValue)
+	//Give entities a certain glow.
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 	{
-		int color[4];
-		for (int i = 0; i < g_TotalTasks; i++)
-		{
-			int entity = g_Task[i].entity;
-			int type = g_Task[i].type;
+		char sName[32];
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
 
-			if ((type & TASK_TYPE_LONG) == TASK_TYPE_LONG)
-			{
-				//Red
-				color[0] = 255;
-				color[1] = 0;
-				color[2] = 0;
-				color[3] = 255;
-			}
-			else if ((type & TASK_TYPE_SHORT) == TASK_TYPE_SHORT)
-			{
-				//Green
-				color[0] = 0;
-				color[1] = 255;
-				color[2] = 0;
-				color[3] = 255;
-			}
-			else if ((type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
-			{
-				//Gray/Grey
-				color[0] = 128;
-				color[1] = 128;
-				color[2] = 128;
-				color[3] = 255;
-			}
-
-			g_GlowEnt[entity] = TF2_CreateGlow(entity, color);
-		}
-
-		int entity = -1;
-		while ((entity = FindEntityByClassname(entity, "*")) != -1)
-		{
-			char sName[32];
-			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
-
-			if (StrContains(sName, "action", false) == 0 || StrEqual(sName, "meeting_button_display", false))
-				g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({255, 165, 0, 255}));
-			else if (StrContains(sName, "sabotage", false) == 0)
-				g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({173, 216, 230, 255}));
-		}
+		if (StrContains(sName, "action", false) == 0 || StrEqual(sName, "meeting_button_display", false))
+			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({255, 165, 0, 255}));
+		else if (StrContains(sName, "sabotage", false) == 0)
+			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({173, 216, 230, 255}));
 	}
 
 	//Assign random players as Imposter and other roles automatically.
@@ -306,39 +268,16 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		current++;
 	}
 
+	//Tell other imposters who the other imposters are in chat.
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i) && g_Player[i].role == Role_Imposter)
 			CPrintToChat(i, "Imposters this match: {H1}%s", sImposters);
-
-	//Assign tasks automatically to players at the start of the round.
-
-	int long = GetGameSetting_Int("long_tasks");
-	int short = GetGameSetting_Int("short_tasks");
-	int common = GetGameSetting_Int("common_tasks");
-
-	int tasks[256] = {-1, ...};
-	for (int i = 0; i < common; i++)
-		tasks[i] = GetRandomTask(TASK_TYPE_COMMON);
-
-	g_Match.tasks_goal = 0;
-
+	
+	//Handle fog controllers being set properly for certain roles.
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i))
 			continue;
-		
-		for (int x = 0; x < long; x++)
-			AssignRandomTask(i, TASK_TYPE_LONG);
-		
-		for (int x = 0; x < short; x++)
-			AssignRandomTask(i, TASK_TYPE_SHORT);
-		
-		for (int x = 0; x < common; x++)
-			if (tasks[i] != -1)
-				AssignTask(i, tasks[i]);
-		
-		if (g_Player[i].role != Role_Imposter)
-			g_Match.tasks_goal += (long + short + common);
 		
 		if (g_Player[i].role == Role_Imposter)
 			SetVariantString("fog_imposters");
@@ -349,6 +288,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 	}
 
+	//Send the hud to all players.
 	SendHudToAll();
 
 	//Make sure all clients are muted whenever the round starts.
@@ -398,9 +338,6 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 	//Lock the meeting button so it can't be used during the lobby phase.
 	TriggerRelay(RELAY_MEETING_BUTTON_LOCK);
-
-	//Parse the available tasks on the map by parsing entity names and logic.
-	ParseTasks();
 
 	//Ensure that all clients are unmuted during the setup phase.
 	UnmuteAllClients();
