@@ -112,3 +112,17 @@ public Action OnEntitySpawn(int entity)
 	
 	return Plugin_Continue;
 }
+
+public Action OnGlowTransmit(int entity, int other)
+{
+	float entityorig[3];
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", entityorig);
+
+	float otherorig[3];
+	GetEntPropVector(other, Prop_Send, "m_vecOrigin", otherorig);
+
+	if (GetVectorDistance(entityorig, otherorig) > 300.0)
+		return Plugin_Stop;
+
+	return Plugin_Continue;
+}

@@ -266,3 +266,182 @@ void RemoveGhost(int client)
 	
 	g_IsDead[client] = false;
 }
+
+int GetTaskByName(const char[] name)
+{
+	for (int i = 0; i < g_TotalTasks; i++)
+	{
+		int entity = g_Tasks[i].entity;
+
+		char sDisplay[64];
+		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+		if (StrEqual(sDisplay, name, false))
+			return i;
+	}
+	
+	return -1;
+}
+
+void GetTaskTypeDisplayName(TaskType tasktype, char[] buffer, int size)
+{
+	switch (tasktype)
+	{
+		case TaskType_Single:
+			strcopy(buffer, size, "Single");
+		case TaskType_Map:
+			strcopy(buffer, size, "Map");
+		case TaskType_Part:
+			strcopy(buffer, size, "Part");
+	}
+}
+
+int GetRandomTask(int type)
+{
+	int[] tasks = new int[256];
+	int amount;
+
+	for (int i = 0; i < g_TotalTasks; i++)
+	{
+		if (g_Tasks[i].tasktype == TaskType_Part)
+			continue;
+		
+		if ((g_Tasks[i].type & type) != type)
+			continue;
+
+		tasks[amount++] = i;
+	}
+	
+	return tasks[GetRandomInt(0, amount - 1)];
+}
+
+bool HasTasks(int client)
+{
+	return g_Player[client].tasks.Length > 0;
+}
+
+bool IsTaskAssigned(int client, int task)
+{
+	return g_Player[client].tasks.FindValue(task) != -1;
+}
+
+bool IsTaskCompleted(int client, int task)
+{
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	bool value;
+	g_Player[client].tasks_completed.GetValue(sTask, value);
+
+	return value;
+}
+
+void MarkTaskComplete(int client, int task)
+{
+	if (g_Player[client].role == Role_Imposter)
+		return;
+	
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	g_Player[client].tasks_completed.SetValue(sTask, 1);
+	g_Match.tasks_current++;
+
+	if (g_Match.tasks_current >= g_Match.tasks_goal)
+		CreateTimer(0.2, Frame_ResetGoal);
+}
+
+public Action Frame_ResetGoal(Handle timer, any data)
+{
+	g_Match.tasks_goal = 0;
+}
+
+void AssignRandomTask(int client, int type)
+{
+	int task = GetRandomTask(type);
+	AssignTask(client, task);
+}
+
+void AssignTask(int client, int task)
+{
+	if (g_Tasks[task].tasktype == TaskType_Part)
+		return;
+	
+	g_Player[client].tasks.Push(task);
+
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	g_Player[client].tasks_completed.SetValue(sTask, 0);
+
+	if (g_Tasks[task].tasktype == TaskType_Map)
+	{
+		int entity = g_Tasks[task].entity;
+
+		char sStart[64];
+		GetCustomKeyValue(entity, "start", sStart, sizeof(sStart));
+
+		g_Player[client].lockout = StrContains(sStart, "*", false) != -1;
+		g_Player[client].random = StrContains(sStart, "%", false) != -1;
+		g_Player[client].intgen = StrContains(sStart, "{", false) != -1;
+
+		if (g_Player[client].random)
+		{
+			char sLookup[512];
+			Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(client, task) + 2);
+
+			char sPart[512];
+			GetCustomKeyValue(entity, sLookup, sPart, sizeof(sPart));
+
+			char sParts[64][64];
+			int parts = ExplodeString(sPart, ",", sParts, 64, 64);
+
+			int random = GetRandomInt(0, parts - 1);
+
+			strcopy(g_Player[client].randomchosen, 64, sParts[random]);
+		}
+	}
+}
+
+void ClearTasks(int client)
+{
+	g_Player[client].tasks.Clear();
+	g_Player[client].tasks_completed.Clear();
+}
+
+int GetTaskStep(int client, int task)
+{
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	int steps;
+	g_Player[client].tasks_steps.GetValue(sTask, steps);
+
+	return steps;
+}
+
+void IncrementTaskSteps(int client, int task)
+{
+	int steps = GetTaskStep(client, task) + 1;
+
+	char sTask[16];
+	IntToString(task, sTask, sizeof(sTask));
+
+	g_Player[client].tasks_steps.SetValue(sTask, steps);
+
+	if (GetTaskStep(client, task) >= GetTaskMapParts(task))
+		MarkTaskComplete(client, task);
+}
+
+int GetTaskMapParts(int task)
+{
+	if (g_Tasks[task].tasktype != TaskType_Map)
+		return -1;
+	
+	int entity = g_Tasks[task].entity;
+
+	char sParts[16];
+	GetCustomKeyValue(entity, "parts", sParts, sizeof(sParts));
+
+	return StringToInt(sParts);
+}

@@ -28,12 +28,79 @@ Task Parts:
  - Key 'display' (Display name to show in the HUD and chat prints.)
  - Key 'link' (Reference for task maps to use.)
 
+Actions:
+ - Name: action
+ - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key 'type' (What type of action it is.)
+
+Sabotages:
+ - Name: sabotage
+ - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key 'type' (What sabotage type it's tied to to turn off on use.)
+ - Key 'sync' (If more than 0, sync all entity interactions required to fix sabotage.)
+
+Vents:
+ - Name: vent
+  - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key: 'index' (The index of the vent for routing usage.)
+ - Key: 'route' (A list of indexes for vents to tie them together.)
+
  * TODO
  - Update tasks to take into consideration parts and orders.
  - Update the eject feature to use map logic instead.
  - Add admin map action.
  - Implement MOTD minigames for tasks.
  - Implement task maps.
+
+Cameras:
+ - Name: camera
+ - Key 'display' (Display name to show in the HUD and chat prints.)
+ - Key 'light' (Name of the light entity to toggle on and off for cameras being active.)
+
+- Task Data for The Skeld
+:::
+task_part_eg_1 = eg_1
+task_part_eg_2 = eg_2
+
+task_part_chu_1 = chu_1
+task_part_chu_2 = chu_2
+
+task_part_data_1 = data_1
+task_part_data_2 = data_2
+task_part_data_3 = data_3
+task_part_data_4 = data_4
+
+task_part_dp_electrical = dp_electrical
+task_part_dp_1 = dp_1
+task_part_dp_2 = dp_2
+task_part_dp_3 = dp_3
+task_part_dp_4 = dp_4
+task_part_dp_5 = dp_5
+task_part_dp_6 = dp_6
+task_part_dp_7 = dp_7
+task_part_dp_8 = dp_8
+
+task_part_lower_fuel = fuel_lower
+task_part_lower_fuel = fuel_upper
+task_part_storage_gascan = storage_gascan
+
+task_part_engine_lower = engine_lower
+task_part_engine_upper = engine_upper
+:::
+
+Actions data for The Skeld
+:::
+Look at Admin Map = map
+Check Security Cameras = cameras
+:::
+
+Sabotages data for the Skeld
+:::
+Communications Disabled = communications
+Reactor Meltdown = meltdown
+Oxygen Depletion = oxygen
+Fix Lights = lights
+:::
 
 Tasks: (Thanks to Muddy)
 
@@ -71,6 +138,14 @@ upload/download is more similar to divert power, you get a random location to do
 
 #define MAX_BUTTONS 25
 
+//Types of tasks. (They can have multiple)
+#define TASK_TYPE_LONG (1<<0)
+#define TASK_TYPE_SHORT (1<<1)
+#define TASK_TYPE_COMMON (1<<2)
+#define TASK_TYPE_VISUAL (1<<3)
+#define TASK_TYPE_CUSTOM (1<<4)
+
+//Types of sabotages.
 #define SABOTAGE_REACTORS 0
 #define SABOTAGE_FIXLIGHTS 1
 #define SABOTAGE_COMMUNICATIONS 2
@@ -96,7 +171,6 @@ upload/download is more similar to divert power, you get a random location to do
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
-#include <clientprefs>
 
 #include <customkeyvalues>
 #include <tf2attributes>
@@ -178,6 +252,26 @@ enum struct Player
 
 	bool scanning;
 
+	ArrayList tasks;
+	StringMap tasks_steps;
+	StringMap tasks_completed;
+	int neartask;
+
+	bool lockout;
+	ArrayList lockouts;
+
+	bool random;
+	char randomchosen[64];
+
+	bool intgen;
+	int intgend;
+	char intgens[256];
+
+	int taskticks;
+	Handle doingtask;
+	int progresstask;
+	int progresstaskpart;
+
 	void Init()
 	{
 		this.color = NO_COLOR;
@@ -205,6 +299,26 @@ enum struct Player
 		this.voted_to = 0;
 
 		this.scanning = false;
+
+		this.tasks = new ArrayList();
+		this.tasks_steps = new StringMap();
+		this.tasks_completed = new StringMap();
+		this.neartask = -1;
+
+		this.lockout = false;
+		this.lockouts = new ArrayList();
+
+		this.random = false;
+		this.randomchosen[0] = '\0';
+
+		this.intgen = false;
+		this.intgend = -1;
+		this.intgens[0] = '\0';
+
+		this.taskticks = 0;
+		this.doingtask = null;
+		this.progresstask = -1;
+		this.progresstaskpart = -1;
 	}
 
 	void Clear()
@@ -234,6 +348,26 @@ enum struct Player
 		this.voted_to = 0;
 
 		this.scanning = false;
+
+		delete this.tasks;
+		delete this.tasks_steps;
+		delete this.tasks_completed;
+		this.neartask = -1;
+
+		this.lockout = false;
+		delete this.lockouts;
+
+		this.random = false;
+		this.randomchosen[0] = '\0';
+
+		this.intgen = false;
+		this.intgend = -1;
+		this.intgens[0] = '\0';
+
+		this.taskticks = 0;
+		StopTimer(this.doingtask);
+		this.progresstask = -1;
+		this.progresstaskpart = -1;
 	}
 }
 
@@ -254,6 +388,9 @@ enum struct Match
 	Handle meeting;
 	int total_meetings;
 	float last_meeting;
+
+	int tasks_current;
+	int tasks_goal;
 }
 
 Match g_Match;
@@ -277,13 +414,35 @@ Handle g_O2;
 int g_DelayDoors = -1;
 Handle g_LockDoors;
 
-Cookie g_GameSettingsCookie;
-
 GlobalForward g_Forward_OnGameSettingsLoaded;
 GlobalForward g_Forward_OnGameSettingsSaveClient;
 GlobalForward g_Forward_OnGameSettingsLoadClient;
 
 bool g_IsDead[MAXPLAYERS + 1];
+
+enum TaskType
+{
+	TaskType_Single,	//Tasks which are by themselves and are simple to complete.
+	TaskType_Map,		//Task maps are lists of instructions with multiple parts that act as 1 task.
+	TaskType_Part		//Task parts go hand in hand with task maps as the actual parts.
+}
+
+enum struct Task
+{
+	int entity;
+	TaskType tasktype;
+	int type;
+
+	void Add(int entity, TaskType tasktype, int type)
+	{
+		this.entity = entity;
+		this.tasktype = tasktype;
+		this.type = type;
+	}
+}
+
+Task g_Tasks[256];
+int g_TotalTasks;
 
 /*****************************/
 //Managed
@@ -376,8 +535,6 @@ public void OnPluginStart()
 	HookEvent("teamplay_round_start", Event_OnRoundStart);
 	HookEvent("teamplay_round_win", Event_OnRoundWin);
 
-	g_GameSettingsCookie = new Cookie("amongus_gamesettings", "Your cached game settings for the mode.", CookieAccess_Protected);
-
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 
 	AddCommandListener(Listener_VoiceMenu, "voicemenu");
@@ -404,6 +561,8 @@ public void OnPluginStart()
 	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
 	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
 	RegAdminCmd("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");
+	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
+	RegAdminCmd("sm_assigntask", Command_AssignTask, ADMFLAG_SLAY, "Assign certain tasks to players.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
@@ -439,6 +598,9 @@ public void OnPluginStart()
 	
 	if (g_Late)
 	{
+		//Parse all available tasks on the map.
+		ParseTasks();
+
 		CPrintToChatAll("{H1}Mode{default}: Setting up Round...");
 		TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
 
@@ -751,22 +913,26 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					}
 					else if (g_Player[client].nearsabotage == -1)
 					{
+						char sType[64];
+						GetCustomKeyValue(entity, "type", sType, sizeof(sType));
+
+						if (StrContains(sType, "meltdown", false) == 0 && g_Reactors == null)
+							continue;
+						
+						if (StrContains(sType, "communications", false) == 0 && !g_DisableCommunications)
+							continue;
+						
+						if (StrContains(sType, "oxygen", false) == 0 && g_O2 == null)
+							continue;
+
+						if (StrContains(sType, "lights", false) == 0 && !g_LightsOff)
+							continue;
+						
+						g_Player[client].nearsabotage = entity;
+
 						char sDisplay[64];
 						GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 
-						if (StrContains(sDisplay, "Reactor Meltdown", false) == 0 && g_Reactors == null)
-							continue;
-						
-						if (StrContains(sDisplay, "Communications Disabled", false) == 0 && !g_DisableCommunications)
-							continue;
-						
-						if (StrContains(sDisplay, "Oxygen Depletion", false) == 0 && g_O2 == null)
-							continue;
-
-						if (StrContains(sDisplay, "Fix Lights", false) == 0 && !g_LightsOff)
-							continue;
-
-						g_Player[client].nearsabotage = entity;
 						PrintCenterText(client, "Interact with MEDIC! to fix this sabotage! (%s)", sDisplay);
 					}
 				}
@@ -804,28 +970,33 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					}
 				}
 
-				int entity = -1; char sName[32];
-				while ((entity = FindEntityByClassname(entity, "prop_dynamic")) != -1)
+				if (g_Player[client].venting)
+					PrintCenterText(client, "Press MEDIC! to exit vent.");
+				else
 				{
-					GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
-
-					if (StrContains(sName, "vent", false) != 0)
-						continue;
-
-					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", targetorigin);
-
-					if (GetVectorDistance(origin, targetorigin) > 100.0)
+					int entity = -1; char sName[32];
+					while ((entity = FindEntityByClassname(entity, "prop_dynamic")) != -1)
 					{
-						if (g_Player[client].nearvent == entity)
+						GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+						if (StrContains(sName, "vent", false) != 0)
+							continue;
+
+						GetEntPropVector(entity, Prop_Send, "m_vecOrigin", targetorigin);
+
+						if (GetVectorDistance(origin, targetorigin) > 100.0)
 						{
-							g_Player[client].nearvent = -1;
-							PrintCenterText(client, "");
+							if (g_Player[client].nearvent == entity)
+							{
+								g_Player[client].nearvent = -1;
+								PrintCenterText(client, "");
+							}
 						}
-					}
-					else if (g_Player[client].nearvent == -1)
-					{
-						g_Player[client].nearvent = entity;
-						PrintCenterText(client, "Near Vent\n(Press MEDIC! to vent)");
+						else if (g_Player[client].nearvent == -1)
+						{
+							g_Player[client].nearvent = entity;
+							PrintCenterText(client, "Near Vent\n(Press MEDIC! to vent)");
+						}
 					}
 				}
 			}
@@ -884,16 +1055,54 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					g_Player[client].nearaction = entity;
 
 					char sDisplay[256];
-					//GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-
-					//TODO: Add the `display` key to action entities.
-					if (StrContains(sName, "action_map", false) == 0)
-						FormatEx(sDisplay, sizeof(sDisplay), "Map");
-					else if (StrContains(sName, "action_cameras", false) == 0)
-						FormatEx(sDisplay, sizeof(sDisplay), "Cameras");
+					GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 					
 					PrintCenterText(client, "Near Action: %s (Press MEDIC! to interact)", sDisplay);
 				}
+			}
+		}
+	}
+
+	/////
+	//Tasks
+	if (IsPlayerAlive(client) && g_Match.meeting == null)
+	{
+		float origin[3];
+		GetClientEyePosition(client, origin);
+		
+		float origin2[3];
+		for (int i = 0; i < g_TotalTasks; i++)
+		{
+			if (g_Tasks[i].tasktype == TaskType_Map)
+				continue;
+			
+			int entity = g_Tasks[i].entity;
+
+			if (entity == -1)
+				continue;
+			
+			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
+
+			if (GetVectorDistance(origin, origin2) > 100.0)
+			{
+				if (g_Player[client].neartask == i)
+				{
+					g_Player[client].neartask = -1;
+
+					if (StopTimer(g_Player[client].doingtask))
+						PrintHintText(client, "Task cancelled.");
+
+					PrintCenterText(client, "");
+				}
+			}
+			else
+			{
+				g_Player[client].neartask = i;
+
+				char sDisplay[256];
+				GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+				
+				PrintCenterText(client, "%s", sDisplay);
 			}
 		}
 	}
@@ -1034,16 +1243,48 @@ void SendHud(int client)
 	char[] sOwner = new char[MAX_NAME_LENGTH + 32];
 
 	if (g_GameOwner != -1)
-		FormatEx(sOwner, MAX_NAME_LENGTH + 32, " (Owner: %N)", g_GameOwner);
+		FormatEx(sOwner, MAX_NAME_LENGTH + 32, " (GM: %N)", g_GameOwner);
 
 	//Mode Name
 	Format(sHud, sizeof(sHud), "%s[Mode] Among Us%s", sHud, sOwner);
 
 	//Role
-	char sRole[32];
-	GetRoleName(g_Player[client].role, sRole, sizeof(sRole));
+	if (!TF2_IsInSetup())
+	{
+		char sRole[32];
+		GetRoleName(g_Player[client].role, sRole, sizeof(sRole));
 
-	Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
+		Format(sHud, sizeof(sHud), "%s\nRole: %s", sHud, sRole);
+	}
+
+	//Tasks
+	if (HasTasks(client) && !g_DisableCommunications)
+	{
+		Format(sHud, sizeof(sHud), "%s\n--%sTasks-- (%i/%i)", sHud, g_Player[client].role == Role_Imposter ? "Fake " : "", g_Match.tasks_current, g_Match.tasks_goal);
+
+		for (int i = 0; i < g_Player[client].tasks.Length; i++)
+		{
+			int task = g_Player[client].tasks.Get(i);
+			int entity = g_Tasks[task].entity;
+			TaskType type = g_Tasks[task].tasktype;
+
+			char sDisplay[64];
+			GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+			Format(sHud, sizeof(sHud), "%s\n%s", sHud, sDisplay);
+
+			if (type == TaskType_Map)
+			{
+				int current = GetTaskStep(client, task);
+				int total = GetTaskMapParts(task);
+
+				Format(sHud, sizeof(sHud), "%s(%i/%i)", sHud, current, total);
+			}
+			
+			if (IsTaskCompleted(client, task))
+				StrCat(sHud, sizeof(sHud), "✓");
+		}
+	}
 
 	//Send the Hud.
 	ShowSyncHudText(client, g_Hud, sHud);
@@ -1062,10 +1303,10 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		return Plugin_Continue;
 	
 	//Make it so you can't interact with anything between rounds.
-	if (g_BetweenRounds)
+	if (g_BetweenRounds || TF2_IsInSetup())
 		return Plugin_Stop;
 	
-	if (g_Player[client].neardeath != -1 && !TF2_IsInSetup())
+	if (g_Player[client].neardeath != -1)
 	{
 		g_Player[client].neardeath = -1;
 		CallMeeting(client);
@@ -1084,7 +1325,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		g_Player[client].lastkill = GetGameTime() + GetGameSetting_Float("kill_cooldown");
 		PrintCenterText(client, "");
 	}
-	else if (g_Player[client].nearvent != -1)
+	else if (g_Player[client].nearvent != -1 && g_Player[client].role == Role_Imposter)
 	{
 		if (g_Player[client].venting)
 			StopVenting(client);
@@ -1093,21 +1334,51 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	}
 	else if (g_Player[client].nearaction != -1)
 	{
-		TF2_PlayDenySound(client);
-		CPrintToChat(client, "This action is currently disabled, not finished yet.");
+		int entity = g_Player[client].nearaction;
+
+		char sType[64];
+		GetCustomKeyValue(entity, "type", sType, sizeof(sType));
+
+		if (StrContains(sType, "meeting", false) == 0)
+		{
+			if (g_Reactors != null || g_LightsOff || g_DisableCommunications || g_O2 != null)
+			{
+				TF2_PlayDenySound(client);
+				CPrintToChat(client, "You cannot call a meeting while a sabotage is active.");
+				return Plugin_Stop;
+			}
+			
+			int max = GetGameSetting_Int("emergency_meetings");
+
+			if (max > 0 && g_Match.total_meetings >= max)
+			{
+				TF2_PlayDenySound(client);
+				CPrintToChat(client, "Maximum number of emergency meetings reached!");
+				return Plugin_Stop;
+			}
+			
+			CallMeeting(client, true);
+			g_Player[client].nearaction = -1;
+		}
+		else
+		{
+			TF2_PlayDenySound(client);
+			CPrintToChat(client, "This action is currently disabled, not finished yet.");
+		}
 	}
 	else if (g_Player[client].nearsabotage != -1)
 	{
 		int entity = g_Player[client].nearsabotage;
 
-		char sDisplay[64];
-		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+		char sType[64];
+		GetCustomKeyValue(entity, "type", sType, sizeof(sType));
+		PrintToChat(client, sType);
 
 		//char sPart[16];
 		//GetCustomKeyValue(entity, "part", sPart, sizeof(sPart));
 		//int part = StringToInt(sPart);
 
-		if (StrContains(sDisplay, "Reactor Meltdown", false) == 0 && g_Reactors != null)
+		if (StrContains(sType, "meltdown", false) == 0 && g_Reactors != null)
 		{
 			int time = GetTime();
 
@@ -1135,21 +1406,21 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			CPrintToChatAll("{H1}%N {default}has stopped the Reactor meltdown.", client);
 			g_IsSabotageActive = false;
 		}
-		else if (StrContains(sDisplay, "Communications Disabled", false) == 0 && g_DisableCommunications)
+		else if (StrContains(sType, "communications", false) == 0 && g_DisableCommunications)
 		{
 			g_DisableCommunications = false;
 			SendHudToAll();
 			CPrintToChatAll("{H1}%N {default}has fixed communications.", client);
 			g_IsSabotageActive = false;
 		}
-		else if (StrContains(sDisplay, "Oxygen Depletion", false) == 0 && g_O2 != null)
+		else if (StrContains(sType, "oxygen", false) == 0 && g_O2 != null)
 		{
 			g_O2Time = 0;
 			StopTimer(g_O2);
 			CPrintToChatAll("{H1}%N {default}has fixed O2.", client);
 			g_IsSabotageActive = false;
 		}
-		else if (StrContains(sDisplay, "Fix Lights", false) == 0 && g_LightsOff)
+		else if (StrContains(sType, "lights", false) == 0 && g_LightsOff)
 		{
 			g_LightsOff = false;
 			CPrintToChatAll("{H1}%N {default}has fixed the lights.", client);
@@ -1162,6 +1433,134 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * fog);
 			DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * fog);
 			g_IsSabotageActive = false;
+		}
+	}
+	else if (g_Player[client].neartask != -1 && g_Player[client].doingtask == null && !TF2_IsInSetup())
+	{
+		int task = g_Player[client].neartask;
+		int entity = g_Tasks[task].entity;
+
+		switch (g_Tasks[task].tasktype)
+		{
+			case TaskType_Single:
+			{
+				if (IsTaskAssigned(client, task) && !IsTaskCompleted(client, task))
+				{
+					int time;
+
+					if ((g_Tasks[task].type & TASK_TYPE_LONG) == TASK_TYPE_LONG)
+						time = 10;
+					else if ((g_Tasks[task].type & TASK_TYPE_SHORT) == TASK_TYPE_SHORT)
+						time = 5;
+					else if ((g_Tasks[task].type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
+						time = 5;
+
+					char sDisplay[64];
+					GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));			
+					
+					//This is considered a task AND an action so we just do a hacky update.
+					if (StrEqual(sDisplay, "Submit Scan", false))
+					{
+						SetEntityMoveType(client, MOVETYPE_NONE);
+
+						float origin[3];
+						GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+						origin[2] += 5.0;
+						TeleportEntity(client, origin, NULL_VECTOR, NULL_VECTOR);
+
+						g_Player[client].scanning = true;
+					}
+
+					g_Player[client].taskticks = time;
+					g_Player[client].progresstask = task;
+					StopTimer(g_Player[client].doingtask);
+					g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+				}
+				else
+					CPrintToChat(client, "You are not assigned to do this task.");
+			}
+
+			case TaskType_Part:
+			{
+				if (g_Player[client].lockouts.FindValue(task) != -1)
+					return Plugin_Stop;
+				
+				char sLink[64];
+				GetCustomKeyValue(entity, "link", sLink, sizeof(sLink));
+				
+				bool discovered;
+				for (int i = 0; i < g_Player[client].tasks.Length; i++)
+				{
+					int taskmap = g_Player[client].tasks.Get(i);
+
+					if (g_Tasks[taskmap].tasktype != TaskType_Map)
+						continue;
+				
+					char sLookup[512];
+					Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(client, taskmap) + 1);
+
+					int entity2 = g_Tasks[taskmap].entity;
+
+					char sPart[512];
+					GetCustomKeyValue(entity2, sLookup, sPart, sizeof(sPart));
+
+					int pos;
+					if ((pos = StrContains(sPart, "{", false)) != -1 && g_Player[client].intgend == -1)
+					{
+						char sWork[256];
+						strcopy(sWork, sizeof(sWork), sPart);
+
+						StripCharactersPre(sWork, sizeof(sWork), pos+1);
+						pos = StrContains(sWork, "}", false);
+						StripCharactersPost(sWork, pos);
+
+						char sRandom[2][16];
+						ExplodeString(sWork, ",", sRandom, 2, 16);
+
+						FormatEx(g_Player[client].intgens, 256, "{%s,%s}", sRandom[0], sRandom[1]);
+
+						int randomvalue = GetRandomInt(StringToInt(sRandom[0]), StringToInt(sRandom[1]));
+
+						g_Player[client].intgend = randomvalue;
+					}
+
+					if (g_Player[client].intgend != -1)
+					{
+						char sFUUUUUCK[64];
+						IntToString(g_Player[client].intgend, sFUUUUUCK, sizeof(sFUUUUUCK));
+
+						ReplaceString(sPart, sizeof(sPart), g_Player[client].intgens, sFUUUUUCK);
+					}
+					
+					if (StrContains(sPart, sLink, false) != -1)
+					{
+						if (strlen(g_Player[client].randomchosen) > 0  && !StrEqual(sLink, g_Player[client].randomchosen, false))
+							return Plugin_Stop;
+						
+						g_Player[client].randomchosen[0] = '\0';
+						
+						int time;
+
+						if ((g_Tasks[taskmap].type & TASK_TYPE_LONG) == TASK_TYPE_LONG)
+							time = 10;
+						else if ((g_Tasks[taskmap].type & TASK_TYPE_SHORT) == TASK_TYPE_SHORT)
+							time = 5;
+						else if ((g_Tasks[taskmap].type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
+							time = 5;
+
+						g_Player[client].taskticks = time;
+						g_Player[client].progresstask = taskmap;
+						g_Player[client].progresstaskpart = task;
+						StopTimer(g_Player[client].doingtask);
+						g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+						discovered = true;
+					}
+				}
+
+				if (!discovered)
+					CPrintToChat(client, "You are not assigned to do this task.");
+			}
 		}
 	}
 
@@ -1245,6 +1644,16 @@ public void OnGameFrame()
 	}
 	else if (count >= required && TF2_IsTimerPaused()) //If there's more than X players and the timer's paused then unpause it.
 		TF2_ResumeTimer();
+	
+	//Check if the current amount of tasks completed is more than or equal to the goal.
+	//If the current tasks amount has met the tasks goal then end the round and give the victory the the non-imposters.
+	if (g_Match.tasks_goal > 0 && g_Match.tasks_current >= g_Match.tasks_goal && !g_BetweenRounds)
+	{
+		g_BetweenRounds = true;
+
+		ForceWin();
+		CPrintToChatAll("Crewmates have completed all tasks, Crewmates win!");
+	}
 }
 
 void CallMeeting(int client = -1, bool button = false)
@@ -1319,6 +1728,7 @@ void StartVenting(int client, int vent)
 
 	TF2_HidePlayer(client);
 	SetEntityMoveType(client, MOVETYPE_NONE);
+	//SetEntProp(client, Prop_Send, "m_iHideHUD", 0);
 
 	TF2_SetThirdPerson(client);
 	EmitSoundToClient(client, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
@@ -1332,6 +1742,7 @@ void StopVenting(int client)
 
 	TF2_ShowPlayer(client);
 	SetEntityMoveType(client, MOVETYPE_WALK);
+	//SetEntProp(client, Prop_Send, "m_iHideHUD", (1<<6));
 
 	TF2_SetFirstPerson(client);
 	EmitSoundToClient(client, "doors/vent_open2.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
@@ -1374,6 +1785,9 @@ void OnMatchCompleted()
 {
 	CPrintToChatAll("{H1}Mode{default}: Match Finished");
 
+	//g_Match.tasks_current = 0;
+	//g_Match.tasks_goal = 0;
+
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i))
@@ -1382,6 +1796,7 @@ void OnMatchCompleted()
 		g_Player[i].role = Role_Crewmate;
 		g_Player[i].ejected = false;
 		RemoveGhost(i);
+		ClearTasks(i);
 	}
 
 	StopTimer(g_Match.meeting);
@@ -1530,4 +1945,44 @@ public void TF2_OnWaitingForPlayersEnd()
 	//Auto start the setup timer on waiting for players end.
 	if (GetTotalPlayers() > 0)
 		TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
+}
+
+void ParseTasks()
+{
+	int entity = -1; char sName[32];
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+		if (StrContains(sName, "task", false) != 0)
+			continue;
+		
+		TaskType tasktype;
+		if (StrContains(sName, "task_part", false) == 0)
+			tasktype = TaskType_Part;
+		else if (StrContains(sName, "task_map", false) == 0)
+			tasktype = TaskType_Map;
+		else
+			tasktype = TaskType_Single;
+		
+		char sType[32];
+		GetCustomKeyValue(entity, "type", sType, sizeof(sType));
+
+		int type;
+		if (StrContains(sType, "long", false) != -1)
+			type |= TASK_TYPE_LONG;
+		if (StrContains(sType, "short", false) != -1)
+			type |= TASK_TYPE_SHORT;
+		if (StrContains(sType, "common", false) != -1)
+			type |= TASK_TYPE_COMMON;
+		if (StrContains(sType, "visual", false) != -1)
+			type |= TASK_TYPE_VISUAL;
+		if (StrContains(sType, "custom", false) != -1)
+			type |= TASK_TYPE_CUSTOM;
+		
+		g_Tasks[g_TotalTasks].Add(entity, tasktype, type);
+		g_TotalTasks++;
+	}
+
+	LogMessage("%i task entities parsed successfully.", g_TotalTasks);
 }

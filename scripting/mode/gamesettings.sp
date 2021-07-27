@@ -1,7 +1,7 @@
 /*****************************/
 //Game Settings
 
-void ParseGameSettings()
+void ParseGameSettings(int client = -1)
 {
 	g_GameSettings.Clear();
 
@@ -30,6 +30,9 @@ void ParseGameSettings()
 
 	Call_StartForward(g_Forward_OnGameSettingsLoaded);
 	Call_Finish();
+
+	if (client > 0)
+		SaveGameSettings(client);
 }
 
 stock int GetGameSetting_Int(const char[] setting)
@@ -104,34 +107,36 @@ stock void SaveGameSettings(int client)
 
 	kv.Rewind();
 
-	char sKeyValues[512];
-	kv.ExportToString(sKeyValues, sizeof(sKeyValues));
+	if (IsClientAuthorized(client))
+	{
+		char sPath[PLATFORM_MAX_PATH];
+		BuildPath(Path_SM, sPath, sizeof(sPath), "data/amongus/playersettings/%i.cfg", GetSteamAccountID(client));
+		kv.ExportToFile(sPath);
+	}
 
 	delete kv;
 	delete snap;
-
-	g_GameSettingsCookie.Set(client, sKeyValues);
 
 	Call_StartForward(g_Forward_OnGameSettingsSaveClient);
 	Call_PushCell(client);
 	Call_Finish();
 }
 
-stock void LoadGameSettings(int client)
+stock void LoadGameSettings(int client, bool menu = false)
 {
-	char sKeyValues[512];
-	g_GameSettingsCookie.Get(client, sKeyValues, sizeof(sKeyValues));
+	char sPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, sPath, sizeof(sPath), "data/amongus/playersettings/%i.cfg", GetSteamAccountID(client));
 
 	//If the client hasn't saved any values before, lets give them the default set of values to use.
-	if (strlen(sKeyValues) == 0)
+	if (!FileExists(sPath))
 	{
-		ParseGameSettings();
-		SaveGameSettings(client);
+		ParseGameSettings(client);
 		return;
 	}
 
 	KeyValues kv = new KeyValues("settings");
-	if (kv.ImportFromString(sKeyValues) && kv.GotoFirstSubKey(false))
+
+	if (kv.ImportFromFile(sPath) && kv.GotoFirstSubKey(false))
 	{
 		g_GameSettings.Clear();
 
@@ -153,4 +158,7 @@ stock void LoadGameSettings(int client)
 	Call_StartForward(g_Forward_OnGameSettingsLoadClient);
 	Call_PushCell(client);
 	Call_Finish();
+
+	if (menu)
+		OpenSettingsMenu(client);
 }

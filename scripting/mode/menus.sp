@@ -308,7 +308,7 @@ void OpenVentsMenu(int client, int vent)
 	Menu menu = new Menu(MenuHandler_Vents);
 	menu.SetTitle("Teleport to a vent:");
 
-	int entity = -1; char sName[32]; char sID[16]; char sDisplay[256];
+	int entity = -1; char sName[32]; char sID[16]; char sItemDisplay[256];
 	while ((entity = FindEntityByClassname(entity, "prop_dynamic")) != -1)
 	{
 		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
@@ -316,19 +316,24 @@ void OpenVentsMenu(int client, int vent)
 		if (StrContains(sName, "vent", false) != 0)
 			continue;
 		
-		ReplaceString(sName, sizeof(sName), "vent_", "");
+		char sDisplay[64];
+		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+		
+		char sIndex[32];
+		GetCustomKeyValue(entity, "index", sIndex, sizeof(sIndex));
+		int index = StringToInt(sIndex);
 		
 		bool routed;
 		for (int x = 0; x < parts; x++)
-			if (StringToInt(sPart[x]) == StringToInt(sName))
+			if (StringToInt(sPart[x]) == index)
 				routed = true;
 		
 		if (!routed)
 			continue;
 		
 		IntToString(EntIndexToEntRef(entity), sID, sizeof(sID));
-		FormatEx(sDisplay, sizeof(sDisplay), "Vent #%i", entity);
-		menu.AddItem(sID, sDisplay);
+		FormatEx(sItemDisplay, sizeof(sItemDisplay), "Vent #%i (%s)", index, sDisplay);
+		menu.AddItem(sID, sItemDisplay);
 	}
 
 	PushMenuInt(menu, "vent", vent);
@@ -386,8 +391,13 @@ void OpenCamerasMenu(int client)
 		IntToString(entity, sID, sizeof(sID));
 		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
 
-		if (StrContains(sName, "camera", false) == 0)
-			menu.AddItem(sID, sName);
+		if (StrContains(sName, "camera", false) != 0)
+			continue;
+		
+		char sDisplay[64];
+		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+		menu.AddItem(sID, sDisplay);
 	}
 
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -446,4 +456,55 @@ stock void GetEntityAbsOrigin(int entity, float origin[3])
 	origin[0] += (mins[0] + maxs[0]) * 0.5;
 	origin[1] += (mins[1] + maxs[1]) * 0.5;
 	origin[2] += (mins[2] + maxs[2]) * 0.5;
+}
+
+void OpenAssignTaskMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_AssignTask);
+	menu.SetTitle("Assign a task to you:");
+
+	char sID[16]; char sItemDisplay[256];
+	for (int i = 0; i < g_TotalTasks; i++)
+	{
+		TaskType type = g_Tasks[i].tasktype;
+
+		if (type == TaskType_Part)
+			continue;
+		
+		int entity = g_Tasks[i].entity;
+
+		char sDisplay[64];
+		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+		char sType[32];
+		GetTaskTypeDisplayName(type, sType, sizeof(sType));
+
+		IntToString(i, sID, sizeof(sID));
+		FormatEx(sItemDisplay, sizeof(sItemDisplay), "%s (%s)", sDisplay, sType);
+
+		menu.AddItem(sID, sItemDisplay);
+	}
+
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int MenuHandler_AssignTask(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char sID[16];
+			menu.GetItem(param2, sID, sizeof(sID));
+			int id = StringToInt(sID);
+
+			AssignTask(param1, id);
+			SendHud(param1);
+			
+			OpenAssignTaskMenu(param1);
+		}
+
+		case MenuAction_End:
+			delete menu;
+	}
 }

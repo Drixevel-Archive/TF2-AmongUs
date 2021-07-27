@@ -654,3 +654,13 @@ stock int GetActiveWeaponIndex(int client)
 	
 	return GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 }
+
+stock void StripCharactersPre(char[] buffer, int size, int position)
+{
+	strcopy(buffer, size, buffer[position]);
+}
+
+stock void StripCharactersPost(char[] buffer, int position)
+{
+	buffer[position] = '\0';
+}

@@ -52,6 +52,9 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 		AssignColor(client);
 	
 	SetPlayerSpeed(client);
+
+	//Make sure the HUD is active during the lobby phase.
+	//SetEntProp(client, Prop_Send, "m_iHideHUD", TF2_IsInSetup() ? 0 : (1<<6));
 }
 
 public Action Event_OnPlayerDeathPre(Event event, const char[] name, bool dontBroadcast)
@@ -99,6 +102,9 @@ public void Event_OnPostInventoryApplication(Event event, const char[] name, boo
 public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	g_BetweenRounds = false;
+
+	//Parse all available tasks on the map.
+	ParseTasks();
 
 	//Makes sure the lobby is locked whenever we're waiting for players to join.
 	if (TF2_IsWaitingForPlayers())

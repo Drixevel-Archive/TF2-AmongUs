@@ -219,3 +219,93 @@ public Action Timer_RespawnPlayer(Handle timer, any data)
 		SetGhost(client);
 	}
 }
+
+public Action Timer_DoingTask(Handle timer, any data)
+{
+	int client = data;
+
+	g_Player[client].taskticks--;
+	int task = g_Player[client].progresstask;
+	int part = g_Player[client].progresstaskpart;
+	int entity = g_Tasks[task].entity;
+
+	char sDisplay[64];
+	GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+	if (g_Player[client].taskticks > 0)
+	{
+		if (StrEqual(sDisplay, "Submit Scan", false) && g_Player[client].taskticks == 2)
+		{
+			float origin[3];
+			GetClientAbsOrigin(client, origin);
+			CreateParticle(g_Player[client].role == Role_Imposter ? "teleporter_red_entrance" : "teleporter_blue_entrance", origin, 5.0);
+		}
+
+		PrintHintText(client, "Doing Task... %i", g_Player[client].taskticks);
+		return Plugin_Continue;
+	}
+
+	if (g_Tasks[task].tasktype == TaskType_Map)
+	{
+		if (g_Player[client].lockout)
+			g_Player[client].lockouts.Push(part);
+		
+		char sLookup[512];
+		Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(client, task) + 1);
+
+		char sPart[512];
+		GetCustomKeyValue(entity, sLookup, sPart, sizeof(sPart));
+
+		g_Player[client].lockout = StrContains(sPart, "*", false) != -1;
+		g_Player[client].random = StrContains(sPart, "%", false) != -1;
+		g_Player[client].intgen = StrContains(sPart, "{", false) != -1;
+
+		if (g_Player[client].random)
+		{
+			Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(client, task) + 2);
+			GetCustomKeyValue(entity, sLookup, sPart, sizeof(sPart));
+
+			char sParts[64][64];
+			int parts = ExplodeString(sPart, ",", sParts, 64, 64);
+
+			int random = GetRandomInt(0, parts - 1);
+
+			strcopy(g_Player[client].randomchosen, 64, sParts[random]);
+		}
+
+		int current = GetTaskStep(client, task);
+		int total = GetTaskMapParts(task);
+
+		if ((current + 1) <= total)
+			IncrementTaskSteps(client, task);
+	}
+	else
+		MarkTaskComplete(client, task);
+	
+	SendHudToAll();
+
+	if (StrEqual(sDisplay, "Submit Scan", false))
+	{
+		g_Player[client].scanning = false;
+		SetEntityMoveType(client, MOVETYPE_WALK);
+	}
+
+	PrintHintText(client, "Task Completed.");
+	g_Player[client].doingtask = null;
+
+	return Plugin_Stop;
+}
+
+public Action Timer_PickRandomOwner(Handle timer)
+{
+	if (g_GameOwner == -1)
+	{
+		g_GameOwner = GetRandomClient();
+
+		if (g_GameOwner != -1)
+		{
+			LoadGameSettings(g_GameOwner, true);
+			SendHudToAll();
+		}
+	}
+}

@@ -215,6 +215,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		g_Player[i].deathorigin[2] = 0.0;
 	}
 
+	g_Match.tasks_current = 0;
 	g_Match.total_meetings = 0;
 
 	/////
@@ -231,6 +232,18 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({255, 165, 0, 255}));
 		else if (StrContains(sName, "sabotage", false) == 0)
 			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({173, 216, 230, 255}));
+		
+		if (entity > 0 && IsValidEntity(g_GlowEnt[entity]))
+			SDKHook(g_GlowEnt[entity], SDKHook_SetTransmit, OnGlowTransmit);
+	}
+
+	//Apply glow effects to tasks which are NOT task maps.
+	for (int i = 0; i < g_TotalTasks; i++)
+	{
+		entity = g_Tasks[i].entity;
+
+		if (g_Tasks[i].tasktype == TaskType_Single || g_Tasks[i].tasktype == TaskType_Part)
+			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({50, 255, 50, 255}));
 	}
 
 	//Assign random players as Imposter and other roles automatically.
@@ -285,11 +298,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 			SetVariantString("fog_crewmates");
 		
 		AcceptEntityInput(i, "SetFogController");
-
 	}
-
-	//Send the hud to all players.
-	SendHudToAll();
 
 	//Make sure all clients are muted whenever the round starts.
 	MuteAllClients();
@@ -302,7 +311,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	if (fog < 0.1)
 		fog = 0.1;
 	
-	DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * fog);
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", (g_FogDistance * 1.25) * fog);
 	DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * fog);
 
 	fog = GetGameSetting_Float("imposter_vision");
@@ -310,12 +319,55 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	if (fog < 0.1)
 		fog = 0.1;
 	
-	DispatchKeyValueFloat(g_FogController_Imposters, "fogstart", g_FogDistance * fog);
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogstart", (g_FogDistance * 1.25) * fog);
 	DispatchKeyValueFloat(g_FogController_Imposters, "fogend", (g_FogDistance * 2) * fog);
 
 	//Turn on the fog controllers.
 	AcceptEntityInput(g_FogController_Crewmates, "TurnOn");
 	AcceptEntityInput(g_FogController_Imposters, "TurnOn");
+
+	/////
+	//Tasks
+
+	//Pull the amount of certain tasks to give players based on game settings.
+	int long = GetGameSetting_Int("long_tasks");
+	int short = GetGameSetting_Int("short_tasks");
+	int common = GetGameSetting_Int("common_tasks");
+
+	//All players should get the same common tasks.
+	int tasks[256] = {-1, ...};
+	for (int i = 0; i < common; i++)
+		tasks[i] = GetRandomTask(TASK_TYPE_COMMON);
+	
+	//Make sure that for new rounds, no tasks are completed so far from previous rounds.
+	g_Match.tasks_goal = 0;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || !IsPlayerAlive(i))
+			continue;
+		
+		for (int x = 0; x < long; x++)
+			AssignRandomTask(i, TASK_TYPE_LONG);
+		
+		for (int x = 0; x < short; x++)
+			AssignRandomTask(i, TASK_TYPE_SHORT);
+		
+		for (int x = 0; x < common; x++)
+			if (tasks[x] != -1)
+				AssignTask(i, tasks[x]);
+		
+		if (g_Player[i].role != Role_Imposter)
+			g_Match.tasks_goal += (long + short + common);
+	}
+
+	//Send the hud to all players.
+	SendHudToAll();
+
+	//Disable the misc hud elements that aren't needed during the match.
+	//for (int i = 1; i <= MaxClients; i++)
+	//	if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i))
+	//		SetEntProp(i, Prop_Send, "m_iHideHUD", (1<<6));
 }
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
@@ -343,17 +395,7 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 	UnmuteAllClients();
 
 	//Lets find a random owner to start off the lobby.
-	if (g_GameOwner == -1)
-	{
-		g_GameOwner = GetRandomClient();
-
-		if (g_GameOwner != -1)
-		{
-			LoadGameSettings(g_GameOwner);
-			OpenSettingsMenu(g_GameOwner);
-			SendHudToAll();
-		}
-	}
+	CreateTimer(2.0, Timer_PickRandomOwner, _, TIMER_FLAG_NO_MAPCHANGE);
 
 	convar_Engine_RespawnWaveTime.IntValue = 1;
 }
