@@ -664,3 +664,17 @@ stock void StripCharactersPost(char[] buffer, int position)
 {
 	buffer[position] = '\0';
 }
+
+stock int FindEntityByName(const char[] name, const char[] classname = "*")
+{
+	int entity = -1; char temp[256];
+	while ((entity = FindEntityByClassname(entity, classname)) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", temp, sizeof(temp));
+		
+		if (StrEqual(temp, name, false))
+			return entity;
+	}
+	
+	return entity;
+}

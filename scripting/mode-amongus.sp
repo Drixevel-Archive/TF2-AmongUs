@@ -272,6 +272,10 @@ enum struct Player
 	int progresstask;
 	int progresstaskpart;
 
+	int camera;
+
+	Handle map;
+
 	void Init()
 	{
 		this.color = NO_COLOR;
@@ -319,6 +323,10 @@ enum struct Player
 		this.doingtask = null;
 		this.progresstask = -1;
 		this.progresstaskpart = -1;
+
+		this.camera = -1;
+
+		this.map = null;
 	}
 
 	void Clear()
@@ -368,6 +376,10 @@ enum struct Player
 		StopTimer(this.doingtask);
 		this.progresstask = -1;
 		this.progresstaskpart = -1;
+
+		this.camera = -1;
+
+		StopTimer(this.map);
 	}
 }
 
@@ -509,7 +521,7 @@ public void OnPluginStart()
 	convar_TopDownView.AddChangeHook(OnConVarChange);
 	convar_Chat_Gag = CreateConVar("sm_mode_amongus_chat_gag", "0", "Should players be gagged during the match outside of meetings?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
-	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "120", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
+	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "30", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Setup.AddChangeHook(OnConVarChange);
 	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "3600", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Round.AddChangeHook(OnConVarChange);
@@ -1078,7 +1090,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			
 			int entity = g_Tasks[i].entity;
 
-			if (entity == -1)
+			if (entity == -1 || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
 				continue;
 			
 			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
@@ -1359,6 +1371,16 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			
 			CallMeeting(client, true);
 			g_Player[client].nearaction = -1;
+		}
+		else if (StrContains(sType, "cameras", false) == 0)
+		{
+			SetEntityMoveType(client, MOVETYPE_OBSERVER);
+			OpenCamerasMenu(client);
+		}
+		else if (StrContains(sType, "map", false) == 0)
+		{
+			SetEntityMoveType(client, MOVETYPE_NONE);
+			OpenMap(client);
 		}
 		else
 		{

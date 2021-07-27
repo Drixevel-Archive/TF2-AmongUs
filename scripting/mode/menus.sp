@@ -383,7 +383,7 @@ void OpenCamerasMenu(int client)
 	Menu menu = new Menu(MenuHandler_Cameras);
 	menu.SetTitle("Cameras:");
 
-	menu.AddItem("no", "no camera");
+	menu.AddItem("no", "Exit Camera View");
 
 	int entity = -1; char sID[16]; char sName[64];
 	while ((entity = FindEntityByClassname(entity, "point_viewcontrol")) != -1)
@@ -409,34 +409,39 @@ public int MenuHandler_Cameras(Menu menu, MenuAction action, int param1, int par
 	{
 		case MenuAction_Select:
 		{
+			if (g_Player[param1].camera != -1)
+			{
+				char sLight[256];
+				GetCustomKeyValue(g_Player[param1].camera, "light", sLight, sizeof(sLight));
+				int light = FindEntityByName(sLight, "light");
+				AcceptEntityInput(light, "TurnOff");
+			}
+			
 			char sID[16]; char sName[64];
 			menu.GetItem(param2, sID, sizeof(sID), _, sName, sizeof(sName));
+			
+			int entity = StringToInt(sID);
+
+			char sLight[256];
+			GetCustomKeyValue(entity, "light", sLight, sizeof(sLight));
+			int light = FindEntityByName(sLight, "light");
 
 			if (StrEqual(sID, "no", false))
 			{
-				SetEntProp(param1, Prop_Send, "m_iObserverMode", 0);
 				SetClientViewEntity(param1, param1);
+				TF2_SetFirstPerson(param1);
+				AcceptEntityInput(entity, "Disable", param1);
+				g_Player[param1].camera = -1;
 				SetEntityMoveType(param1, MOVETYPE_WALK);
-				OpenCamerasMenu(param1);
 				return;
 			}
 
-			int entity = StringToInt(sID);
-
-			char sWatcher[64];
-			Format(sWatcher, sizeof(sWatcher), "target%i", param1);
-			DispatchKeyValue(param1, "targetname", sWatcher);
-
-			SetClientViewEntity(param1, entity);
-			SetEntProp(param1, Prop_Send, "m_iObserverMode", 1);
+			DispatchKeyValue(entity, "spawnflags", "40");
+			TF2_SetThirdPerson(param1);
+			AcceptEntityInput(entity, "Enable", param1);
+			AcceptEntityInput(light, "TurnOn");
+			g_Player[param1].camera = entity;
 			SetEntityMoveType(param1, MOVETYPE_OBSERVER);
-
-			SetVariantString(sWatcher);
-			AcceptEntityInput(entity, "Enable", param1, entity, 0);
-
-			float origin[3];
-			GetEntityAbsOrigin(entity, origin);
-			TeleportEntity(param1, origin, NULL_VECTOR, NULL_VECTOR);
 
 			OpenCamerasMenu(param1);
 		}
@@ -507,4 +512,92 @@ public int MenuHandler_AssignTask(Menu menu, MenuAction action, int param1, int 
 		case MenuAction_End:
 			delete menu;
 	}
+}
+
+void OpenMap(int client, bool repeat = false)
+{
+	if (!NavMesh_Exists())
+		return;
+	
+	Panel panel = new Panel();
+	panel.SetTitle("Admin Panel (Updates every Second)");
+
+	ArrayList locations = new ArrayList(ByteCountToCells(64));
+	StringMap amounts = new StringMap();
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || !IsPlayerAlive(i) || g_Player[i].venting)
+			continue;
+
+		float origin[3];
+		GetClientAbsOrigin(i, origin);
+
+		CNavArea area = NavMesh_GetNearestArea(origin, true, 10000.0, false, true, -2);
+
+		if (area != INVALID_NAV_AREA)
+		{
+			char sID[16];
+			IntToString(area.ID, sID, sizeof(sID));
+
+			char sName[64];
+			g_AreaNames.GetString(sID, sName, sizeof(sName));
+
+			if (locations.FindString(sName) == -1)
+				locations.PushString(sName);
+			
+			int total;
+			amounts.GetValue(sName, total);
+			total++;
+			amounts.SetValue(sName, total);
+		}
+	}
+
+	for (int i = 0; i < locations.Length; i++)
+	{
+		char sLocation[64];
+		locations.GetString(i, sLocation, sizeof(sLocation));
+
+		int total;
+		amounts.GetValue(sLocation, total);
+
+		char sDisplay[128];
+		FormatEx(sDisplay, sizeof(sDisplay), "%s: %i", sLocation, total);
+		panel.DrawText(sDisplay);
+	}
+
+	delete locations;
+	delete amounts;
+
+	panel.DrawItem("Exit");
+
+	panel.Send(client, MenuAction_Void, MENU_TIME_FOREVER);
+	delete panel;
+
+	if (repeat)
+	{
+		StopTimer(g_Player[client].map);
+		g_Player[client].map = CreateTimer(1.0, Timer_OpenMap, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	}
+}
+
+public int MenuAction_Void(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			StopTimer(g_Player[param1].map);
+			SetEntityMoveType(param1, MOVETYPE_WALK);
+		}
+
+		case MenuAction_End:
+			delete menu;
+	}
+}
+
+public Action Timer_OpenMap(Handle timer, any data)
+{
+	int client = data;
+	OpenMap(client);
 }
