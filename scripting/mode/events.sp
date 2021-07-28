@@ -6,6 +6,8 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	int userid = event.GetInt("userid");
 	int client = GetClientOfUserId(userid);
 
+	RemoveGhost(client);
+
 	if (convar_TopDownView.BoolValue)
 		CreateCamera(client);
 

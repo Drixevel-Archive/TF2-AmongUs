@@ -484,6 +484,16 @@ stock void TF2_PlayDenySound(int client)
 	EmitGameSoundToClient(client, "Player.DenyWeaponSelection");
 }
 
+stock void SendDenyMessage(int client, char[] format, any ...)
+{
+	TF2_PlayDenySound(client);
+
+	char sBuffer[255];
+	VFormat(sBuffer, sizeof(sBuffer), format, 3);
+
+	CPrintToChat(client, sBuffer);
+}
+
 stock void TF2Attrib_ApplyMoveSpeedBonus(int client, float value)
 {
 	TF2Attrib_SetByName(client, "move speed bonus", 1.0 + value);

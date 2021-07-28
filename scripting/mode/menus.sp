@@ -179,8 +179,7 @@ void CreateVoteMenu(int client)
 {
 	if (g_Match.meeting == null)
 	{
-		TF2_PlayDenySound(client);
-		CPrintToChat(client, "You can only cast votes while a meeting is going on.");
+		SendDenyMessage(client, "You can only cast votes while a meeting is going on.");
 		return;
 	}
 	
@@ -409,12 +408,13 @@ public int MenuHandler_Cameras(Menu menu, MenuAction action, int param1, int par
 	{
 		case MenuAction_Select:
 		{
-			if (g_Player[param1].camera != -1)
+			if (g_Player[param1].camera != -1 && !g_IsDead[param1])
 			{
 				char sLight[256];
 				GetCustomKeyValue(g_Player[param1].camera, "light", sLight, sizeof(sLight));
 				int light = FindEntityByName(sLight, "light");
-				AcceptEntityInput(light, "TurnOff");
+				if (IsValidEntity(light))
+					AcceptEntityInput(light, "TurnOff");
 			}
 			
 			char sID[16]; char sName[64];
@@ -436,12 +436,15 @@ public int MenuHandler_Cameras(Menu menu, MenuAction action, int param1, int par
 				return;
 			}
 
-			DispatchKeyValue(entity, "spawnflags", "40");
+			DispatchKeyValue(entity, "spawnflags", "8");
 			TF2_SetThirdPerson(param1);
 			AcceptEntityInput(entity, "Enable", param1);
-			AcceptEntityInput(light, "TurnOn");
+			
+			if (IsValidEntity(light) && !g_IsDead[param1])
+				AcceptEntityInput(light, "TurnOn");
+			
 			g_Player[param1].camera = entity;
-			SetEntityMoveType(param1, MOVETYPE_OBSERVER);
+			SetEntityMoveType(param1, MOVETYPE_NONE);
 
 			OpenCamerasMenu(param1);
 		}

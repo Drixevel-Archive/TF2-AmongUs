@@ -250,6 +250,7 @@ void SetGhost(int client)
 
 	SetEntityRenderMode(client, RENDER_TRANSALPHA);
 	SetEntityRenderColor(client, _, _, _, 70);
+	SetEntityMoveType(client, MOVETYPE_NOCLIP);
 	
 	g_IsDead[client] = true;
 }
@@ -263,6 +264,7 @@ void RemoveGhost(int client)
 
 	SetEntityRenderMode(client, RENDER_NORMAL);
 	SetEntityRenderColor(client, _, _, _, _);
+	SetEntityMoveType(client, MOVETYPE_WALK);
 	
 	g_IsDead[client] = false;
 }

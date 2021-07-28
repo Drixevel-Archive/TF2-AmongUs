@@ -238,7 +238,7 @@ public Action Command_Start(int client, int args)
 		return Plugin_Handled;
 	}
 
-	TF2_SetSetupTime(5);
+	TF2_SetSetupTime(6); //Starts at 6 so the announcer starts counting from 5 instead of 4.
 	CPrintToChatAll("{H1}%N {default}has started the match.", client);
 	return Plugin_Handled;
 }

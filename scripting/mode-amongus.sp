@@ -442,12 +442,14 @@ enum TaskType
 enum struct Task
 {
 	int entity;
+	int entityref;
 	TaskType tasktype;
 	int type;
 
 	void Add(int entity, TaskType tasktype, int type)
 	{
 		this.entity = entity;
+		this.entityref = EntIndexToEntRef(entity);
 		this.tasktype = tasktype;
 		this.type = type;
 	}
@@ -945,7 +947,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 						char sDisplay[64];
 						GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 
-						PrintCenterText(client, "Interact with MEDIC! to fix this sabotage! (%s)", sDisplay);
+						PrintCenterText(client, "Near Sabotage: %s (Press MEDIC! to fix)", sDisplay);
 					}
 				}
 			}
@@ -978,7 +980,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 					else if (g_Player[client].target == -1)
 					{
 						g_Player[client].target = i;
-						PrintCenterText(client, "Current Target: %N\n(Press MEDIC! to kill them)", i);
+						PrintCenterText(client, "Near Target: %N (Press MEDIC! to MURDER!)", i);
 					}
 				}
 
@@ -1007,7 +1009,11 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 						else if (g_Player[client].nearvent == -1)
 						{
 							g_Player[client].nearvent = entity;
-							PrintCenterText(client, "Near Vent\n(Press MEDIC! to vent)");
+
+							char sDisplay[256];
+							GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+							
+							PrintCenterText(client, "Near Vent: %s (Press MEDIC! to vent)", sDisplay);
 						}
 					}
 				}
@@ -1040,7 +1046,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				else
 				{
 					g_Player[client].neardeath = i;
-					PrintCenterText(client, "Near Dead Body\nInteract with the by by calling for MEDIC!");
+					PrintCenterText(client, "Near Body: %N (Press MEDIC! to call a meeting)", i);
 				}
 			}
 
@@ -1114,7 +1120,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				char sDisplay[256];
 				GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 				
-				PrintCenterText(client, "%s", sDisplay);
+				PrintCenterText(client, "Near Task: %s (Press MEDIC! to interact)", sDisplay);
 			}
 		}
 	}
@@ -1130,8 +1136,7 @@ void OnButtonPress(int client, int button)
 		{
 			if (g_DelayDoors != -1 && g_DelayDoors > GetTime())
 			{
-				TF2_PlayDenySound(client);
-				CPrintToChat(client, "Please wait {H2}%i {default}seconds before locking all doors again.", (g_DelayDoors - GetTime()));
+				SendDenyMessage(client, "Please wait {H2}%i {default}seconds before locking all doors again.", (g_DelayDoors - GetTime()));
 				return;
 			}
 			
@@ -1315,20 +1320,19 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		return Plugin_Continue;
 	
 	//Make it so you can't interact with anything between rounds.
-	if (g_BetweenRounds || TF2_IsInSetup())
+	if (g_BetweenRounds || TF2_IsInSetup() || g_Player[client].camera != -1)
 		return Plugin_Stop;
 	
-	if (g_Player[client].neardeath != -1)
+	if (g_Player[client].neardeath != -1 && !g_IsDead[client])
 	{
 		g_Player[client].neardeath = -1;
 		CallMeeting(client);
 	}
-	else if (g_Player[client].target > 0 && g_Player[client].target <= MaxClients)
+	else if (g_Player[client].target > 0 && g_Player[client].target <= MaxClients && !g_IsDead[client])
 	{
 		if (g_Player[client].lastkill > 0 && g_Player[client].lastkill > GetGameTime())
 		{
-			TF2_PlayDenySound(client);
-			CPrintToChat(client, "You must wait {H1}%.2f {default}seconds before executing another person.", (g_Player[client].lastkill - GetGameTime()));
+			SendDenyMessage(client, "You must wait {H1}%.2f {default}seconds before executing another person.", (g_Player[client].lastkill - GetGameTime()));
 			return Plugin_Stop;
 		}
 
@@ -1337,7 +1341,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		g_Player[client].lastkill = GetGameTime() + GetGameSetting_Float("kill_cooldown");
 		PrintCenterText(client, "");
 	}
-	else if (g_Player[client].nearvent != -1 && g_Player[client].role == Role_Imposter)
+	else if (g_Player[client].nearvent != -1 && g_Player[client].role == Role_Imposter && !g_IsDead[client])
 	{
 		if (g_Player[client].venting)
 			StopVenting(client);
@@ -1355,8 +1359,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		{
 			if (g_Reactors != null || g_LightsOff || g_DisableCommunications || g_O2 != null)
 			{
-				TF2_PlayDenySound(client);
-				CPrintToChat(client, "You cannot call a meeting while a sabotage is active.");
+				SendDenyMessage(client, "You cannot call a meeting while a sabotage is active.");
 				return Plugin_Stop;
 			}
 			
@@ -1364,8 +1367,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 
 			if (max > 0 && g_Match.total_meetings >= max)
 			{
-				TF2_PlayDenySound(client);
-				CPrintToChat(client, "Maximum number of emergency meetings reached!");
+				SendDenyMessage(client, "Maximum number of emergency meetings reached!");
 				return Plugin_Stop;
 			}
 			
@@ -1384,11 +1386,10 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		}
 		else
 		{
-			TF2_PlayDenySound(client);
-			CPrintToChat(client, "This action is currently disabled, not finished yet.");
+			SendDenyMessage(client, "This action is currently disabled, not finished yet.");
 		}
 	}
-	else if (g_Player[client].nearsabotage != -1)
+	else if (g_Player[client].nearsabotage != -1 && !g_IsDead[client])
 	{
 		int entity = g_Player[client].nearsabotage;
 
@@ -1499,7 +1500,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 				}
 				else
-					CPrintToChat(client, "You are not assigned to do this task.");
+					SendDenyMessage(client, "You are not assigned to do this task.");
 			}
 
 			case TaskType_Part:
@@ -1557,7 +1558,10 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					if (StrContains(sPart, sLink, false) != -1)
 					{
 						if (strlen(g_Player[client].randomchosen) > 0  && !StrEqual(sLink, g_Player[client].randomchosen, false))
+						{
+							SendDenyMessage(client, "You are not assigned to do this task.");
 							return Plugin_Stop;
+						}
 						
 						g_Player[client].randomchosen[0] = '\0';
 						
@@ -1616,8 +1620,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	if (g_Match.meeting != null)
 		return Plugin_Continue;
 	
-	TF2_PlayDenySound(client);
-	CPrintToChat(client, "You are not allowed to type right now.");
+	SendDenyMessage(client, "You are not allowed to type right now.");
 	return Plugin_Stop;
 }
 
@@ -1662,7 +1665,7 @@ public void OnGameFrame()
 		if (!TF2_IsTimerPaused())
 			TF2_PauseTimer();
 		
-		//PrintCenterTextAll("%i players required to start.", required);
+		PrintCenterTextAll("%i players required to start.", required);
 	}
 	else if (count >= required && TF2_IsTimerPaused()) //If there's more than X players and the timer's paused then unpause it.
 		TF2_ResumeTimer();
@@ -1682,8 +1685,7 @@ void CallMeeting(int client = -1, bool button = false)
 {
 	if (g_Match.last_meeting > 0 && g_Match.last_meeting > GetGameTime())
 	{
-		TF2_PlayDenySound(client);
-		CPrintToChat(client, "You must wait {H1}%.2f {default}seconds to call another meeting.", (g_Match.last_meeting - GetGameTime()));
+		SendDenyMessage(client, "You must wait {H1}%.2f {default}seconds to call another meeting.", (g_Match.last_meeting - GetGameTime()));
 		return;
 	}
 
@@ -1783,8 +1785,7 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 		
 		if (g_Reactors != null || g_LightsOff || g_DisableCommunications || g_O2 != null)
 		{
-			TF2_PlayDenySound(activator);
-			CPrintToChat(activator, "You cannot call a meeting while a sabotage is active.");
+			SendDenyMessage(activator, "You cannot call a meeting while a sabotage is active.");
 			return Plugin_Stop;
 		}
 		
@@ -1792,8 +1793,7 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 
 		if (max > 0 && g_Match.total_meetings >= max)
 		{
-			TF2_PlayDenySound(activator);
-			CPrintToChat(activator, "Maximum number of emergency meetings reached!");
+			SendDenyMessage(activator, "Maximum number of emergency meetings reached!");
 			return Plugin_Stop;
 		}
 
@@ -1907,8 +1907,7 @@ void StartSabotage(int client, int sabotage)
 	
 	if (g_DelaySabotage != -1 && g_DelaySabotage > GetTime())
 	{
-		TF2_PlayDenySound(client);
-		CPrintToChat(client, "Please wait {H2}%i {default}seconds before using another sabotage.", (g_DelaySabotage - GetTime()));
+		SendDenyMessage(client, "Please wait {H2}%i {default}seconds before using another sabotage.", (g_DelaySabotage - GetTime()));
 		return;
 	}
 	
