@@ -600,6 +600,7 @@ public void OnPluginStart()
 	HookEvent("post_inventory_application", Event_OnPostInventoryApplication);
 	HookEvent("teamplay_round_start", Event_OnRoundStart);
 	HookEvent("teamplay_round_win", Event_OnRoundWin);
+	HookEvent("teamplay_broadcast_audio", Event_OnBroadcastAudio, EventHookMode_Pre);
 
 	HookUserMessage(GetUserMessageId("VGUIMenu"), OnVGUIMenu, true);
 

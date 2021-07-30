@@ -141,3 +141,16 @@ public void Event_OnRoundWin(Event event, const char[] name, bool dontBroadcast)
 
 	OnMatchCompleted(view_as<TFTeam>(event.GetInt("team")));
 }
+
+public Action Event_OnBroadcastAudio(Event event, const char[] name, bool dontBroadcast)
+{
+	char strAudio[40];
+	event.GetString("sound", strAudio, sizeof(strAudio));
+
+	if (strncmp(strAudio, "Game.Your", 9) == 0)
+		return Plugin_Handled;
+	else if(strcmp(strAudio, "Game.Stalemate") == 0)
+		return Plugin_Handled;
+
+	return Plugin_Continue;
+}
