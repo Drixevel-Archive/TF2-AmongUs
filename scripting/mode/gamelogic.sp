@@ -220,34 +220,6 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	g_Match.tasks_current = 0;
 	g_Match.total_meetings = 0;
 
-	/////
-	//Setup glows for certain map entities.
-
-	//Give entities a certain glow.
-	int entity = -1;
-	while ((entity = FindEntityByClassname(entity, "*")) != -1)
-	{
-		char sName[32];
-		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
-
-		if (StrContains(sName, "action", false) == 0 || StrEqual(sName, "meeting_button_display", false))
-			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({255, 165, 0, 255}));
-		else if (StrContains(sName, "sabotage", false) == 0)
-			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({173, 216, 230, 255}));
-		
-		if (entity > 0 && IsValidEntity(g_GlowEnt[entity]))
-			SDKHook(g_GlowEnt[entity], SDKHook_SetTransmit, OnGlowTransmit);
-	}
-
-	//Apply glow effects to tasks which are NOT task maps.
-	for (int i = 0; i < g_TotalTasks; i++)
-	{
-		entity = g_Tasks[i].entity;
-
-		if (g_Tasks[i].tasktype == TaskType_Single || g_Tasks[i].tasktype == TaskType_Part)
-			g_GlowEnt[entity] = TF2_CreateGlow(entity, view_as<int>({50, 255, 50, 255}));
-	}
-
 	//Assign random players as Imposter and other roles automatically.
 	int amount = GetGameSetting_Int("imposters");
 	int current;

@@ -256,8 +256,6 @@ StringMap g_AreaNames;
 int g_GameOwner = -1;
 char g_UpdatingGameSetting[MAXPLAYERS + 1][32];
 
-int g_GlowEnt[2048 + 1] = {-1, ...};
-
 enum Roles
 {
 	Role_Crewmate,
@@ -694,11 +692,6 @@ public void OnPluginEnd()
 
 		RemoveGhost(i);
 	}
-	
-	int entity = -1;
-	while ((entity = FindEntityByClassname(entity, "*")) != -1)
-		if (entity > MaxClients && g_GlowEnt[entity] > MaxClients)
-			AcceptEntityInput(g_GlowEnt[entity], "Kill");
 	
 	if (g_FogController_Crewmates > 0)
 		AcceptEntityInput(g_FogController_Crewmates, "Kill");
