@@ -116,6 +116,7 @@ public Action Timer_ReactorTick(Handle timer, any data)
 	if (g_ReactorsTime > 0)
 	{
 		PrintHintTextToAll("Reactor Meltdown in %i", g_ReactorsTime);
+		EmitSoundToAll(SOUND_SABOTAGE);
 		return Plugin_Continue;
 	}
 
@@ -138,6 +139,7 @@ public Action Timer_O2Tick(Handle timer, any data)
 	if (g_O2Time > 0)
 	{
 		PrintHintTextToAll("O2 Depletion in %i", g_O2Time);
+		EmitSoundToAll(SOUND_SABOTAGE);
 		return Plugin_Continue;
 	}
 
@@ -163,6 +165,7 @@ public Action Timer_CreateDeadBody(Handle timer, any userid)
 	int client;
 	if ((client = GetClientOfUserId(userid)) > 0 && IsClientInGame(client))
 	{
+		EmitSoundToClient(client, SOUND_IMPOSTER_DEATHMUSIC);
 		TF2_SpawnRagdoll(client, 99999.0, RAG_NOHEAD | RAG_NOTORSO);
 		
 		//Cache their death location and allow it to be discovered.

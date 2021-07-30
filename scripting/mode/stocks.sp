@@ -688,3 +688,17 @@ stock int FindEntityByName(const char[] name, const char[] classname = "*")
 	
 	return entity;
 }
+
+stock void HandleSound(const char[] sound, bool download = true)
+{
+	PrecacheSound(sound);
+
+	if (!download)
+		return;
+
+	char sDownload[PLATFORM_MAX_PATH];
+	FormatEx(sDownload, sizeof(sDownload), "sound/%s", sound);
+
+	AddFileToDownloadsTable(sDownload);
+}
+}

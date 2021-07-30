@@ -6,6 +6,8 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	int userid = event.GetInt("userid");
 	int client = GetClientOfUserId(userid);
 
+	EmitSoundToAll(SOUND_SPAWN, client);
+
 	RemoveGhost(client);
 
 	if (convar_TopDownView.BoolValue)
@@ -84,6 +86,10 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 
 	//We respawn the player after a bit so we can set them as a ghost.
 	CreateTimer(0.4, Timer_RespawnPlayer, userid, TIMER_FLAG_NO_MAPCHANGE);
+
+	int attacker;
+	if ((attacker = GetClientOfUserId(event.GetInt("attacker"))) > 0 && IsClientInGame(attacker) && IsPlayerAlive(attacker) && !IsFakeClient(attacker) && g_Player[attacker].role == Role_Imposter)
+		EmitSoundToClient(attacker, SOUND_IMPOSTER_KILL);
 }
 
 public void Event_OnPostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
@@ -133,5 +139,5 @@ public void Event_OnRoundWin(Event event, const char[] name, bool dontBroadcast)
 {
 	g_BetweenRounds = true;
 
-	OnMatchCompleted();
+	OnMatchCompleted(view_as<TFTeam>(event.GetInt("team")));
 }

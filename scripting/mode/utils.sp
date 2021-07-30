@@ -340,6 +340,8 @@ bool IsTaskCompleted(int client, int task)
 
 void MarkTaskComplete(int client, int task)
 {
+	EmitSoundToClient(client, SOUND_TASK_COMPLETE);
+	
 	if (g_Player[client].role == Role_Imposter)
 		return;
 	

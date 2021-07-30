@@ -207,6 +207,8 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 {
 	CPrintToChatAll("{H1}Mode{default}: Match Started");
 
+	EmitSoundToAll(SOUND_ROUNDSTART);
+
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		g_Player[i].showdeath = false;
@@ -372,7 +374,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 public void Timer_OnFinished(const char[] output, int caller, int activator, float delay)
 {
-	OnMatchCompleted();
+	OnMatchCompleted(TFTeam_Spectator);
 }
 
 public void Timer_OnSetupStart(const char[] output, int caller, int activator, float delay)

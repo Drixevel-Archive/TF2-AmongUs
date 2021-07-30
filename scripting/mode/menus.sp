@@ -283,6 +283,8 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 				CPrintToChatAll("{H1}%N {default}voted to Skip!", param1);
 			else
 				CPrintToChatAll("{H1}%N {default}voted for {H2}%N!", param1, target);
+			
+			EmitSoundToClient(param1, SOUND_VOTE_CONFIRM);
 
 			if (g_Match.meeting != null)
 				CreateVoteMenu(param1);
@@ -367,7 +369,17 @@ public int MenuHandler_Vents(Menu menu, MenuAction action, int param1, int param
 			origin[2] += 20.0;
 
 			TeleportEntity(param1, origin, NULL_VECTOR, NULL_VECTOR);
-			EmitSoundToClient(param1, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+			//EmitSoundToClient(param1, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+			
+			switch (GetRandomInt(1, 3))
+			{
+				case 1:
+					EmitSoundToClient(param1, SOUND_VENT_MOVE1);
+				case 2:
+					EmitSoundToClient(param1, SOUND_VENT_MOVE2);
+				case 3:
+					EmitSoundToClient(param1, SOUND_VENT_MOVE3);
+			}
 
 			OpenVentsMenu(param1, vent);
 		}

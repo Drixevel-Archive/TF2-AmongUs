@@ -166,6 +166,42 @@ upload/download is more similar to divert power, you get a random location to do
 #define RELAY_MEETING_BUTTON_LOCK "meeting_button_lock"	//Is intended to lock the meeting button from use.
 #define RELAY_MEETING_BUTTON_UNLOCK "meeting_button_unlock"	//Is intended to unlock the meeting button so it can be used.
 
+#define SOUND_ALARM "amongus/alarm.wav"
+#define SOUND_BODYFOUND "amongus/bodyfound.wav"
+#define SOUND_DOOR_CLOSE "amongus/door_close.wav"
+#define SOUND_DOOR_OPEN "amongus/door_open.wav"
+#define SOUND_EJECT_TEXT "amongus/eject_text.wav"
+#define SOUND_NOTIFICATION "amongus/notification.wav"
+#define SOUND_PANEL_CLOSE "amongus/panel_close.wav"
+#define SOUND_PANEL_OPEN "amongus/panel_open.wav"
+#define SOUND_ROUNDSTART "amongus/roundstart.wav"
+#define SOUND_SABOTAGE "amongus/sabotage.wav"
+#define SOUND_TASK_COMPLETE "amongus/task_complete.wav"
+#define SOUND_TASK_INPROGRESS "amongus/task_inprogress.wav"
+#define SOUND_UI_HOVER "amongus/ui_hover.wav"
+#define SOUND_UI_SELECT "amongus/ui_select.wav"
+#define SOUND_VICTORY_CREW "amongus/victory_crew.wav"
+#define SOUND_VICTORY_DISCONNECT "amongus/victory_disconnect.wav"
+#define SOUND_VICTORY_IMPOSTER "amongus/victory_impostor.wav"
+#define SOUND_VOTE_TIMER "amongus/vote_timer.wav"
+#define SOUND_VOTE_CONFIRM "amongus/votescreen_avote.wav"
+#define SOUND_VOTE_LOCKIN "amongus/votescreen_lockin.wav"
+
+#define SOUND_DISCONNECT "amongus/disconnect.wav"
+#define SOUND_IMPOSTER_DEATHMUSIC "amongus/imposter_deathmusic.wav"
+#define SOUND_IMPOSTER_KILL "amongus/impostor_kill.wav"
+#define SOUND_SPAWN "amongus/spawn.wav"
+#define SOUND_VENT_MOVE1 "amongus/vent_move1.wav"
+#define SOUND_VENT_MOVE2 "amongus/vent_move2.wav"
+#define SOUND_VENT_MOVE3 "amongus/vent_move3.wav"
+#define SOUND_VENT_OPEN "amongus/vent_open.wav"
+
+#define FFADE_IN	0x0001			// Just here so we don't pass 0 into the function
+#define FFADE_OUT	0x0002			// Fade out (not in)
+#define FFADE_MODULATE	0x0004		// Modulate (don't blend)
+#define FFADE_STAYOUT	0x0008		// ignores the duration, stays faded out until new ScreenFade message received
+#define FFADE_PURGE	0x0010			// Purges all other fades, replacing them with this one
+
 /*****************************/
 //Includes
 #include <sourcemod>
@@ -681,6 +717,30 @@ public void OnMapStart()
 	PrecacheSound("doors/vent_open2.wav");	//Played whenever a player is finished venting.
 	PrecacheSound("doors/vent_open3.wav");	//Played whenever a player starts venting or moves to a different vent.
 
+	HandleSound(SOUND_ALARM);
+	HandleSound(SOUND_BODYFOUND);
+
+	HandleSound(SOUND_ROUNDSTART);
+
+	HandleSound(SOUND_SABOTAGE);
+
+	HandleSound(SOUND_TASK_COMPLETE);
+	HandleSound(SOUND_TASK_INPROGRESS);
+	
+	HandleSound(SOUND_VICTORY_CREW);
+	HandleSound(SOUND_VICTORY_IMPOSTER);
+
+	HandleSound(SOUND_VOTE_CONFIRM);
+
+	HandleSound(SOUND_DISCONNECT);
+	HandleSound(SOUND_IMPOSTER_DEATHMUSIC);
+	HandleSound(SOUND_IMPOSTER_KILL);
+	HandleSound(SOUND_SPAWN);
+	HandleSound(SOUND_VENT_MOVE1);
+	HandleSound(SOUND_VENT_MOVE2);
+	HandleSound(SOUND_VENT_MOVE3);
+	HandleSound(SOUND_VENT_OPEN);
+
 	/////
 	//Fog Controllers
 
@@ -868,6 +928,8 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
+	EmitSoundToAll(SOUND_DISCONNECT, client);
+	
 	//If the owner of the game disconnects then free up the slot.
 	if (client == g_GameOwner)
 	{
@@ -1515,6 +1577,8 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					g_Player[client].progresstask = task;
 					StopTimer(g_Player[client].doingtask);
 					g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+					EmitSoundToClient(client, SOUND_TASK_INPROGRESS);
 				}
 				else
 					SendDenyMessage(client, "You are not assigned to do this task.");
@@ -1603,6 +1667,8 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 
 				if (!discovered)
 					CPrintToChat(client, "You are not assigned to do this task.");
+				else
+					EmitSoundToClient(client, SOUND_TASK_INPROGRESS);
 			}
 		}
 	}
@@ -1819,6 +1885,8 @@ void CallMeeting(int client = -1, bool button = false)
 		else
 			CPrintToChatAll("{H1}%N {default}has found a body!", client);
 	}
+
+	EmitSoundToAll(button ? SOUND_ALARM : SOUND_BODYFOUND);
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -1838,7 +1906,7 @@ void CallMeeting(int client = -1, bool button = false)
 		}
 	}
 
-	EmitSoundToAll("ambient_mp3/alarms/doomsday_lift_alarm.mp3");
+	//EmitSoundToAll("ambient_mp3/alarms/doomsday_lift_alarm.mp3");
 	UnmuteAllClients();
 
 	TriggerRelay("meeting_button_lock");
@@ -1878,7 +1946,8 @@ void StartVenting(int client, int vent)
 	//SetEntProp(client, Prop_Send, "m_iHideHUD", 0);
 
 	TF2_SetThirdPerson(client);
-	EmitSoundToClient(client, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+	//EmitSoundToClient(client, "doors/vent_open3.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+	EmitSoundToClient(client, SOUND_VENT_OPEN);
 
 	OpenVentsMenu(client, vent);
 }
@@ -1926,9 +1995,17 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 	return Plugin_Continue;
 }
 
-void OnMatchCompleted()
+void OnMatchCompleted(TFTeam team)
 {
 	CPrintToChatAll("{H1}Mode{default}: Match Finished");
+
+	switch (team)
+	{
+		case TFTeam_Red:
+			EmitSoundToAll(SOUND_VICTORY_IMPOSTER);
+		case TFTeam_Blue:
+			EmitSoundToAll(SOUND_VICTORY_CREW);
+	}
 
 	//g_Match.tasks_current = 0;
 	//g_Match.tasks_goal = 0;
@@ -2037,7 +2114,7 @@ void StartSabotage(int client, int sabotage)
 	g_IsSabotageActive = true;
 	g_DelaySabotage = GetTime() + convar_Sabotages_Cooldown.IntValue;
 
-	EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
+	//EmitSoundToAll("mvm/ambient_mp3/mvm_siren.mp3");
 
 	switch (sabotage)
 	{
