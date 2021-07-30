@@ -74,7 +74,7 @@ public Action OnPreThink(int client)
 	}
 
 	//While scanning, we want to display a circle around them.
-	if (g_Player[client].scanning)
+	if (g_Player[client].scanning && GetGameSetting_Bool("visual_tasks"))
 	{
 		float origin[3];
 		GetClientAbsOrigin(client, origin);
