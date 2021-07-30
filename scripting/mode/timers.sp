@@ -115,9 +115,9 @@ public Action Timer_ReactorTick(Handle timer, any data)
 
 	if (g_ReactorsTime > 0)
 	{
-		PrintHintTextToAll("Reactor Meltdown in %i", g_ReactorsTime);
 		EmitSoundToAll(SOUND_SABOTAGE);
 		ScreenFadeAll(convar_Fade_Dur.IntValue, convar_Fade_Hold.IntValue, FFADE_IN, view_as<int>({255, 0, 0, 50}));
+		PrintSilentHintAll("Reactor Meltdown in %i (%i/2)", g_ReactorsTime, (g_ReactorExclude != -1) ? 1 : 0);
 		return Plugin_Continue;
 	}
 
@@ -139,9 +139,9 @@ public Action Timer_O2Tick(Handle timer, any data)
 
 	if (g_O2Time > 0)
 	{
-		PrintHintTextToAll("O2 Depletion in %i", g_O2Time);
 		EmitSoundToAll(SOUND_SABOTAGE);
 		ScreenFadeAll(convar_Fade_Dur.IntValue, convar_Fade_Hold.IntValue, FFADE_IN, view_as<int>({255, 0, 0, 50}));
+		PrintSilentHintAll("O2 Depletion in %i", g_O2Time);
 		return Plugin_Continue;
 	}
 

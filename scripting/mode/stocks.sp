@@ -701,6 +701,22 @@ stock void HandleSound(const char[] sound, bool download = true)
 
 	AddFileToDownloadsTable(sDownload);
 }
+
+stock void PrintSilentHintAll(const char[] format, any ...)
+{
+	char message[255];
+	VFormat(message, sizeof(message), format, 2);
+	
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || IsFakeClient(i))
+			continue;
+		
+		PrintHintText(i, message);
+		StopSound(i, SNDCHAN_STATIC, "UI/hint.wav");
+	}
+}
+
 stock void ScreenFadeAll(int duration = 4, int hold_time = 4, int flag = FFADE_IN, int colors[4] = {255, 255, 255, 255}, bool reliable = true)
 {
 	bool pb = GetFeatureStatus(FeatureType_Native, "GetUserMessageType") == FeatureStatus_Available && GetUserMessageType() == UM_Protobuf;
