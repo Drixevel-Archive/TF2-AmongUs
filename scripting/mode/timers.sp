@@ -234,7 +234,7 @@ public Action Timer_DoingTask(Handle timer, any data)
 
 	if (g_Player[client].taskticks > 0)
 	{
-		if (StrEqual(sDisplay, "Submit Scan", false) && g_Player[client].taskticks == 2)
+		if (StrEqual(sDisplay, "Submit Scan", false) && g_Player[client].taskticks == 2 && GetGameSetting_Bool("visual_tasks"))
 		{
 			float origin[3];
 			GetClientAbsOrigin(client, origin);
