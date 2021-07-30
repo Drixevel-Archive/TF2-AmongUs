@@ -818,6 +818,11 @@ public void OnConVarChange(ConVar convar, const char[] oldValue, const char[] ne
 	}
 }
 
+public void OnConfigsExecuted()
+{
+	convar_Engine_RespawnWaveTime.Flags &= ~FCVAR_NOTIFY;
+}
+
 public Action OnVGUIMenu(UserMsg msg_id, BfRead msg, const int[] players, int playersNum, bool reliable, bool init) 
 {
 	char sMSG[12];
