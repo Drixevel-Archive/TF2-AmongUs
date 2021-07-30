@@ -2132,7 +2132,7 @@ void StartSabotage(int client, int sabotage)
 
 			g_ReactorsTime = 30;
 			StopTimer(g_Reactors);
-			g_Reactors = CreateTimer(1.0, Timer_ReactorTick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+			g_Reactors = CreateTimer(1.5, Timer_ReactorTick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 
 		case SABOTAGE_FIXLIGHTS:
@@ -2162,7 +2162,7 @@ void StartSabotage(int client, int sabotage)
 
 			g_O2Time = 30;
 			StopTimer(g_O2);
-			g_O2 = CreateTimer(1.0, Timer_O2Tick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+			g_O2 = CreateTimer(1.5, Timer_O2Tick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
 
