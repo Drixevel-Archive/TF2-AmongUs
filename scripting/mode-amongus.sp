@@ -236,6 +236,9 @@ ConVar convar_VotePercentage_Ejections;
 
 ConVar convar_Engine_RespawnWaveTime;
 
+ConVar convar_Fade_Dur;
+ConVar convar_Fade_Hold;
+
 /*****************************/
 //Globals
 
@@ -589,6 +592,9 @@ public void OnPluginStart()
 	convar_VotePercentage_Ejections = CreateConVar("sm_mode_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	
 	convar_Engine_RespawnWaveTime = FindConVar("mp_respawnwavetime");
+
+	convar_Fade_Dur = CreateConVar("sm_mode_amongus_fade_dur", "100");
+	convar_Fade_Hold = CreateConVar("sm_mode_amongus_fade_hold", "100");
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
 	HookEvent("player_death", Event_OnPlayerDeathPre, EventHookMode_Pre);

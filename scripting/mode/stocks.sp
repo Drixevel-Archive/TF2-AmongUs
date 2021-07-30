@@ -701,4 +701,39 @@ stock void HandleSound(const char[] sound, bool download = true)
 
 	AddFileToDownloadsTable(sDownload);
 }
+stock void ScreenFadeAll(int duration = 4, int hold_time = 4, int flag = FFADE_IN, int colors[4] = {255, 255, 255, 255}, bool reliable = true)
+{
+	bool pb = GetFeatureStatus(FeatureType_Native, "GetUserMessageType") == FeatureStatus_Available && GetUserMessageType() == UM_Protobuf;
+	Handle userMessage;
+	
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || IsFakeClient(i))
+			continue;
+		
+		userMessage = StartMessageOne("Fade", i, (reliable ? USERMSG_RELIABLE : 0));
+
+		if (userMessage == null)
+			continue;
+
+		if (pb)
+		{
+			PbSetInt(userMessage, "duration", duration);
+			PbSetInt(userMessage, "hold_time", hold_time);
+			PbSetInt(userMessage, "flags", flag);
+			PbSetColor(userMessage, "clr", colors);
+		}
+		else
+		{
+			BfWriteShort(userMessage, duration);
+			BfWriteShort(userMessage, hold_time);
+			BfWriteShort(userMessage, flag);
+			BfWriteByte(userMessage, colors[0]);
+			BfWriteByte(userMessage, colors[1]);
+			BfWriteByte(userMessage, colors[2]);
+			BfWriteByte(userMessage, colors[3]);
+		}
+		
+		EndMessage();
+	}
 }

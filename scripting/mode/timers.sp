@@ -117,6 +117,7 @@ public Action Timer_ReactorTick(Handle timer, any data)
 	{
 		PrintHintTextToAll("Reactor Meltdown in %i", g_ReactorsTime);
 		EmitSoundToAll(SOUND_SABOTAGE);
+		ScreenFadeAll(convar_Fade_Dur.IntValue, convar_Fade_Hold.IntValue, FFADE_IN, view_as<int>({255, 0, 0, 50}));
 		return Plugin_Continue;
 	}
 
@@ -140,6 +141,7 @@ public Action Timer_O2Tick(Handle timer, any data)
 	{
 		PrintHintTextToAll("O2 Depletion in %i", g_O2Time);
 		EmitSoundToAll(SOUND_SABOTAGE);
+		ScreenFadeAll(convar_Fade_Dur.IntValue, convar_Fade_Hold.IntValue, FFADE_IN, view_as<int>({255, 0, 0, 50}));
 		return Plugin_Continue;
 	}
 
