@@ -351,3 +351,28 @@ public Action Command_AssignTask(int client, int args)
 	OpenAssignTaskMenu(client);
 	return Plugin_Handled;
 }
+
+public Action Command_EditMarks(int client, int args)
+{
+	g_Player[client].editingmarks = !g_Player[client].editingmarks;
+	CPrintToChat(client, "Marks Editor: {H2}%s", g_Player[client].editingmarks ? "Enabled" : "Disabled");
+	return Plugin_Handled;
+}
+
+public Action Command_PaintMarks(int client, int args)
+{
+	if (strlen(g_Player[client].paintmarks) > 0)
+	{
+		g_Player[client].paintmarks[0] = '\0';
+		CPrintToChat(client, "Mark painting has been disabled.");
+		return Plugin_Handled;
+	}
+
+	char sName[64];
+	GetCmdArgString(sName, sizeof(sName));
+
+	strcopy(g_Player[client].paintmarks, 64, sName);
+	CPrintToChat(client, "Painting areas of movement for: %s", g_Player[client].paintmarks);
+
+	return Plugin_Handled;
+}

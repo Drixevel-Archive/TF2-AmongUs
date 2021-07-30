@@ -276,6 +276,9 @@ enum struct Player
 
 	Handle map;
 
+	bool editingmarks;
+	char paintmarks[64];
+
 	void Init()
 	{
 		this.color = NO_COLOR;
@@ -327,6 +330,9 @@ enum struct Player
 		this.camera = -1;
 
 		this.map = null;
+
+		this.editingmarks = false;
+		this.paintmarks[0] = '\0';
 	}
 
 	void Clear()
@@ -380,6 +386,9 @@ enum struct Player
 		this.camera = -1;
 
 		StopTimer(this.map);
+
+		this.editingmarks = false;
+		this.paintmarks[0] = '\0';
 	}
 }
 
@@ -457,6 +466,9 @@ enum struct Task
 
 Task g_Tasks[256];
 int g_TotalTasks;
+
+float g_flTrackNavAreaNextThink;
+int g_iPathLaserModelIndex = -1;
 
 /*****************************/
 //Managed
@@ -577,6 +589,8 @@ public void OnPluginStart()
 	RegAdminCmd("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");
 	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
 	RegAdminCmd("sm_assigntask", Command_AssignTask, ADMFLAG_SLAY, "Assign certain tasks to players.");
+	RegAdminCmd("sm_editmarks", Command_EditMarks, ADMFLAG_SLAY, "Opens up the marks editor.");
+	RegAdminCmd("sm_paintmarks", Command_PaintMarks, ADMFLAG_SLAY, "Paint marks based on where the players moving.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();
@@ -696,6 +710,9 @@ public void OnMapStart()
 	DispatchSpawn(g_FogController_Imposters);
 
 	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
+
+	g_flTrackNavAreaNextThink = 0.0;
+	g_iPathLaserModelIndex = PrecacheModel("materials/sprites/laserbeam.vmt");
 }
 
 public void OnMapEnd()
@@ -1052,7 +1069,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 
 			int entity = -1; char sName[32];
 			while ((entity = FindEntityByClassname(entity, "*")) != -1)
-			{
+			{ 	
 				GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
 
 				if (StrContains(sName, "action", false) != 0)
@@ -1679,6 +1696,112 @@ public void OnGameFrame()
 		ForceWin();
 		CPrintToChatAll("Crewmates have completed all tasks, Crewmates win!");
 	}
+
+	if (GetGameTime() >= g_flTrackNavAreaNextThink)
+	{
+		g_flTrackNavAreaNextThink = GetGameTime() + 0.1;
+
+		static const int DefaultAreaColor[] = { 255, 0, 0, 255 };
+		static const int FocusedAreaColor[] = { 255, 255, 0, 255 };
+		static const int MarkedAreaColor[] = { 0, 255, 0, 255 };
+
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (g_Player[client].editingmarks)
+			{
+				float flEyePos[3], flEyeDir[3], flEndPos[3];
+				GetClientEyePosition(client, flEyePos);
+				GetClientEyeAngles(client, flEyeDir);
+				GetAngleVectors(flEyeDir, flEyeDir, NULL_VECTOR, NULL_VECTOR);
+				NormalizeVector(flEyeDir, flEyeDir);
+				ScaleVector(flEyeDir, 1000.0);
+				AddVectors(flEyePos, flEyeDir, flEndPos);
+				
+				Handle hTrace = TR_TraceRayFilterEx(flEyePos, flEndPos, MASK_PLAYERSOLID_BRUSHONLY, RayType_EndPoint, TraceRayDontHitEntity, client);
+				
+				TR_GetEndPosition(flEndPos, hTrace);
+				delete hTrace;
+
+				CNavArea area = NavMesh_GetNearestArea(flEndPos);
+				
+				if (area == INVALID_NAV_AREA)
+					continue;
+				
+				DrawNavArea(client, area, FocusedAreaColor, MarkedAreaColor);
+
+				if (strlen(g_Player[client].paintmarks) > 0)
+				{
+					char sID[16];
+					IntToString(area.ID, sID, sizeof(sID));
+					g_AreaNames.SetString(sID, g_Player[client].paintmarks);
+				}
+
+				ArrayList connections = new ArrayList();
+				area.GetAdjacentList(NAV_DIR_COUNT, connections);
+
+				for (int i = 0; i < connections.Length; i++)
+					DrawNavArea(client, connections.Get(i), DefaultAreaColor, MarkedAreaColor);	
+
+				delete connections;
+			}
+		}
+	}
+}
+
+public bool TraceRayDontHitEntity(int entity,int mask, any data)
+{
+	if (entity == data)
+		return false;
+	
+	return true;
+}
+
+void DrawNavArea(int client, CNavArea area, const int color[4], const int marked[4], float duration=0.15) 
+{
+	if (!IsClientInGame(client) || area == INVALID_NAV_AREA)
+		return;
+	
+	char sID[16];
+	IntToString(area.ID, sID, sizeof(sID));
+	
+	char sName[64];
+	g_AreaNames.GetString(sID, sName, sizeof(sName));
+
+	bool ismarked;
+	if (strlen(sName) > 0 && StrEqual(g_Player[client].paintmarks, sName, false))
+		ismarked = true;
+
+	float from[3], to[3];
+	area.GetCorner(NAV_CORNER_NORTH_WEST, from);
+	area.GetCorner(NAV_CORNER_NORTH_EAST, to);
+	from[2] += 2; to[2] += 2;
+
+	TE_SetupBeamPoints(from, to, g_iPathLaserModelIndex, g_iPathLaserModelIndex, 0, 30, duration, 1.0, 1.0, 0, 0.0, ismarked ? marked : color, 1);
+	TE_SendToClient(client);
+
+	area.GetCorner(NAV_CORNER_NORTH_EAST, from);
+	area.GetCorner(NAV_CORNER_SOUTH_EAST, to);
+	from[2] += 2; to[2] += 2;
+
+	TE_SetupBeamPoints(from, to, g_iPathLaserModelIndex, g_iPathLaserModelIndex, 0, 30, duration, 1.0, 1.0, 0, 0.0, ismarked ? marked : color, 1);
+	TE_SendToClient(client);
+
+	area.GetCorner(NAV_CORNER_SOUTH_EAST, from);
+	area.GetCorner(NAV_CORNER_SOUTH_WEST, to);
+	from[2] += 2; to[2] += 2;
+
+	TE_SetupBeamPoints(from, to, g_iPathLaserModelIndex, g_iPathLaserModelIndex, 0, 30, duration, 1.0, 1.0, 0, 0.0, ismarked ? marked : color, 1);
+	TE_SendToClient(client);
+
+	area.GetCorner(NAV_CORNER_SOUTH_WEST, from);
+	area.GetCorner(NAV_CORNER_NORTH_WEST, to);
+	from[2] += 2; to[2] += 2;
+
+	TE_SetupBeamPoints(from, to, g_iPathLaserModelIndex, g_iPathLaserModelIndex, 0, 30, duration, 1.0, 1.0, 0, 0.0, ismarked ? marked : color, 1);
+	TE_SendToClient(client);
 }
 
 void CallMeeting(int client = -1, bool button = false)
