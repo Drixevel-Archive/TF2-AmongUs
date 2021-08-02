@@ -6,7 +6,8 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	int userid = event.GetInt("userid");
 	int client = GetClientOfUserId(userid);
 
-	EmitSoundToAll(SOUND_SPAWN, client);
+	if (IsClientInGame(client) && IsPlayerAlive(client))
+		EmitSoundToAll(SOUND_SPAWN, client);
 
 	RemoveGhost(client);
 
