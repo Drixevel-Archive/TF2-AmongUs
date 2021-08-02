@@ -303,6 +303,9 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	/////
 	//Tasks
 
+	// for (int i = 0; i < g_TotalTasks; i++)
+	// 	g_Tasks[i].CreateSprite();
+
 	//Pull the amount of certain tasks to give players based on game settings.
 	int long = GetGameSetting_Int("long_tasks");
 	int short = GetGameSetting_Int("short_tasks");

@@ -202,6 +202,8 @@ upload/download is more similar to divert power, you get a random location to do
 #define FFADE_STAYOUT	0x0008		// ignores the duration, stays faded out until new ScreenFade message received
 #define FFADE_PURGE	0x0010			// Purges all other fades, replacing them with this one
 
+#define TASK_SPRITE "sprites/obj_icons/warning_highlight"
+
 /*****************************/
 //Includes
 #include <sourcemod>
@@ -491,6 +493,7 @@ enum struct Task
 	int entityref;
 	TaskType tasktype;
 	int type;
+	int sprite;
 
 	void Add(int entity, TaskType tasktype, int type)
 	{
@@ -498,6 +501,25 @@ enum struct Task
 		this.entityref = EntIndexToEntRef(entity);
 		this.tasktype = tasktype;
 		this.type = type;
+		this.sprite = -1;
+	}
+
+	void CreateSprite()
+	{
+		this.KillSprite();
+		this.sprite = CreateSprite(this.entity, TASK_SPRITE, view_as<float>({0.0, 0.0, 0.0}));
+
+		if (IsValidEntity(this.sprite))
+			SDKHook(this.sprite, SDKHook_SetTransmit, OnTaskSpriteTransmit);
+	}
+
+	void KillSprite()
+	{
+		if (this.sprite > 0 && IsValidEntity(this.sprite))
+		{
+			AcceptEntityInput(this.sprite, "kill");
+			this.sprite = -1;
+		}
 	}
 }
 
@@ -506,6 +528,8 @@ int g_TotalTasks;
 
 float g_flTrackNavAreaNextThink;
 int g_iPathLaserModelIndex = -1;
+
+float g_TEParticleDelay;
 
 /*****************************/
 //Managed
@@ -693,6 +717,9 @@ public void OnPluginEnd()
 
 		RemoveGhost(i);
 	}
+
+	for (int i = 0; i < g_TotalTasks; i++)
+		g_Tasks[i].KillSprite();
 	
 	if (g_FogController_Crewmates > 0)
 		AcceptEntityInput(g_FogController_Crewmates, "Kill");
@@ -711,6 +738,12 @@ public void OnMapStart()
 
 	/////
 	//Precache Files
+
+	char sBuffer[PLATFORM_MAX_PATH];
+	FormatEx(sBuffer, sizeof(sBuffer), "%s.vmt", TASK_SPRITE);
+	PrecacheGeneric(sBuffer, true);
+	FormatEx(sBuffer, sizeof(sBuffer), "%s.vtf", TASK_SPRITE);
+	PrecacheGeneric(sBuffer, true);
 
 	PrecacheSound ("ambient_mp3/alarms/doomsday_lift_alarm.mp3"); //Used when finding a body for an emergency meeting.
 
@@ -773,6 +806,8 @@ public void OnMapStart()
 
 	g_flTrackNavAreaNextThink = 0.0;
 	g_iPathLaserModelIndex = PrecacheModel("materials/sprites/laserbeam.vmt");
+
+	g_TEParticleDelay = 0.0;
 }
 
 public void OnMapEnd()
@@ -1823,6 +1858,39 @@ public void OnGameFrame()
 			}
 		}
 	}
+
+	if (GetGameTime() >= g_TEParticleDelay)
+	{
+		g_TEParticleDelay = GetGameTime() + 10.0;
+
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (!IsClientInGame(i) || !IsPlayerAlive(i) || IsFakeClient(i))
+				continue;
+			
+			for (int x = 0; x < g_Player[i].tasks.Length; x++)
+			{
+				int task = g_Player[i].tasks.Get(x);
+
+				if (g_Tasks[task].tasktype == TaskType_Single)
+				{
+					if (IsTaskCompleted(i, task))
+						continue;
+					
+					int entity = g_Tasks[task].entity;
+					
+					char sDisplay[64];
+					GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+
+					float origin[3];
+					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+					origin[2] += 10.0;
+
+					TF2_CreateAnnotation(i, x, origin, sDisplay, 10.0, "vo/null.wav");
+				}
+			}
+		}
+	}
 }
 
 public bool TraceRayDontHitEntity(int entity,int mask, any data)
@@ -2028,6 +2096,9 @@ void OnMatchCompleted(TFTeam team)
 		RemoveGhost(i);
 		ClearTasks(i);
 	}
+
+	for (int i = 0; i < g_TotalTasks; i++)
+		g_Tasks[i].KillSprite();
 
 	StopTimer(g_Match.meeting);
 	StopTimer(g_LockDoors);

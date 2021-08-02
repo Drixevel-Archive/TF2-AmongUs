@@ -269,6 +269,17 @@ void RemoveGhost(int client)
 	g_IsDead[client] = false;
 }
 
+bool IsValidTask(int task)
+{
+	if (task < 0)
+		return false;
+	
+	if (task > (g_TotalTasks - 1))
+		return false;
+	
+	return true;
+}
+
 int GetTaskByName(const char[] name)
 {
 	for (int i = 0; i < g_TotalTasks; i++)
@@ -448,4 +459,42 @@ int GetTaskMapParts(int task)
 	GetCustomKeyValue(entity, "parts", sParts, sizeof(sParts));
 
 	return StringToInt(sParts);
+}
+
+int CreateSprite(int entity, const char[] file, float offsets[3])
+{
+	char sName[128];
+	GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+	float vOrigin[3];
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", vOrigin);
+
+	vOrigin[0] += offsets[0];
+	vOrigin[1] += offsets[1];
+	vOrigin[2] += offsets[2];
+
+	int sprite = CreateEntityByName("env_sprite_oriented");
+
+	if (IsValidEntity(sprite))
+	{
+		char sFile[PLATFORM_MAX_PATH];
+		strcopy(sFile, sizeof(sFile), file);
+
+		if (StrContains(sFile, ".vmt", false) == -1)
+			StrCat(sFile, sizeof(sFile), ".vmt");
+
+		DispatchKeyValue(sprite, "model", sFile);
+		DispatchKeyValue(sprite, "spawnflags", "1");
+		DispatchKeyValue(sprite, "scale", "0.1");
+		DispatchKeyValue(sprite, "rendermode", "1");
+		DispatchKeyValue(sprite, "rendercolor", "255 255 255");
+		DispatchKeyValue(sprite, "parentname", sName);
+		DispatchSpawn(sprite);
+		
+		TeleportEntity(sprite, vOrigin, NULL_VECTOR, NULL_VECTOR);
+
+		SetEntPropEnt(sprite, Prop_Data, "m_hOwnerEntity", entity);
+	}
+
+	return sprite;
 }

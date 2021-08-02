@@ -753,3 +753,26 @@ stock void ScreenFadeAll(int duration = 4, int hold_time = 4, int flag = FFADE_I
 		EndMessage();
 	}
 }
+
+void TF2_CreateAnnotation(int client, int index, float[3] origin, const char[] text, float lifetime = 10.0, const char[] sound = "vo/null.wav")
+{
+	if (!IsClientInGame(client))
+		return;
+	
+	Event event = CreateEvent("show_annotation");
+		
+	if (event == null)
+		return;
+		
+	event.SetFloat("worldPosX", origin[0]);
+	event.SetFloat("worldPosY", origin[1]);
+	event.SetFloat("worldPosZ", origin[2]);
+	event.SetFloat("lifetime", lifetime);
+	event.SetInt("id", index * MAXPLAYERS + client + 8750);
+	event.SetInt("visibilityBitfield", (1 << client));
+	event.SetString("text", text);
+	event.SetString("play_sound", sound);
+	event.SetString("show_effect", "1");
+	event.SetString("show_distance", "1");
+	event.Fire(false);
+}

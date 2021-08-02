@@ -112,3 +112,21 @@ public Action OnEntitySpawn(int entity)
 	
 	return Plugin_Continue;
 }
+
+public Action OnTaskSpriteTransmit(int entity, int client)
+{
+	if (client < 1 || client > MaxClients || !IsClientInGame(client) || !IsPlayerAlive(client))
+		return Plugin_Stop;
+	
+	int taskent = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
+	
+	int task = -1;
+	for (int i = 0; i < g_TotalTasks; i++)
+		if (g_Tasks[i].entity == taskent)
+			task = i;
+
+	if (!IsValidTask(task) || !IsTaskAssigned(client, task))
+		return Plugin_Stop;
+	
+	return Plugin_Continue;
+}
