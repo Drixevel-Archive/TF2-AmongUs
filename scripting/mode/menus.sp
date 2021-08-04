@@ -603,6 +603,9 @@ void OpenMap(int client, bool repeat = false)
 			char sName[64];
 			g_AreaNames.GetString(sID, sName, sizeof(sName));
 
+			if (strlen(sName) == 0)
+				continue;
+
 			if (locations.FindString(sName) == -1)
 				locations.PushString(sName);
 			
