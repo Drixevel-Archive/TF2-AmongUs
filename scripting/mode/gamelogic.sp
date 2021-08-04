@@ -170,12 +170,12 @@ public void Timer_On1MinRemain(const char[] output, int caller, int activator, f
 
 public void Timer_On30SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	
 }
 
 public void Timer_On10SecRemain(const char[] output, int caller, int activator, float delay)
 {
-
+	StartIntroSequence();
 }
 
 public void Timer_On5SecRemain(const char[] output, int caller, int activator, float delay)

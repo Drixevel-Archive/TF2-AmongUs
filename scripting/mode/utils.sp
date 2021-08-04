@@ -524,3 +524,102 @@ public void Frame_ListCommands(DataPack pack)
 		CPrintToChat(client, "%T", "commands in console", client);
 	}
 }
+float g_LastTele[MAXPLAYERS + 1][3];
+void StartIntroSequence()
+{
+	ScreenFadeAll(100, 2500, FFADE_OUT, view_as<int>({0, 0, 0, 255}), true);
+
+	for (int i = 1; i <= MaxClients; i++)
+		if (IsClientInGame(i) && IsPlayerAlive(i))
+			TF2_RespawnPlayer(i);
+	
+	CreateTimer(0.5, Timer_ShowSHH, _, TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(1.0, Timer_SetPlayerIntro, _, TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(10.0, Timer_HideIntro, _, TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(15.0, Timer_RespawnPlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action Timer_ShowSHH(Handle timer)
+{
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+		
+		SetHudTextParams(-1.0, -1.0, 3.0, 255, 255, 255, 255);
+		ShowHudText(i, -1, "SHHHH....");
+	}
+}
+
+public Action Timer_SetPlayerIntro(Handle timer)
+{
+	int camera = FindEntityByName("intro_cam", "point_viewcontrol");
+	DispatchKeyValue(camera, "spawnflags", "12");
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || !IsPlayerAlive(i))
+			continue;
+		
+		TeleTest(i);
+		AcceptEntityInput(camera, "Enable", i);
+		SetEntityMoveType(i, MOVETYPE_NONE);
+	}
+}
+
+void TeleTest(int client)
+{
+	GetClientAbsOrigin(client, g_LastTele[client]);
+	
+	int entity = -1; float origin1[3]; float origin2[3]; float angles[3]; char sName[64];
+	while ((entity = FindEntityByClassname(entity, "info_teleport_destination")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+		if (StrContains(sName, "intro_tele", false) != 0)
+			continue;
+		
+		GetEntPropVector(entity, Prop_Data, "m_vecOrigin", origin1);
+		origin1[2] += 5.0;
+
+		int count;
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (IsClientInGame(i) && IsPlayerAlive(i))
+			{
+				GetClientAbsOrigin(i, origin2);
+
+				if (GetVectorDistance(origin1, origin2) <= 50.0)
+					count++;
+			}
+		}
+
+		if (count < 1)
+		{
+			GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
+			TeleportEntity(client, origin1, angles, NULL_VECTOR);
+			break;
+		}
+	}
+}
+
+public Action Timer_HideIntro(Handle timer)
+{
+	ScreenFadeAll(100, 3500, FFADE_OUT, view_as<int>({0, 0, 0, 255}), true);
+}
+
+public Action Timer_RespawnPlayers(Handle timer)
+{
+	int camera = FindEntityByName("intro_cam", "point_viewcontrol");
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i))
+			continue;
+
+		TeleportEntity(i, g_LastTele[i], NULL_VECTOR, NULL_VECTOR);
+		AcceptEntityInput(camera, "Disable", i);
+		SetClientViewEntity(i, i);
+		SetEntityMoveType(i, MOVETYPE_WALK);
+	}
+}

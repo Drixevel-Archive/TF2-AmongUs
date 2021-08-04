@@ -659,8 +659,6 @@ public int MenuAction_Void(Menu menu, MenuAction action, int param1, int param2)
 	}
 }
 
-
-
 void OpenCommandsMenu(int client, bool admin = false, bool back = false)
 {
 	PrintCommandsInConsole(client, admin);
