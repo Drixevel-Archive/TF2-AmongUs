@@ -114,7 +114,7 @@ public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcas
 	g_BetweenRounds = false;
 
 	//Parse all available tasks on the map.
-	ParseTasks();
+	CreateTimer(0.2, Timer_ParseTasks, _, TIMER_FLAG_NO_MAPCHANGE);
 
 	//Makes sure the lobby is locked whenever we're waiting for players to join.
 	if (TF2_IsWaitingForPlayers())

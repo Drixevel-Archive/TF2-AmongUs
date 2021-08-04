@@ -342,4 +342,7 @@ public Action Timer_ShowAd(Handle timer)
 
 	if (g_CurrentAd > 2)
 		g_CurrentAd = 0;
+public Action Timer_ParseTasks(Handle timer)
+{
+	ParseTasks();
 }
