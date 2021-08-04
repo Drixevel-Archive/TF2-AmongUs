@@ -145,68 +145,66 @@ stock void TF2_ResumeTimer()
 
 public void Timer_On5MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 5 Minutes Remaining");
+
 }
 
 public void Timer_On4MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 4 Minutes Remaining");
+
 }
 
 public void Timer_On3MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 3 Minutes Remaining");
+
 }
 
 public void Timer_On2MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 2 Minutes Remaining");
+
 }
 
 public void Timer_On1MinRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 1 Minute Remaining");
+
 }
 
 public void Timer_On30SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 30 Seconds Remaining");
+
 }
 
 public void Timer_On10SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 10 Seconds Remaining");
+
 }
 
 public void Timer_On5SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 5 Seconds Remaining");
+
 }
 
 public void Timer_On4SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 4 Seconds Remaining");
+
 }
 
 public void Timer_On3SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 3 Seconds Remaining");
+
 }
 
 public void Timer_On2SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 2 Seconds Remaining");
+
 }
 
 public void Timer_On1SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H2}Lobby{default}: 1 Second Remaining");
+
 }
 
 public void Timer_OnRoundStart(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H1}Mode{default}: Match Started");
-
 	EmitSoundToAll(SOUND_ROUNDSTART);
 
 	for (int i = 1; i <= MaxClients; i++)
@@ -241,7 +239,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 
 		g_Player[client].role = Role_Imposter;
 		SendHud(client);
-		CPrintToChat(client, "You are an {H1}IMPOSTER{default}!");
+		CPrintToChat(client, "%T", "imposter gained", client);
 		TF2_GiveItem(client, "tf_weapon_pda_engineer_build", 25, TF2Quality_Vintage, 1);
 
 		if (first)
@@ -258,7 +256,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 	//Tell other imposters who the other imposters are in chat.
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && IsPlayerAlive(i) && !IsFakeClient(i) && g_Player[i].role == Role_Imposter)
-			CPrintToChat(i, "Imposters this match: {H1}%s", sImposters);
+			CPrintToChat(i, "%T", "list imposters", i, sImposters);
 	
 	//Handle fog controllers being set properly for certain roles.
 	for (int i = 1; i <= MaxClients; i++)
@@ -354,8 +352,6 @@ public void Timer_OnFinished(const char[] output, int caller, int activator, flo
 
 public void Timer_OnSetupStart(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H1}Mode{default}: Lobby Started");
-
 	GameRules_SetProp("m_bInSetup", true);
 
 	//Respawn all players on the map on setup so they're in the lobby.
@@ -379,8 +375,6 @@ public void Timer_OnSetupStart(const char[] output, int caller, int activator, f
 
 public void Timer_OnSetupFinished(const char[] output, int caller, int activator, float delay)
 {
-	CPrintToChatAll("{H1}Mode{default}: Lobby Finished");
-
 	GameRules_SetProp("m_bInSetup", false);
 
 	//Unlock and open the doors whenever the lobby phase is finished.

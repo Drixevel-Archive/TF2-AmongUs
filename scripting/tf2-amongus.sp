@@ -590,7 +590,6 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	CPrintToChatAll("{H1}Mode{default}: Initializing...");
 	RegPluginLibrary("tf2-amongus");
 
 	//Natives
@@ -627,6 +626,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	LoadTranslations("amongus.phrases");
+
 	CSetPrefix("{black}[{ghostwhite}Among Us{black}]");
 	CSetHighlight("{crimson}");
 	CSetHighlight2("{darkorchid}");
@@ -726,15 +727,12 @@ public void OnPluginStart()
 	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 		if (GetEntityClassname(entity, classname, sizeof(classname)))
 			OnEntityCreated(entity, classname);
-	
-	CPrintToChatAll("{H1}Mode{default}: Loaded");
-	
+		
 	if (g_Late)
 	{
 		//Parse all available tasks on the map.
 		ParseTasks();
 
-		CPrintToChatAll("{H1}Mode{default}: Setting up Round...");
 		TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
 
 		for (int i = 1; i <= MaxClients; i++)
@@ -745,8 +743,6 @@ public void OnPluginStart()
 
 public void OnPluginEnd()
 {
-	CPrintToChatAll("{H1}Mode{default}: Unloaded");
-
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i))
@@ -915,14 +911,6 @@ public Action OnClientCommand(int client, int args)
 {
 	char sCommand[32];
 	GetCmdArg(0, sCommand, sizeof(sCommand));
-	// PrintToChat(client, sCommand);
-
-	// char sArg[32];
-	// for (int i = 1; i <= args; i++)
-	// {
-	// 	GetCmdArg(i, sArg, sizeof(sArg));
-	// 	PrintToChat(client, " - %s", sArg);
-	// }
 
 	if (StrEqual(sCommand, "joinclass", false))
 	{
@@ -1022,7 +1010,7 @@ public void OnClientDisconnect(int client)
 		if (imposters < 1)
 		{
 			ForceWin();
-			CPrintToChatAll("All imposters have disconnected, Crewmates win!");
+			CPrintToChatAll("%t", "imposters disconnected");
 		}
 	}
 }
@@ -1315,7 +1303,7 @@ void OnButtonPress(int client, int button)
 			if (locked != INVALID_ENT_REFERENCE && locked2 != INVALID_ENT_REFERENCE)
 			{
 				g_DelayDoors = GetTime() + convar_Sabotages_Cooldown_Doors.IntValue;
-				CPrintToChat(client, "Door is now locked for 10 seconds!");
+				CPrintToChat(client, "%T", "door is locked", client);
 				StopTimer(g_LockDoors);
 
 				DataPack pack;
@@ -1540,11 +1528,6 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 
 		char sType[64];
 		GetCustomKeyValue(entity, "type", sType, sizeof(sType));
-		PrintToChat(client, sType);
-
-		//char sPart[16];
-		//GetCustomKeyValue(entity, "part", sPart, sizeof(sPart));
-		//int part = StringToInt(sPart);
 
 		if (StrContains(sType, "meltdown", false) == 0 && g_Reactors != null)
 		{
@@ -1571,7 +1554,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			g_ReactorExclude = -1;
 			g_ReactorsTime = 0;
 			StopTimer(g_Reactors);
-			CPrintToChatAll("{H1}%N {default}has stopped the Reactor meltdown.", client);
+			CPrintToChatAll("%t", "reactor meltdown stopped", client);
 			g_IsSabotageActive = false;
 
 			Call_StartForward(g_Forward_OnSabotageFailurePost);
@@ -1583,14 +1566,14 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		{
 			g_DisableCommunications = false;
 			SendHudToAll();
-			CPrintToChatAll("{H1}%N {default}has fixed communications.", client);
+			CPrintToChatAll("%t", "communications fixed", client);
 			g_IsSabotageActive = false;
 		}
 		else if (StrContains(sType, "oxygen", false) == 0 && g_O2 != null)
 		{
 			g_O2Time = 0;
 			StopTimer(g_O2);
-			CPrintToChatAll("{H1}%N {default}has fixed O2.", client);
+			CPrintToChatAll("%t", "o2 fixed", client);
 			g_IsSabotageActive = false;
 
 			Call_StartForward(g_Forward_OnSabotageFailurePost);
@@ -1601,7 +1584,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		else if (StrContains(sType, "lights", false) == 0 && g_LightsOff)
 		{
 			g_LightsOff = false;
-			CPrintToChatAll("{H1}%N {default}has fixed the lights.", client);
+			CPrintToChatAll("%t", "lights fixed", client);
 			
 			float fog = GetGameSetting_Float("crewmate_vision");
 
@@ -1754,7 +1737,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 				}
 
 				if (!discovered)
-					CPrintToChat(client, "You are not assigned to do this task.");
+					CPrintToChat(client, "%T", "not assigned task", client);
 				else
 					EmitSoundToClient(client, SOUND_TASK_INPROGRESS);
 			}
@@ -1848,7 +1831,7 @@ public void OnGameFrame()
 		g_BetweenRounds = true;
 
 		ForceWin();
-		CPrintToChatAll("Crewmates have completed all tasks, Crewmates win!");
+		CPrintToChatAll("%t", "all tasks completed");
 	}
 
 	if (GetGameTime() >= g_flTrackNavAreaNextThink)
@@ -2002,9 +1985,9 @@ void CallMeeting(int client = -1, bool button = false)
 	if (client > 0)
 	{
 		if (button)
-			CPrintToChatAll("{H1}%N {default}has called a meeting!", client);
+			CPrintToChatAll("%t", "has called a meeting", client);
 		else
-			CPrintToChatAll("{H1}%N {default}has found a body!", client);
+			CPrintToChatAll("%t", "has found a body", client);
 	}
 
 	EmitSoundToAll(button ? SOUND_ALARM : SOUND_BODYFOUND);
@@ -2099,7 +2082,6 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 {
 	char sName[32];
 	GetEntPropString(caller, Prop_Data, "m_iName", sName, sizeof(sName));
-	//PrintToChatAll("[%s][%i][%i][%.2f]", output, caller, activator, delay);
 
 	if (StrEqual(sName, RELAY_MEETING_BUTTON_OPEN, false) && g_Match.meeting == null)
 	{
@@ -2128,8 +2110,6 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 
 void OnMatchCompleted(TFTeam team)
 {
-	CPrintToChatAll("{H1}Mode{default}: Match Finished");
-
 	switch (team)
 	{
 		case TFTeam_Red:
@@ -2254,7 +2234,7 @@ void StartSabotage(int client, int sabotage)
 	{
 		case SABOTAGE_REACTORS:
 		{
-			CPrintToChatAll("Reactors are now under meltdown!");
+			CPrintToChatAll("%t", "reactors under meltdown");
 
 			g_ReactorsTime = 30;
 			StopTimer(g_Reactors);
@@ -2263,7 +2243,7 @@ void StartSabotage(int client, int sabotage)
 
 		case SABOTAGE_FIXLIGHTS:
 		{
-			CPrintToChatAll("Lights are now off!");
+			CPrintToChatAll("%t", "lights are off");
 			g_LightsOff = true;
 
 			float fog = GetGameSetting_Float("crewmate_vision");
@@ -2277,14 +2257,14 @@ void StartSabotage(int client, int sabotage)
 
 		case SABOTAGE_COMMUNICATIONS:
 		{
-			CPrintToChatAll("Communications have been disabled!");
+			CPrintToChatAll("%t", "communications disabled");
 			g_DisableCommunications = true;
 			SendHudToAll();
 		}
 
 		case SABOTAGE_DEPLETION:
 		{
-			CPrintToChatAll("Oxygen is being depleted!");
+			CPrintToChatAll("%t", "o2 depleted");
 
 			g_O2Time = 30;
 			StopTimer(g_O2);

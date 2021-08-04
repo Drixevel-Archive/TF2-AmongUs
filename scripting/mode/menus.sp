@@ -24,7 +24,7 @@ public int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 
 			if (StrEqual(sInfo, "description", false))
 			{
-				CPrintToChat(param1, "Brief Description: {H2}%s", PLUGIN_DESCRIPTION);
+				CPrintToChat(param1, "%T", "brief description", param1, PLUGIN_DESCRIPTION);
 				OpenMainMenu(param1);
 			}
 			else if (StrEqual(sInfo, "color", false))
@@ -85,7 +85,7 @@ void OpenSettingsMenu(int client, bool backbutton = false)
 {
 	if (!IsAdmin(client) && client != g_GameOwner)
 	{
-		CPrintToChat(client, "You are not currently the game owner, you aren't allowed to change game settings.");
+		CPrintToChat(client, "%T", "denied settings change not game owner", client);
 		return;
 	}
 
@@ -178,7 +178,7 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 		{
 			if (!IsAdmin(param1) && param1 != g_GameOwner)
 			{
-				CPrintToChat(param1, "You are not currently the game owner, you aren't allowed to change game settings.");
+				CPrintToChat(param1, "%T", "denied settings change not game owner", param1);
 				return;
 			}
 
@@ -192,23 +192,23 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 					ParseGameSettings();
 					SaveGameSettings(param1);
 					OpenSettingsMenu(param1);
-					CPrintToChat(param1, "All of your game settings have been reset to default.");
+					CPrintToChat(param1, "%T", "game settings reset", param1);
 
 				}
 				else if (StrEqual(sInfo, "start", false))
 				{
-					TF2_SetSetupTime(5);
-					CPrintToChatAll("{H1}%N {default}has started the match.", param1);
+					TF2_SetSetupTime(6);
+					CPrintToChatAll("%t", "match manually started", param1);
 				}
 				else
 				{
 					strcopy(g_UpdatingGameSetting[param1], 32, sInfo);
-					CPrintToChat(param1, "Please type in chat the new value for key '%s':", sInfo);
+					CPrintToChat(param1, "%T", "change game setting", param1, sInfo);
 				}
 			}
 			else
 			{
-				CPrintToChat(param1, "You are not allowed to change settings while the match is live.");
+				CPrintToChat(param1, "%T", "denied settings change match is live", param1);
 				OpenSettingsMenu(param1);
 			}
 		}
@@ -282,14 +282,14 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 		{
 			if (!IsPlayerAlive(param1))
 			{
-				CPrintToChat(param1, "You are not allowed to vote while dead.");
+				CPrintToChat(param1, "%T", "voting while dead", param1);
 				CreateVoteMenu(param1);
 				return;
 			}
 
 			if (g_Match.meeting == null)
 			{
-				CPrintToChat(param1, "No meeting is currently active.");
+				CPrintToChat(param1, "%T", "meeting not active", param1);
 				CreateVoteMenu(param1);
 				return;
 			}
@@ -325,11 +325,11 @@ public int MenuHandler_Vote(Menu menu, MenuAction action, int param1, int param2
 			}
 
 			if (param1 == target)
-				CPrintToChatAll("{H1}%N {default}voted for {H2}Themself!", param1);
+				CPrintToChatAll("%t", "voted themself", param1);
 			else if (target == 0)
-				CPrintToChatAll("{H1}%N {default}voted to Skip!", param1);
+				CPrintToChatAll("%t", "voted to skip", param1);
 			else
-				CPrintToChatAll("{H1}%N {default}voted for {H2}%N!", param1, target);
+				CPrintToChatAll("%t", "voted against", param1, target);
 			
 			EmitSoundToClient(param1, SOUND_VOTE_CONFIRM);
 

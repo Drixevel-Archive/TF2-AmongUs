@@ -26,7 +26,7 @@ public Action Command_Role(int client, int args)
 	
 	char sRole[32];
 	GetRoleName(g_Player[client].role, sRole, sizeof(sRole));
-	CPrintToChat(client, "Current Role: {H1}%s", sRole);
+	CPrintToChat(client, "%T", "current role", client, sRole);
 	
 	return Plugin_Handled;
 }
@@ -88,7 +88,7 @@ public Action Command_SetRole(int client, int args)
 	{
 		char sRoles[255];
 		RoleNamesBuffer(sRoles, sizeof(sRoles));
-		CPrintToChat(client, "Specified role invalid, please choose the following: {H1}%s", sRoles);
+		CPrintToChat(client, "%T", "invalid role specified", client ,sRoles);
 		return Plugin_Handled;
 	}
 
@@ -111,11 +111,11 @@ public Action Command_SetRole(int client, int args)
 	}
 
 	if (client == target)
-		CPrintToChat(client, "You have updated your role to: {H1}%s", sRole);
+		CPrintToChat(client, "%T", "role updated", client, sRole);
 	else
 	{
-		CPrintToChat(client, "You have updated {H2}%N{default}'s role to: {H1}%s", target, sRole);
-		CPrintToChat(target, "{H2}%N has updated your role to: {H1}%s", client, sRole);
+		CPrintToChat(client, "%T", "target role updated", client, target, sRole);
+		CPrintToChat(target, "%T", "admin role updated", target, client, sRole);
 	}
 
 	return Plugin_Handled;
@@ -147,7 +147,7 @@ public Action Command_SetOwner(int client, int args)
 	OpenSettingsMenu(target);
 	SendHudToAll();
 
-	CPrintToChatAll("{H1}%N {default}has set the game owner to: {H1}%N", client, target);
+	CPrintToChatAll("%t", "game owner set by admin", client, target);
 
 	return Plugin_Handled;
 }
@@ -160,7 +160,7 @@ public Action Command_RemoveOwner(int client, int args)
 		return Plugin_Handled;
 	}
 
-	CPrintToChatAll("{H1}%N {default}has removed game ownership from {H1}%N{default}.", client, g_GameOwner);
+	CPrintToChatAll("%t", "game owner removed", client, g_GameOwner);
 	g_GameOwner = -1;
 	ParseGameSettings();
 	SendHudToAll();
@@ -174,7 +174,7 @@ public Action Command_Respawn(int client, int args)
 		if (IsClientInGame(i) && !IsPlayerAlive(i))
 			TF2_RespawnPlayer(i);
 	
-	CPrintToChatAll("{H1}%N {default}has respawnd all dead players on teams.");
+	CPrintToChatAll("%t", "admin respawned dead players");
 	return Plugin_Handled;
 }
 
@@ -207,7 +207,7 @@ public Action Command_Eject(int client, int args)
 	}
 
 	EjectPlayer(target);
-	CPrintToChatAll("{H1}%N {default}has ejected {H1}%N {default}into space!", client, target);
+	CPrintToChatAll("%t", "admin ejection", client, target);
 
 	return Plugin_Handled;
 }
@@ -243,12 +243,13 @@ public Action Command_Start(int client, int args)
 {
 	if (!CheckCommandAccess(client, "", ADMFLAG_SLAY, true) && client != g_GameOwner)
 	{
-		CPrintToChat(client, "You do not have access to this menu.");
+		CPrintToChat(client, "%T", "no command access", client);
 		return Plugin_Handled;
 	}
 
 	TF2_SetSetupTime(6); //Starts at 6 so the announcer starts counting from 5 instead of 4.
-	CPrintToChatAll("{H1}%N {default}has started the match.", client);
+	CPrintToChatAll("%t", "match manually started", client);
+
 	return Plugin_Handled;
 }
 
@@ -294,7 +295,7 @@ public Action Command_Mark(int client, int args)
 
 	g_AreaNames.SetString(sID, sName);
 
-	CPrintToChat(client, "Name {H1}%s {default}set for Navmesh ID {H2}%i{default}.", sName, id);
+	CPrintToChat(client, "%T", "mark set", client, sName, id);
 	
 	return Plugin_Handled;
 }
@@ -305,7 +306,7 @@ public Action Command_SaveMarks(int client, int args)
 	GetCurrentMap(sMap, sizeof(sMap));
 
 	SaveMarks(sMap);
-	CReplyToCommand(client, "Marks for map {H1}%s {default}has been saved.", sMap);
+	CReplyToCommand(client, "%T", "marks saved", client, sMap);
 	
 	return Plugin_Handled;
 }
@@ -350,7 +351,7 @@ public Action Command_GiveTask(int client, int args)
 	SendHud(target);
 
 	CReplyToCommand(client, "You have assigned task {H1}%s {default} to {H2}%N{default}.", sTask, target);
-	CPrintToChat(target, "{H2}%N {default}has assigned you the task: {H1}%s", client, sTask);
+	CPrintToChat(target, "%T", "task assigned maually", target, client, sTask);
 
 	return Plugin_Handled;
 }
@@ -364,7 +365,7 @@ public Action Command_AssignTask(int client, int args)
 public Action Command_EditMarks(int client, int args)
 {
 	g_Player[client].editingmarks = !g_Player[client].editingmarks;
-	CPrintToChat(client, "Marks Editor: {H2}%s", g_Player[client].editingmarks ? "Enabled" : "Disabled");
+	CPrintToChat(client, "%T", "marks editor toggle", client, g_Player[client].editingmarks ? "Enabled" : "Disabled");
 	return Plugin_Handled;
 }
 
@@ -373,7 +374,7 @@ public Action Command_PaintMarks(int client, int args)
 	if (strlen(g_Player[client].paintmarks) > 0)
 	{
 		g_Player[client].paintmarks[0] = '\0';
-		CPrintToChat(client, "Mark painting has been disabled.");
+		CPrintToChat(client, "%T", "marks painting disabled", client);
 		return Plugin_Handled;
 	}
 
@@ -381,7 +382,7 @@ public Action Command_PaintMarks(int client, int args)
 	GetCmdArgString(sName, sizeof(sName));
 
 	strcopy(g_Player[client].paintmarks, 64, sName);
-	CPrintToChat(client, "Painting areas of movement for: %s", g_Player[client].paintmarks);
+	CPrintToChat(client, "%T", "marks painting enabled", client, g_Player[client].paintmarks);
 
 	return Plugin_Handled;
 }

@@ -67,9 +67,9 @@ public Action Timer_EndVoting(Handle timer)
 			EjectPlayer(i);
 
 			if (confirm)
-				CPrintToChatAll("{H1}%N {default}has been ejected! They were %s{default}an Imposter!", i, g_Player[i].role != Role_Imposter ? "{H2}NOT " : "");
+				CPrintToChatAll("%t", "ejected confirm", i, g_Player[i].role != Role_Imposter ? "NOT " : "");
 			else
-				CPrintToChatAll("{H1}%N {default}has been ejected!", i);
+				CPrintToChatAll("%t", "ejected", i);
 		}
 		
 		g_Player[i].voted_to = 0;
@@ -143,7 +143,7 @@ public Action Timer_ReactorTick(Handle timer, any data)
 public Action Timer_O2Tick(Handle timer, any data)
 {
 	int client = GetClientOfUserId(data);
-	
+
 	g_O2Time--;
 
 	if (g_O2Time > 0)
@@ -205,7 +205,7 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 	if (total_crewmates < 1)
 	{
 		ForceWin(true);
-		CPrintToChatAll("Imposters are the only ones left, Imposters win!");
+		CPrintToChatAll("%t", "imposters left win");
 	}
 
 	int total_imposters;
@@ -217,12 +217,12 @@ public Action Timer_CheckAlivePlayers(Handle timer)
 	if (total_crewmates == total_imposters)
 	{
 		ForceWin(true);
-		CPrintToChatAll("There's an equal amount of crewmates to Imposters, Imposters win!");
+		CPrintToChatAll("%t", "imposters equal win");
 	}
 	else if (total_imposters < 1)
 	{
 		ForceWin();
-		CPrintToChatAll("There are no more Imposters alive, Crewmates win!");
+		CPrintToChatAll("%t", "crewmates win imposters dead");
 	}
 
 	return Plugin_Continue;

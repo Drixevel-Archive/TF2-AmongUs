@@ -128,7 +128,6 @@ public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcas
 		return;
 	}
 
-	CPrintToChatAll("{H1}Mode{default}: Setting up Round...");
 	TF2_CreateTimer(convar_Time_Setup.IntValue, convar_Time_Round.IntValue);
 
 	for (int i = 1; i <= MaxClients; i++)
