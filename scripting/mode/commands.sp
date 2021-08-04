@@ -39,10 +39,13 @@ public Action Command_GameSettings(int client, int args)
 
 public Action Command_Owner(int client, int args)
 {
+	char sName[MAX_NAME_LENGTH];
 	if (g_GameOwner != -1)
-		CReplyToCommand(client, "Current Owner: {H1}%N", g_GameOwner);
+		GetClientName(g_GameOwner, sName, sizeof(sName));
 	else
-		CReplyToCommand(client, "Current Owner: {H1}<Vacant>");
+		strcopy(sName, sizeof(sName), "<Not Active>");
+	
+	CReplyToCommand(client, "%T", "current owner", client, sName);
 	
 	return Plugin_Handled;
 }
@@ -56,7 +59,7 @@ public Action Command_Voting(int client, int args)
 public Action Command_ReloadColors(int client, int args)
 {
 	ParseColors();
-	CReplyToCommand(client, "Colors have been reloaded.");
+	CReplyToCommand(client, "%T", "colors reloaded", client);
 	return Plugin_Handled;
 }
 
@@ -66,7 +69,7 @@ public Action Command_SetRole(int client, int args)
 	{
 		char sCommand[32];
 		GetCmdArg(0, sCommand, sizeof(sCommand));
-		CReplyToCommand(client, "Usage: {H2}%s {H1}<target> <role>", sCommand);
+		CReplyToCommand(client, "%T", "usage set role", client, sCommand);
 		return Plugin_Handled;
 	}
 
@@ -77,7 +80,7 @@ public Action Command_SetRole(int client, int args)
 
 	if (target < 1)
 	{
-		CReplyToCommand(client, "Target {H1}%s {default}not found, please try again.", sTarget);
+		CReplyToCommand(client, "%T", "target not found", client, sTarget);
 		return Plugin_Handled;
 	}
 
@@ -127,7 +130,7 @@ public Action Command_SetOwner(int client, int args)
 	{
 		char sCommand[32];
 		GetCmdArg(0, sCommand, sizeof(sCommand));
-		CReplyToCommand(client, "Usage: {H2}%s {H1}<target>", sCommand);
+		CReplyToCommand(client, "%T", "usage set owner", client, sCommand);
 		return Plugin_Handled;
 	}
 
@@ -138,7 +141,7 @@ public Action Command_SetOwner(int client, int args)
 
 	if (target < 1)
 	{
-		CReplyToCommand(client, "Target {H1}%s {default}not found, please try again.", sTarget);
+		CReplyToCommand(client, "%T", "target not found", client, sTarget);
 		return Plugin_Handled;
 	}
 
@@ -156,7 +159,7 @@ public Action Command_RemoveOwner(int client, int args)
 {
 	if (g_GameOwner == -1)
 	{
-		CReplyToCommand(client, "There currently isn't an active game owner.");
+		CReplyToCommand(client, "%T", "no active game owner", client);
 		return Plugin_Handled;
 	}
 
@@ -190,19 +193,19 @@ public Action Command_Eject(int client, int args)
 
 	if (target < 1)
 	{
-		CReplyToCommand(client, "Target {H1}%s {default}not found, please try again.", sTarget);
+		CReplyToCommand(client, "%T", "target not found", client, sTarget);
 		return Plugin_Handled;
 	}
 
 	if (!IsClientInGame(target))
 	{
-		CReplyToCommand(client, "Target {H1}%N {default}is not available, please try again.", target);
+		CReplyToCommand(client, "%T", "target not ingame", client, target);
 		return Plugin_Handled;
 	}
 
-	if (!IsClientInGame(target))
+	if (!IsPlayerAlive(target))
 	{
-		CReplyToCommand(client, "Target {H1}%N {default}is not alive, please try again.", target);
+		CReplyToCommand(client, "%T", "target not alive", client, target);
 		return Plugin_Handled;
 	}
 
@@ -323,7 +326,7 @@ public Action Command_GiveTask(int client, int args)
 	{
 		char sCommand[32];
 		GetCmdArg(0, sCommand, sizeof(sCommand));
-		CReplyToCommand(client, "Usage: {H2}%s {H1}<target> <task>", sCommand);
+		CReplyToCommand(client, "%T", "usage give task", client, sCommand);
 		return Plugin_Handled;
 	}
 
@@ -333,7 +336,7 @@ public Action Command_GiveTask(int client, int args)
 
 	if (target < 1)
 	{
-		CReplyToCommand(client, "Target {H1}%s {default}not found, please try again.", sTarget);
+		CReplyToCommand(client, "%T", "target not found", client, sTarget);
 		return Plugin_Handled;
 	}
 
@@ -343,14 +346,14 @@ public Action Command_GiveTask(int client, int args)
 
 	if (task == -1)
 	{
-		CReplyToCommand(client, "Invalid task specified, please try again.");
+		CReplyToCommand(client, "%T", "invalid task specified", client);
 		return Plugin_Handled;
 	}
 
 	AssignTask(target, task);
 	SendHud(target);
 
-	CReplyToCommand(client, "You have assigned task {H1}%s {default} to {H2}%N{default}.", sTask, target);
+	CReplyToCommand(client, "%T", "task assigned admin", client, sTask, target);
 	CPrintToChat(target, "%T", "task assigned maually", target, client, sTask);
 
 	return Plugin_Handled;

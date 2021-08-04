@@ -147,12 +147,6 @@
 		"en"	"Name {H1}{1} {default}set for Navmesh ID {H2}{2}{default}."
 	}
 
-	"marks saved"
-	{
-		"#format"	"{1:s}"
-		"en"	"Marks for map {H1}{1} {default}has been saved."
-	}
-
 	"task assigned maually"
 	{
 		"#format"	"{1:N},{2:s}"
@@ -317,5 +311,75 @@
 	{
 		"#format"	"{1:i}"
 		"en"	"Please wait {H2}{1} {default}seconds before using another sabotage."
+	}
+
+	//Replies
+	"current owner"
+	{
+		"#format"	"{1:s}"
+		"en"	"Current Owner: {H1}{1}"
+	}
+
+	"colors reloaded"
+	{
+		"en"	"Colors have been reloaded."
+	}
+
+	"usage set role"
+	{
+		"#format"	"{1:s}"
+		"en"	"Usage: {H2}{1} {H1}<target> <role>"
+	}
+
+	"target not found"
+	{
+		"#format"	"{1:s}"
+		"en"	"Target {H1}{1} {default}not found, please try again."
+	}
+
+	"usage set owner"
+	{
+		"#format"	"{1:s}"
+		"en"	"Usage: {H2}{1} {H1}<target>"
+	}
+
+	"no active game owner"
+	{
+		"en"	"There currently isn't an active game owner."	
+	}
+
+	"target not ingame"
+	{
+		"#format"	"{1:N}"
+		"en"	"Target {H1}{1} {default}is not available, please try again."
+	}
+
+	"target not alive"
+	{
+		"#format"	"{1:N}"
+		"en"	"Target {H1}{1} {default}is not alive, please try again."
+	}
+
+	"marks saved"
+	{
+		"#format"	"{1:s}"
+		"en"	"Marks for map {H1}{1} {default}has been saved."
+	}
+
+	"usage give task"
+	{
+		"#format"	"{1:s}"
+		"en"	"Usage: {H2}{1} {H1}<target> <task>"
+	}
+
+	"invalid task specified"
+	{
+		"en"	"Invalid task specified, please try again."
+	}
+
+	"task assigned admin"
+	{
+		"#format"	"{1:s},{2:N}"
+		"en"	"You have assigned task {H1}{1} {default} to {H2}{2}{default}."
 	}
 }
