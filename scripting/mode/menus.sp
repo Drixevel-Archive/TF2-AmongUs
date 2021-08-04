@@ -528,18 +528,6 @@ public int MenuHandler_Cameras(Menu menu, MenuAction action, int param1, int par
 	}
 }
 
-stock void GetEntityAbsOrigin(int entity, float origin[3])
-{
-	float mins[3]; float maxs[3];
-	GetEntPropVector(entity,Prop_Send,"m_vecOrigin",origin);
-	GetEntPropVector(entity,Prop_Send,"m_vecMins",mins);
-	GetEntPropVector(entity,Prop_Send,"m_vecMaxs",maxs);
-
-	origin[0] += (mins[0] + maxs[0]) * 0.5;
-	origin[1] += (mins[1] + maxs[1]) * 0.5;
-	origin[2] += (mins[2] + maxs[2]) * 0.5;
-}
-
 void OpenAssignTaskMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_AssignTask);
@@ -668,11 +656,7 @@ public int MenuAction_Void(Menu menu, MenuAction action, int param1, int param2)
 	}
 }
 
-public Action Timer_OpenMap(Handle timer, any data)
-{
-	int client = data;
-	OpenMap(client);
-}
+
 
 void OpenCommandsMenu(int client, bool admin = false, bool back = false)
 {

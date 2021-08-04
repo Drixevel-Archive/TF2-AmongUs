@@ -342,6 +342,19 @@ public Action Timer_ShowAd(Handle timer)
 
 	if (g_CurrentAd > 2)
 		g_CurrentAd = 0;
+}
+
+public Action Timer_OpenMap(Handle timer, any data)
+{
+	int client = data;
+	OpenMap(client);
+}
+
+public Action Frame_ResetGoal(Handle timer, any data)
+{
+	g_Match.tasks_goal = 0;
+}
+
 public Action Timer_ParseTasks(Handle timer)
 {
 	ParseTasks();

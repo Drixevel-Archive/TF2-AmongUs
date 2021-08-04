@@ -364,11 +364,6 @@ void MarkTaskComplete(int client, int task)
 	Call_Finish();
 }
 
-public Action Frame_ResetGoal(Handle timer, any data)
-{
-	g_Match.tasks_goal = 0;
-}
-
 void AssignRandomTask(int client, int type)
 {
 	int task = GetRandomTask(type);
