@@ -1048,7 +1048,7 @@ public void OnClientDisconnect(int client)
 		
 		if (crewmates < 1)
 		{
-			ForceWin();
+			ForceWin(true);
 			CPrintToChatAll("%t", "crewmates disconnected");
 		}
 	}
