@@ -57,6 +57,7 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 		AssignColor(client);
 	
 	SetPlayerSpeed(client);
+	SetColor(client, g_Player[client].color);
 
 	//Make sure the HUD is active during the lobby phase.
 	//SetEntProp(client, Prop_Send, "m_iHideHUD", TF2_IsInSetup() ? 0 : (1<<6));
