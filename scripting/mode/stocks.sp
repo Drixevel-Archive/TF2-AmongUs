@@ -776,3 +776,41 @@ void TF2_CreateAnnotation(int client, int index, float[3] origin, const char[] t
 	event.SetString("show_distance", "1");
 	event.Fire(false);
 }
+
+int CreateSprite(int entity, const char[] file, float offsets[3])
+{
+	char sName[128];
+	GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+
+	float vOrigin[3];
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", vOrigin);
+
+	vOrigin[0] += offsets[0];
+	vOrigin[1] += offsets[1];
+	vOrigin[2] += offsets[2];
+
+	int sprite = CreateEntityByName("env_sprite_oriented");
+
+	if (IsValidEntity(sprite))
+	{
+		char sFile[PLATFORM_MAX_PATH];
+		strcopy(sFile, sizeof(sFile), file);
+
+		if (StrContains(sFile, ".vmt", false) == -1)
+			StrCat(sFile, sizeof(sFile), ".vmt");
+
+		DispatchKeyValue(sprite, "model", sFile);
+		DispatchKeyValue(sprite, "spawnflags", "1");
+		DispatchKeyValue(sprite, "scale", "0.1");
+		DispatchKeyValue(sprite, "rendermode", "1");
+		DispatchKeyValue(sprite, "rendercolor", "255 255 255");
+		DispatchKeyValue(sprite, "parentname", sName);
+		DispatchSpawn(sprite);
+		
+		TeleportEntity(sprite, vOrigin, NULL_VECTOR, NULL_VECTOR);
+
+		SetEntPropEnt(sprite, Prop_Data, "m_hOwnerEntity", entity);
+	}
+
+	return sprite;
+}
