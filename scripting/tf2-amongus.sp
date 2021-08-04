@@ -249,6 +249,7 @@ GlobalForward g_Forward_OnGameSettingsLoaded;
 GlobalForward g_Forward_OnGameSettingsSaveClient;
 GlobalForward g_Forward_OnGameSettingsLoadClient;
 
+GlobalForward g_Forward_OnRoleAssignedPost;
 GlobalForward g_Forward_OnColorSetPost;
 GlobalForward g_Forward_OnTaskStartedPost;
 GlobalForward g_Forward_OnTaskCompletedPost;
@@ -275,13 +276,6 @@ StringMap g_AreaNames;
 
 int g_GameOwner = -1;
 char g_UpdatingGameSetting[MAXPLAYERS + 1][32];
-
-enum Roles
-{
-	Role_Crewmate,
-	Role_Imposter,
-	Role_Total
-};
 
 enum struct Player
 {
@@ -610,6 +604,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	g_Forward_OnGameSettingsSaveClient = new GlobalForward("GameSettings_OnSaveClient", ET_Ignore, Param_Cell);
 	g_Forward_OnGameSettingsLoadClient = new GlobalForward("GameSettings_OnLoadClient", ET_Ignore, Param_Cell);
 
+	g_Forward_OnRoleAssignedPost = new GlobalForward("AmongUs_OnRoleAssigned", ET_Ignore, Param_Cell, Param_Cell);
 	g_Forward_OnColorSetPost = new GlobalForward("AmongUs_OnColorSet", ET_Ignore, Param_Cell, Param_Cell);
 	g_Forward_OnTaskStartedPost = new GlobalForward("AmongUs_OnTaskStarted", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_Forward_OnTaskCompletedPost = new GlobalForward("AmongUs_OnTaskCompleted", ET_Ignore, Param_Cell, Param_Cell);
@@ -2127,6 +2122,10 @@ void OnMatchCompleted(TFTeam team)
 			continue;
 		
 		g_Player[i].role = Role_Crewmate;
+		Call_StartForward(g_Forward_OnRoleAssignedPost);
+		Call_PushCell(i);
+		Call_PushCell(g_Player[i].role);
+		Call_Finish();
 		g_Player[i].ejected = false;
 		RemoveGhost(i);
 		ClearTasks(i);

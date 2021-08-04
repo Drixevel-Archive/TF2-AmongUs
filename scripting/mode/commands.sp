@@ -98,6 +98,11 @@ public Action Command_SetRole(int client, int args)
 	g_Player[target].role = GetRoleByName(sRole);
 	SendHud(target);
 
+	Call_StartForward(g_Forward_OnRoleAssignedPost);
+	Call_PushCell(target);
+	Call_PushCell(g_Player[target].role);
+	Call_Finish();
+
 	if (g_Player[target].role == Role_Imposter)
 		SetVariantString("fog_imposters");
 	else

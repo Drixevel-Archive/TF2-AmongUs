@@ -3,6 +3,13 @@
 #endif 
 #define _tf2_amongus_
 
+enum Roles
+{
+	Role_Crewmate,
+	Role_Imposter,
+	Role_Total
+};
+
 /**
  * Called whenever a set of game settings has been parsed successfully.
  *
@@ -25,6 +32,15 @@ forward void GameSettings_OnSaveClient(int client);
  * @return           N/A
  */
 forward void GameSettings_OnLoadClient(int client);
+
+/**
+ * Called whenever a player is assigned a role.
+ *
+ * @param client     Client index.
+ * @param role       Role index.
+ * @return           N/A
+ */
+forward void AmongUs_OnRoleAssigned(int client, Roles role);
 
 /**
  * Called whenever a player is set to a certain color.

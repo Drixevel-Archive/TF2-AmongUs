@@ -242,6 +242,11 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		CPrintToChat(client, "%T", "imposter gained", client);
 		TF2_GiveItem(client, "tf_weapon_pda_engineer_build", 25, TF2Quality_Vintage, 1);
 
+		Call_StartForward(g_Forward_OnRoleAssignedPost);
+		Call_PushCell(client);
+		Call_PushCell(g_Player[client].role);
+		Call_Finish();
+
 		if (first)
 		{
 			first = false;
