@@ -204,6 +204,8 @@ upload/download is more similar to divert power, you get a random location to do
 
 #define TASK_SPRITE "sprites/obj_icons/warning_highlight"
 
+#define SYSTEM_UI_MESSAGE "ui/system_message_alert.wav"
+
 /*****************************/
 //Includes
 
@@ -798,6 +800,8 @@ public void OnMapStart()
 	PrecacheSound("doors/vent_open2.wav");	//Played whenever a player is finished venting.
 	PrecacheSound("doors/vent_open3.wav");	//Played whenever a player starts venting or moves to a different vent.
 
+	PrecacheSound(SYSTEM_UI_MESSAGE);
+
 	HandleSound(SOUND_ALARM);
 	HandleSound(SOUND_BODYFOUND);
 	HandleSound(SOUND_ROUNDSTART);
@@ -998,6 +1002,18 @@ public void OnClientPutInServer(int client)
 	SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 	SDKHook(client, SDKHook_PreThink, OnPreThink);
 	SDKHook(client, SDKHook_SetTransmit, OnSetTransmit);
+
+	QueryClientConVar(client, "cl_downloadfilter", OnParseDownloadFilter);
+}
+
+public void OnParseDownloadFilter(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, any value)
+{
+	if (!StrEqual(cvarValue, "all", false))
+	{
+		EmitSoundToClient(client, SYSTEM_UI_MESSAGE);
+		SetHudTextParams(-1.0, -1.0, 10.0, 255, 0, 0, 255);
+		ShowHudText(client, -1, "Please reconnect with your downloads filter set to ALL.");
+	}
 }
 
 public void OnClientDisconnect(int client)
