@@ -1218,7 +1218,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			
 			int entity = g_Tasks[i].entity;
 
-			if (entity == -1 || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
+			if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
 				continue;
 			
 			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
@@ -1405,6 +1405,10 @@ void SendHud(int client)
 		{
 			int task = g_Player[client].tasks.Get(i);
 			int entity = g_Tasks[task].entity;
+
+			if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
+				continue;
+			
 			TaskType type = g_Tasks[task].tasktype;
 
 			char sDisplay[64];
@@ -1584,6 +1588,9 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	{
 		int task = g_Player[client].neartask;
 		int entity = g_Tasks[task].entity;
+
+		if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
+			return Plugin_Stop;
 
 		switch (g_Tasks[task].tasktype)
 		{
@@ -1878,6 +1885,9 @@ public void OnGameFrame()
 						continue;
 					
 					int entity = g_Tasks[task].entity;
+
+					if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
+						continue;
 					
 					char sDisplay[64];
 					GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
