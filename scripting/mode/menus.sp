@@ -472,6 +472,7 @@ void OpenCamerasMenu(int client)
 		menu.AddItem(sID, sDisplay);
 	}
 
+	menu.ExitButton = false;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
