@@ -1,6 +1,15 @@
 /*****************************/
 //Commands
 
+public Action Command_MainMenu(int client, int args)
+{
+	if (client == 0)
+		return Plugin_Handled;
+	
+	OpenMainMenu(client);
+	return Plugin_Handled;
+}
+
 public Action Command_Colors(int client, int args)
 {
 	if (client == 0)

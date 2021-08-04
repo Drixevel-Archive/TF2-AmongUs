@@ -1,9 +1,46 @@
 /*****************************/
 //Menus
 
+void OpenMainMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_MainMenu);
+	menu.SetTitle("%s (%s)", PLUGIN_NAME, PLUGIN_VERSION);
+
+	menu.AddItem("description", "Brief Description");
+	menu.AddItem("color", "Set your Color");
+	menu.AddItem("gamesettings", "Change your Game Settings");
+
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char sInfo[32];
+			menu.GetItem(param2, sInfo, sizeof(sInfo));
+
+			if (StrEqual(sInfo, "description", false))
+			{
+				CPrintToChat(param1, "Brief Description: {H2}%s", PLUGIN_DESCRIPTION);
+				OpenMainMenu(param1);
+			}
+			else if (StrEqual(sInfo, "color", false))
+				OpenColorsMenu(param1, true);
+			else if (StrEqual(sInfo, "gamesettings", false))
+				OpenSettingsMenu(param1, true);
+		}
+		
+		case MenuAction_End:
+			delete menu;
+	}
+}
+
 /////
 //Colors
-void OpenColorsMenu(int client)
+void OpenColorsMenu(int client, bool backbutton = false)
 {
 	Menu menu = new Menu(MenuHandler_Colors);
 	menu.SetTitle("Available Colors:");
@@ -17,6 +54,7 @@ void OpenColorsMenu(int client)
 		menu.AddItem(sID, g_Colors[i].name);
 	}
 
+	menu.ExitBackButton = backbutton;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -34,12 +72,16 @@ public int MenuHandler_Colors(Menu menu, MenuAction action, int param1, int para
 			OpenColorsMenu(param1);
 		}
 
+		case MenuAction_Cancel:
+			if (param2 == MenuCancel_ExitBack)
+				OpenMainMenu(param1);
+		
 		case MenuAction_End:
 			delete menu;
 	}
 }
 
-void OpenSettingsMenu(int client)
+void OpenSettingsMenu(int client, bool backbutton = false)
 {
 	if (!IsAdmin(client) && client != g_GameOwner)
 	{
@@ -124,6 +166,7 @@ void OpenSettingsMenu(int client)
 	FormatEx(sDisplay, sizeof(sDisplay), "Short Tasks: %i", GetGameSetting_Int("short_tasks"));
 	menu.AddItem(sInfo, sDisplay);
 
+	menu.ExitBackButton = backbutton;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -169,6 +212,10 @@ public int MenuHandler_GameSettings(Menu menu, MenuAction action, int param1, in
 				OpenSettingsMenu(param1);
 			}
 		}
+
+		case MenuAction_Cancel:
+			if (param2 == MenuCancel_ExitBack)
+				OpenMainMenu(param1);
 
 		case MenuAction_End:
 			delete menu;
