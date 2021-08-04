@@ -243,6 +243,16 @@ ConVar convar_Fade_Dur;
 ConVar convar_Fade_Hold;
 
 /*****************************/
+//Forwards
+
+GlobalForward g_Forward_OnGameSettingsLoaded;
+GlobalForward g_Forward_OnGameSettingsSaveClient;
+GlobalForward g_Forward_OnGameSettingsLoadClient;
+
+GlobalForward g_Forward_OnColorSetPost;
+GlobalForward g_Forward_OnTaskCompletedPost;
+
+/*****************************/
 //Globals
 
 bool g_Late;
@@ -475,10 +485,6 @@ Handle g_O2;
 int g_DelayDoors = -1;
 Handle g_LockDoors;
 
-GlobalForward g_Forward_OnGameSettingsLoaded;
-GlobalForward g_Forward_OnGameSettingsSaveClient;
-GlobalForward g_Forward_OnGameSettingsLoadClient;
-
 bool g_IsDead[MAXPLAYERS + 1];
 
 enum TaskType
@@ -597,6 +603,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	g_Forward_OnGameSettingsLoaded = new GlobalForward("GameSettings_OnParsed", ET_Ignore);
 	g_Forward_OnGameSettingsSaveClient = new GlobalForward("GameSettings_OnSaveClient", ET_Ignore, Param_Cell);
 	g_Forward_OnGameSettingsLoadClient = new GlobalForward("GameSettings_OnLoadClient", ET_Ignore, Param_Cell);
+
+	g_Forward_OnColorSetPost = new GlobalForward("AmongUs_OnColorSetPost", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnTaskCompletedPost = new GlobalForward("AmongUs_OnTaskCompletedPost", ET_Ignore, Param_Cell, Param_Cell);
 
 	g_Late = late;
 	return APLRes_Success;
@@ -1319,6 +1328,11 @@ void SetColor(int client, int color)
 		SetEntityRenderMode(client, RENDER_NORMAL);
 		SetEntityRenderColor(client, 255, 255, 255, 255);
 	}
+
+	Call_StartForward(g_Forward_OnColorSetPost);
+	Call_PushCell(client);
+	Call_PushCellRef(color);
+	Call_Finish();
 }
 
 void AssignColor(int client)

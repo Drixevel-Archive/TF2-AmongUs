@@ -357,6 +357,11 @@ void MarkTaskComplete(int client, int task)
 
 	if (g_Match.tasks_current >= g_Match.tasks_goal)
 		CreateTimer(0.2, Frame_ResetGoal);
+	
+	Call_StartForward(g_Forward_OnTaskCompletedPost);
+	Call_PushCell(client);
+	Call_PushCell(task);
+	Call_Finish();
 }
 
 public Action Frame_ResetGoal(Handle timer, any data)
