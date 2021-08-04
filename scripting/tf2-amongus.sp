@@ -832,7 +832,7 @@ public void OnMapStart()
 	DispatchKeyValue(g_FogController_Crewmates, "fogcolor2", "0 0 0");
 	DispatchKeyValueFloat(g_FogController_Crewmates, "fogstart", g_FogDistance * GetGameSetting_Float("crewmate_vision"));
 	DispatchKeyValueFloat(g_FogController_Crewmates, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("crewmate_vision"));
-	DispatchKeyValueFloat(g_FogController_Crewmates, "fogmaxdensity", 1.0);
+	DispatchKeyValueFloat(g_FogController_Crewmates, "fogmaxdensity", 0.95);
 	DispatchSpawn(g_FogController_Crewmates);
 
 	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
@@ -845,7 +845,7 @@ public void OnMapStart()
 	DispatchKeyValue(g_FogController_Imposters, "fogcolor2", "0 0 0");
 	DispatchKeyValueFloat(g_FogController_Imposters, "fogstart", g_FogDistance * GetGameSetting_Float("imposter_vision"));
 	DispatchKeyValueFloat(g_FogController_Imposters, "fogend", (g_FogDistance * 2) * GetGameSetting_Float("imposter_vision"));
-	DispatchKeyValueFloat(g_FogController_Imposters, "fogmaxdensity", 1.0);
+	DispatchKeyValueFloat(g_FogController_Imposters, "fogmaxdensity", 0.95);
 	DispatchSpawn(g_FogController_Imposters);
 
 	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
