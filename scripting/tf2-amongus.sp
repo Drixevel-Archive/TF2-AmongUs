@@ -1048,7 +1048,6 @@ public void OnClientDisconnect_Post(int client)
 	g_Player[client].Clear();
 	g_Camera[client] = 0;
 	g_IsDead[client] = false;
-	g_IsDead[client] = false;
 	g_LastButtons[client] = 0;
 }
 
