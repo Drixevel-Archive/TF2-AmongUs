@@ -347,7 +347,7 @@ public Action Timer_ShowAd(Handle timer)
 public Action Timer_OpenMap(Handle timer, any data)
 {
 	int client = data;
-	OpenMap(client);
+	OpenMap(client, true);
 }
 
 public Action Frame_ResetGoal(Handle timer, any data)

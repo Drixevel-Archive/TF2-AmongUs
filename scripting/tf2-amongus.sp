@@ -1542,7 +1542,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		else if (StrContains(sType, "map", false) == 0)
 		{
 			SetEntityMoveType(client, MOVETYPE_NONE);
-			OpenMap(client);
+			OpenMap(client, true);
 		}
 		else
 		{
