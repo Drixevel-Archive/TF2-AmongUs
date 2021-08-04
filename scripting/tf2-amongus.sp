@@ -557,6 +557,11 @@ float g_TEParticleDelay;
 
 int g_CurrentAd;
 
+ArrayList g_PlayerCommands;
+StringMap g_PlayerCommandDescriptions;
+ArrayList g_AdminCommands;
+StringMap g_AdminCommandDescriptions;
+
 /*****************************/
 //Managed
 
@@ -671,29 +676,37 @@ public void OnPluginStart()
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnLogicRelayTriggered);
 
-	RegConsoleCmd("sm_mainmenu", Command_MainMenu, "Displays the main menu of the mode to players.");
-	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
-	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
-	RegConsoleCmd("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
-	RegConsoleCmd("sm_owner", Command_Owner, "Displays who the current game owner is in chat.");
-	RegConsoleCmd("sm_voting", Command_Voting, "Displays the voting menu during meetings.");
-	RegConsoleCmd("sm_start", Command_Start, "Start the match during the lobby automatically.");
+	//Stores commands in arrays for menus to access a list.
+	g_PlayerCommands = new ArrayList(ByteCountToCells(64));
+	g_PlayerCommandDescriptions = new StringMap();
+	g_AdminCommands = new ArrayList(ByteCountToCells(64));
+	g_AdminCommandDescriptions = new StringMap();
 
-	RegAdminCmd("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
-	RegAdminCmd("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
-	RegAdminCmd("sm_setowner", Command_SetOwner, ADMFLAG_GENERIC, "Sets a specific player to own the match.");
-	RegAdminCmd("sm_removeowner", Command_RemoveOwner, ADMFLAG_GENERIC, "Removes the current owner if there is one.");
-	RegAdminCmd("sm_respawn", Command_Respawn, ADMFLAG_SLAY, "Respawn all players who are actively dead on teams.");
-	RegAdminCmd("sm_eject", Command_Eject, ADMFLAG_SLAY, "Eject players from the map and out of the match.");
-	RegAdminCmd("sm_imposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
-	RegAdminCmd("sm_listimposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
-	RegAdminCmd("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
-	RegAdminCmd("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
-	RegAdminCmd("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");
-	RegAdminCmd("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
-	RegAdminCmd("sm_assigntask", Command_AssignTask, ADMFLAG_SLAY, "Assign certain tasks to players.");
-	RegAdminCmd("sm_editmarks", Command_EditMarks, ADMFLAG_SLAY, "Opens up the marks editor.");
-	RegAdminCmd("sm_paintmarks", Command_PaintMarks, ADMFLAG_SLAY, "Paint marks based on where the players moving.");
+	RegConsoleCmdEx("sm_mainmenu", Command_MainMenu, "Displays the main menu of the mode to players.");
+	RegConsoleCmdEx("sm_commands", Command_Commands, "Shows all available player commands.");
+	RegConsoleCmdEx("sm_admincommands", Command_AdminCommands, "Shows all available admin commands.");
+	RegConsoleCmdEx("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
+	RegConsoleCmdEx("sm_role", Command_Role, "Displays what your current role is in chat.");
+	RegConsoleCmdEx("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
+	RegConsoleCmdEx("sm_owner", Command_Owner, "Displays who the current game owner is in chat.");
+	RegConsoleCmdEx("sm_voting", Command_Voting, "Displays the voting menu during meetings.");
+	RegConsoleCmdEx("sm_start", Command_Start, "Start the match during the lobby automatically.");
+
+	RegAdminCmdEx("sm_reloadcolors", Command_ReloadColors, ADMFLAG_GENERIC, "Reload available colors players can use.");
+	RegAdminCmdEx("sm_setrole", Command_SetRole, ADMFLAG_GENERIC, "Sets a specific player to a specific role.");
+	RegAdminCmdEx("sm_setowner", Command_SetOwner, ADMFLAG_GENERIC, "Sets a specific player to own the match.");
+	RegAdminCmdEx("sm_removeowner", Command_RemoveOwner, ADMFLAG_GENERIC, "Removes the current owner if there is one.");
+	RegAdminCmdEx("sm_respawn", Command_Respawn, ADMFLAG_SLAY, "Respawn all players who are actively dead on teams.");
+	RegAdminCmdEx("sm_eject", Command_Eject, ADMFLAG_SLAY, "Eject players from the map and out of the match.");
+	RegAdminCmdEx("sm_imposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
+	RegAdminCmdEx("sm_listimposters", Command_ListImposters, ADMFLAG_SLAY, "List the current imposters in the match.");
+	RegAdminCmdEx("sm_mark", Command_Mark, ADMFLAG_SLAY, "Mark certain nav areas as certain names to show in the HUD.");
+	RegAdminCmdEx("sm_savemarks", Command_SaveMarks, ADMFLAG_SLAY, "Save all marks to a data file to be used later.");
+	RegAdminCmdEx("sm_cameras", Command_Cameras, ADMFLAG_SLAY, "Shows what cameras are available on the map.");
+	RegAdminCmdEx("sm_givetask", Command_GiveTask, ADMFLAG_GENERIC, "Give a player a certain task to do.");
+	RegAdminCmdEx("sm_assigntask", Command_AssignTask, ADMFLAG_SLAY, "Assign certain tasks to players.");
+	RegAdminCmdEx("sm_editmarks", Command_EditMarks, ADMFLAG_SLAY, "Opens up the marks editor.");
+	RegAdminCmdEx("sm_paintmarks", Command_PaintMarks, ADMFLAG_SLAY, "Paint marks based on where the players moving.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();

@@ -9,6 +9,10 @@ void OpenMainMenu(int client)
 	menu.AddItem("description", "Brief Description");
 	menu.AddItem("color", "Set your Color");
 	menu.AddItem("gamesettings", "Change your Game Settings");
+	menu.AddItem("commands", "View Available Commands");
+
+	if (IsAdmin(client))
+		menu.AddItem("admincommands", "View Available Admin Commands");
 
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -31,6 +35,10 @@ public int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 				OpenColorsMenu(param1, true);
 			else if (StrEqual(sInfo, "gamesettings", false))
 				OpenSettingsMenu(param1, true);
+			else if (StrEqual(sInfo, "commands", false))
+				OpenCommandsMenu(param1, false, true);
+			else if (StrEqual(sInfo, "admincommands", false))
+				OpenCommandsMenu(param1, true, true);
 		}
 		
 		case MenuAction_End:
@@ -663,4 +671,52 @@ public Action Timer_OpenMap(Handle timer, any data)
 {
 	int client = data;
 	OpenMap(client);
+}
+
+void OpenCommandsMenu(int client, bool admin = false, bool back = false)
+{
+	PrintCommandsInConsole(client, admin);
+
+	Panel panel = new Panel();
+	panel.SetTitle(admin ? "Available Admin Commands:" : "Available Commands:");
+
+	int amount = admin ? g_AdminCommands.Length : g_PlayerCommands.Length;
+
+	char sCommand[64]; char sDescription[128]; char sDisplay[256];
+	for (int i = 0; i < amount; i++)
+	{
+		if (admin)
+		{
+			g_AdminCommands.GetString(i, sCommand, sizeof(sCommand));
+			g_AdminCommandDescriptions.GetString(sCommand, sDescription, sizeof(sDescription));
+		}
+		else
+		{
+			g_PlayerCommands.GetString(i, sCommand, sizeof(sCommand));
+			g_PlayerCommandDescriptions.GetString(sCommand, sDescription, sizeof(sDescription));
+		}
+		
+		//FormatEx(sDisplay, sizeof(sDisplay), "%s - %s", sCommand, sDescription);
+		FormatEx(sDisplay, sizeof(sDisplay), "%s", sCommand);
+		panel.DrawText(sDisplay);
+	}
+
+	panel.DrawText(" ");
+
+	if (back)
+		panel.DrawItem("Back");
+	
+	panel.Send(client, MenuAction_Commands, MENU_TIME_FOREVER);
+	delete panel;
+}
+
+public int MenuAction_Commands(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			OpenMainMenu(param1);
+		}
+	}
 }

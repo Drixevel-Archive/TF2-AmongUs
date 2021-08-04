@@ -263,6 +263,11 @@
 		"en"	"There are no more Imposters alive, Crewmates win!"
 	}
 
+	"commands in console"
+	{
+		"en"	"Commands with descriptions are also listed in console."
+	}
+
 	//Errors
 	"error time lock all doors"
 	{

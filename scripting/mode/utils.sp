@@ -496,3 +496,74 @@ int CreateSprite(int entity, const char[] file, float offsets[3])
 
 	return sprite;
 }
+
+void RegConsoleCmdEx(const char[] cmd, ConCmd callback, const char[] description="", int flags=0)
+{
+	if (g_PlayerCommands.FindString(cmd) == -1)
+		g_PlayerCommands.PushString(cmd);
+	
+	g_PlayerCommandDescriptions.SetString(cmd, description);
+	
+	RegConsoleCmd(cmd, callback, description, flags);
+}
+
+void RegAdminCmdEx(const char[] cmd, ConCmd callback, int adminflags, const char[] description="", const char[] group="", int flags=0)
+{
+	if (g_AdminCommands.FindString(cmd) == -1)
+		g_AdminCommands.PushString(cmd);
+	
+	g_AdminCommandDescriptions.SetString(cmd, description);
+	
+	RegAdminCmd(cmd, callback, adminflags, description, group, flags);
+}
+
+void PrintCommandsInConsole(int client, bool admin)
+{
+	PrintToConsole(client, "==================================\n== Available %s Commands:", admin ? "Admin" : "Player");
+
+	DataPack pack = new DataPack();
+	pack.WriteCell(GetClientUserId(client));
+	pack.WriteCell(admin);
+
+	RequestFrame(Frame_ListCommands, pack);
+}
+
+public void Frame_ListCommands(DataPack pack)
+{
+	pack.Reset();
+
+	int userid = pack.ReadCell();
+	bool admin = pack.ReadCell();
+
+	delete pack;
+
+	int client;
+	if ((client = GetClientOfUserId(userid)) == 0)
+		return;
+
+	int amount = admin ? g_AdminCommands.Length : g_PlayerCommands.Length;
+
+	char sCommand[64]; char sDescription[128];
+	for (int i = 0; i < amount; i++)
+	{
+		if (admin)
+		{
+			g_AdminCommands.GetString(i, sCommand, sizeof(sCommand));
+			g_AdminCommandDescriptions.GetString(sCommand, sDescription, sizeof(sDescription));
+		}
+		else
+		{
+			g_PlayerCommands.GetString(i, sCommand, sizeof(sCommand));
+			g_PlayerCommandDescriptions.GetString(sCommand, sDescription, sizeof(sDescription));
+		}
+
+		PrintToConsole(client, "%s - %s", sCommand, sDescription);
+	}
+
+	//Add a VERY slight delay to this.
+	if (GetRandomInt(0, 1) < 2)
+	{
+		PrintToConsole(client, "==================================");
+		CPrintToChat(client, "%T", "commands in console", client);
+	}
+}
