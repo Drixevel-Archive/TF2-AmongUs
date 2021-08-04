@@ -772,7 +772,7 @@ void TF2_CreateAnnotation(int client, int index, float[3] origin, const char[] t
 	event.SetInt("visibilityBitfield", (1 << client));
 	event.SetString("text", text);
 	event.SetString("play_sound", sound);
-	event.SetString("show_effect", "1");
+	event.SetString("show_effect", "0");
 	event.SetString("show_distance", "1");
 	event.Fire(false);
 }
