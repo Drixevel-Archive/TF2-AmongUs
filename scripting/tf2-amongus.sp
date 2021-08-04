@@ -2068,11 +2068,37 @@ void CallMeeting(int client = -1, bool button = false)
 
 void EjectPlayer(int client)
 {
+	int eject_point = FindEntityByName("eject_tele", "info_teleport_destination");
+
+	if (!IsValidEntity(eject_point))
+		return;
+	
+	int eject_camera = FindEntityByName("eject_cam", "point_viewcontrol");
+
+	if (IsValidEntity(eject_camera))
+	{
+		DispatchKeyValue(eject_camera, "spawnflags", "12");
+
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (!IsClientInGame(i) || i == client)
+				continue;
+			
+			AcceptEntityInput(eject_camera, "Enable", i);
+		}
+	}
+	
 	//Mark the player as ejected.
 	g_Player[client].ejected = true;
 
+	float origin[3];
+	GetEntPropVector(eject_point, Prop_Send, "m_vecOrigin", origin);
+
+	float angles[3];
+	GetEntPropVector(eject_point, Prop_Send, "m_angRotation", angles);
+
 	//Temporary coordinates until better logic is setup with the map.
-	TeleportEntity(client, view_as<float>({640.0, -1500.0, 500.0}), view_as<float>({0.0, 90.0, 0.0}), view_as<float>({0.0, 0.0, 0.0}));
+	TeleportEntity(client, origin, angles, view_as<float>({0.0, 0.0, 0.0}));
 
 	//Create The timer so we know they're gonna be dead after a bit of being ejected.
 	StopTimer(g_Player[client].ejectedtimer);

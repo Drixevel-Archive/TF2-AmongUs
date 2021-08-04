@@ -107,6 +107,22 @@ public Action Timer_Suicide(Handle timer, any data)
 		
 		g_Player[client].ejectedtimer = null;
 	}
+
+	int eject_camera = FindEntityByName("eject_cam", "point_viewcontrol");
+
+	if (IsValidEntity(eject_camera))
+	{
+		DispatchKeyValue(eject_camera, "spawnflags", "12");
+
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (!IsClientInGame(i) || i == client)
+				continue;
+			
+			AcceptEntityInput(eject_camera, "Disable", i);
+			SetClientViewEntity(i, i);
+		}
+	}
 }
 
 public Action Timer_ReactorTick(Handle timer, any data)
