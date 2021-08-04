@@ -63,6 +63,51 @@ forward void AmongUs_OnTaskCompleted(int client, int task);
  */
 forward void AmongUs_OnSabotageStarted(int client, int sabotage);
 
+/**
+ * Called whenever a sabotage has successfully ended the match.
+ *
+ * @param client     Client index.
+ * @param sabotage   Sabotage index.
+ * @return           N/A
+ */
+forward void AmongUs_OnSabotageSuccess(int client, int sabotage);
+
+/**
+ * Called whenever a sabotage has failed to end the match.
+ *
+ * @param client     Client index.
+ * @param sabotage   Sabotage index.
+ * @return           N/A
+ */
+forward void AmongUs_OnSabotageFailure(int client, int sabotage);
+
+/**
+ * Called whenever a player has started using the vents.
+ *
+ * @param client     Client index.
+ * @param vent   	 Vent index.
+ * @return           N/A
+ */
+forward void AmongUs_OnVentingStart(int client, int vent);
+
+/**
+ * Called whenever a player has switched to a new vent.
+ *
+ * @param client     Client index.
+ * @param vent   	 Vent index.
+ * @return           N/A
+ */
+forward void AmongUs_OnVentingSwitch(int client, int vent);
+
+/**
+ * Called whenever a player has finished using the vents.
+ *
+ * @param client     Client index.
+ * @param vent   	 Vent index.
+ * @return           N/A
+ */
+forward void AmongUs_OnVentingEnd(int client, int vent);
+
 //Methodmaps
 methodmap GameSettings
 {

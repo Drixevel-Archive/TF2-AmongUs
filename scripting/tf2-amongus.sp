@@ -255,6 +255,9 @@ GlobalForward g_Forward_OnTaskCompletedPost;
 GlobalForward g_Forward_OnSabotageStartedPost;
 GlobalForward g_Forward_OnSabotageSuccessPost;
 GlobalForward g_Forward_OnSabotageFailurePost;
+GlobalForward g_Forward_OnVentingStartPost;
+GlobalForward g_Forward_OnVentingSwitchPost;
+GlobalForward g_Forward_OnVentingEndPost;
 
 /*****************************/
 //Globals
@@ -614,6 +617,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	g_Forward_OnSabotageStartedPost = new GlobalForward("AmongUs_OnSabotageStarted", ET_Ignore, Param_Cell, Param_Cell);
 	g_Forward_OnSabotageSuccessPost = new GlobalForward("AmongUs_OnSabotageSuccess", ET_Ignore, Param_Cell, Param_Cell);
 	g_Forward_OnSabotageFailurePost = new GlobalForward("AmongUs_OnSabotageFailure", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnVentingStartPost = new GlobalForward("AmongUs_OnVentingStart", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnVentingSwitchPost = new GlobalForward("AmongUs_OnVentingSwitch", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnVentingEndPost = new GlobalForward("AmongUs_OnVentingEnd", ET_Ignore, Param_Cell, Param_Cell);
 
 	g_Late = late;
 	return APLRes_Success;
@@ -1482,7 +1488,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	else if (g_Player[client].nearvent != -1 && g_Player[client].role == Role_Imposter && !g_IsDead[client])
 	{
 		if (g_Player[client].venting)
-			StopVenting(client);
+			StopVenting(client, g_Player[client].nearvent);
 		else
 			StartVenting(client, g_Player[client].nearvent);
 	}
@@ -2064,9 +2070,14 @@ void StartVenting(int client, int vent)
 	EmitSoundToClient(client, SOUND_VENT_OPEN);
 
 	OpenVentsMenu(client, vent);
+
+	Call_StartForward(g_Forward_OnVentingStartPost);
+	Call_PushCell(client);
+	Call_PushCell(vent);
+	Call_Finish();
 }
 
-void StopVenting(int client)
+void StopVenting(int client, int vent)
 {
 	g_Player[client].venting = false;
 
@@ -2076,6 +2087,11 @@ void StopVenting(int client)
 
 	TF2_SetFirstPerson(client);
 	EmitSoundToClient(client, "doors/vent_open2.wav", SOUND_FROM_PLAYER, SNDCHAN_REPLACE, SNDLEVEL_NONE, SND_CHANGEVOL, 0.75);
+
+	Call_StartForward(g_Forward_OnVentingEndPost);
+	Call_PushCell(client);
+	Call_PushCell(vent);
+	Call_Finish();
 }
 
 public Action OnLogicRelayTriggered(const char[] output, int caller, int activator, float delay)

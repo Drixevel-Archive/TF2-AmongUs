@@ -381,7 +381,13 @@ public int MenuHandler_Vents(Menu menu, MenuAction action, int param1, int param
 					EmitSoundToClient(param1, SOUND_VENT_MOVE3);
 			}
 
-			OpenVentsMenu(param1, vent);
+			g_Player[param1].nearvent = entity;
+			OpenVentsMenu(param1, entity);
+
+			Call_StartForward(g_Forward_OnVentingSwitchPost);
+			Call_PushCell(param1);
+			Call_PushCell(vent);
+			Call_Finish();
 		}
 
 		case MenuAction_End:
