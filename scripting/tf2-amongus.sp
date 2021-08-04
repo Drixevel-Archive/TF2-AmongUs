@@ -127,8 +127,8 @@ upload/download is more similar to divert power, you get a random location to do
 
 /*****************************/
 //Defines
-#define PLUGIN_NAME "[Mode] Among Us"
-#define PLUGIN_DESCRIPTION "A mode which replicates the Among Us game."
+#define PLUGIN_NAME "[TF2] Among Us"
+#define PLUGIN_DESCRIPTION "A gamemode for Team Fortress 2 which replicates the Among Us game."
 #define PLUGIN_VERSION "1.0.0"
 
 //Debug mode to make it easier to work on the mode.
@@ -555,7 +555,7 @@ public Plugin myinfo =
 	author = "Drixevel", 
 	description = PLUGIN_DESCRIPTION, 
 	version = PLUGIN_VERSION, 
-	url = "https://scoutshideaway.com/"
+	url = "https://drixevel.dev/"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
