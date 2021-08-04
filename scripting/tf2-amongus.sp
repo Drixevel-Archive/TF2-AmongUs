@@ -673,6 +673,7 @@ public void OnPluginStart()
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnLogicRelayTriggered);
 
+	RegConsoleCmd("sm_mainmenu", Command_MainMenu, "Displays the main menu of the mode to players.");
 	RegConsoleCmd("sm_colors", Command_Colors, "Displays the list of available colors which you can pick.");
 	RegConsoleCmd("sm_role", Command_Role, "Displays what your current role is in chat.");
 	RegConsoleCmd("sm_gamesettings", Command_GameSettings, "Allows for the game settings to be changed by admins or the game owner.");
@@ -1345,7 +1346,7 @@ void SetColor(int client, int color)
 
 	Call_StartForward(g_Forward_OnColorSetPost);
 	Call_PushCell(client);
-	Call_PushCellRef(color);
+	Call_PushCell(color);
 	Call_Finish();
 }
 
