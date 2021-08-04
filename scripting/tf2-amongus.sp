@@ -1268,7 +1268,7 @@ void OnButtonPress(int client, int button)
 		{
 			if (g_DelayDoors != -1 && g_DelayDoors > GetTime())
 			{
-				SendDenyMessage(client, "Please wait {H2}%i {default}seconds before locking all doors again.", (g_DelayDoors - GetTime()));
+				SendDenyMessage(client, "%T", "error time lock all doors", client, (g_DelayDoors - GetTime()));
 				return;
 			}
 			
@@ -1465,7 +1465,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	{
 		if (g_Player[client].lastkill > 0 && g_Player[client].lastkill > GetGameTime())
 		{
-			SendDenyMessage(client, "You must wait {H1}%.2f {default}seconds before executing another person.", (g_Player[client].lastkill - GetGameTime()));
+			SendDenyMessage(client, "%T", "error time execution", client, (g_Player[client].lastkill - GetGameTime()));
 			return Plugin_Stop;
 		}
 
@@ -1492,7 +1492,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		{
 			if (g_Reactors != null || g_LightsOff || g_DisableCommunications || g_O2 != null)
 			{
-				SendDenyMessage(client, "You cannot call a meeting while a sabotage is active.");
+				SendDenyMessage(client, "%T", "error no meeting while sabotage", client);
 				return Plugin_Stop;
 			}
 			
@@ -1500,7 +1500,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 
 			if (max > 0 && g_Match.total_meetings >= max)
 			{
-				SendDenyMessage(client, "Maximum number of emergency meetings reached!");
+				SendDenyMessage(client, "%T", "error maximum emergencies reached", client);
 				return Plugin_Stop;
 			}
 			
@@ -1519,7 +1519,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		}
 		else
 		{
-			SendDenyMessage(client, "This action is currently disabled, not finished yet.");
+			SendDenyMessage(client, "%T", "error action disabled", client);
 		}
 	}
 	else if (g_Player[client].nearsabotage != -1 && !g_IsDead[client])
@@ -1646,7 +1646,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					EmitSoundToClient(client, SOUND_TASK_INPROGRESS);
 				}
 				else
-					SendDenyMessage(client, "You are not assigned to do this task.");
+					SendDenyMessage(client, "%T", "error not assigned task", client);
 			}
 
 			case TaskType_Part:
@@ -1705,7 +1705,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					{
 						if (strlen(g_Player[client].randomchosen) > 0  && !StrEqual(sLink, g_Player[client].randomchosen, false))
 						{
-							SendDenyMessage(client, "You are not assigned to do this task.");
+							SendDenyMessage(client, "%T", "error not assigned task", client);
 							return Plugin_Stop;
 						}
 						
@@ -1774,7 +1774,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	if (g_Match.meeting != null)
 		return Plugin_Continue;
 	
-	SendDenyMessage(client, "You are not allowed to type right now.");
+	SendDenyMessage(client, "%T", "error not allowed to type", client);
 	return Plugin_Stop;
 }
 
@@ -1978,7 +1978,7 @@ void CallMeeting(int client = -1, bool button = false)
 {
 	if (g_Match.last_meeting > 0 && g_Match.last_meeting > GetGameTime())
 	{
-		SendDenyMessage(client, "You must wait {H1}%.2f {default}seconds to call another meeting.", (g_Match.last_meeting - GetGameTime()));
+		SendDenyMessage(client, "%T", "error time meeting wait", client, (g_Match.last_meeting - GetGameTime()));
 		return;
 	}
 
@@ -2090,7 +2090,7 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 		
 		if (g_Reactors != null || g_LightsOff || g_DisableCommunications || g_O2 != null)
 		{
-			SendDenyMessage(activator, "You cannot call a meeting while a sabotage is active.");
+			SendDenyMessage(activator, "%T", "error no meeting while sabotage", activator);
 			return Plugin_Stop;
 		}
 		
@@ -2098,7 +2098,7 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 
 		if (max > 0 && g_Match.total_meetings >= max)
 		{
-			SendDenyMessage(activator, "Maximum number of emergency meetings reached!");
+			SendDenyMessage(activator, "%T", "error maximum emergencies reached", activator);
 			return Plugin_Stop;
 		}
 
@@ -2221,7 +2221,7 @@ void StartSabotage(int client, int sabotage)
 	
 	if (g_DelaySabotage != -1 && g_DelaySabotage > GetTime())
 	{
-		SendDenyMessage(client, "Please wait {H2}%i {default}seconds before using another sabotage.", (g_DelaySabotage - GetTime()));
+		SendDenyMessage(client, "%T", "error time sabotage cooldown", client, (g_DelaySabotage - GetTime()));
 		return;
 	}
 	

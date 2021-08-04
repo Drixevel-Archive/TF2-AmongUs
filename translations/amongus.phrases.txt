@@ -268,4 +268,54 @@
 	{
 		"en"	"There are no more Imposters alive, Crewmates win!"
 	}
+
+	//Errors
+	"error time lock all doors"
+	{
+		"#format"	"{1:i}"
+		"en"	"Please wait {H2}{1} {default}seconds before locking all doors again."
+	}
+
+	"error time execution"
+	{
+		"#format"	"{1:.2f}"
+		"en"	"You must wait {H1}{1} {default}seconds before executing another person."
+	}
+
+	"error no meeting while sabotage"
+	{
+		"en"	"You cannot call a meeting while a sabotage is active."
+	}
+
+	"error maximum emergencies reached"
+	{
+		"en"	"Maximum number of emergency meetings reached!"
+	}
+
+	"error action disabled"
+	{
+		"en"	"This action is currently disabled, not finished yet."
+	}
+
+	"error not assigned task"
+	{
+		"en"	"You are not assigned to do this task."
+	}
+
+	"error not allowed to type"
+	{
+		"en"	"You are not allowed to type right now."
+	}
+
+	"error time meeting wait"
+	{
+		"#format"	"{1:.2f}"
+		"en"	"You must wait {H1}{1} {default}seconds to call another meeting."
+	}
+
+	"error time sabotage cooldown"
+	{
+		"#format"	"{1:i}"
+		"en"	"Please wait {H2}{1} {default}seconds before using another sabotage."
+	}
 }
