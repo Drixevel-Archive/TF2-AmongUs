@@ -591,34 +591,30 @@ public void OnPluginStart()
 	CSetHighlight("{crimson}");
 	CSetHighlight2("{darkorchid}");
 
-	CreateConVar("sm_gamemode_amongus_version", PLUGIN_VERSION, PLUGIN_DESCRIPTION, FCVAR_NOTIFY|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_DONTRECORD);
+	CreateConVar("sm_amongus_version", PLUGIN_VERSION, PLUGIN_DESCRIPTION, FCVAR_NOTIFY|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_DONTRECORD);
 
-	convar_Required_Players = CreateConVar("sm_mode_amongus_required_players", "3", "How many players should be required for the gamemode to start?", FCVAR_NOTIFY, true, 0.0);
-	convar_TopDownView = CreateConVar("sm_mode_amongus_topdownview", "0", "Should players by default be in a top down view?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_Required_Players = CreateConVar("sm_amongus_required_players", "3", "How many players should be required for the gamemode to start?", FCVAR_NOTIFY, true, 0.0);
+	convar_TopDownView = CreateConVar("sm_amongus_topdownview", "0", "Should players by default be in a top down view?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_Chat_Gag = CreateConVar("sm_amongus_chat_gag", "0", "Should players be gagged during the match outside of meetings?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_Time_Setup = CreateConVar("sm_amongus_timer_setup", "30", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
+	convar_Time_Round = CreateConVar("sm_amongus_timer_round", "3600", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
+	convar_Hud = CreateConVar("sm_amongus_hud", "1", "Should the global hud be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_Hud_Position = CreateConVar("sm_amongus_hud_position", "0.0 0.0", "Where should the hud be on screen?", FCVAR_NOTIFY);
+	convar_Hud_Color = CreateConVar("sm_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
+	convar_Sabotages_Cooldown = CreateConVar("sm_amongus_sabotages_cooldown", "30", "How long in seconds should Sabotages be on cooldown?", FCVAR_NOTIFY, true, 0.0);
+	convar_Sabotages_Cooldown_Doors = CreateConVar("sm_amongus_sabotages_cooldown_doors", "16", "How long in seconds should the Doors Sabotage be on cooldown?", FCVAR_NOTIFY, true, 0.0);
+	convar_VotePercentage_Ejections = CreateConVar("sm_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	convar_Fade_Dur = CreateConVar("sm_amongus_sabotage_fade_dur", "100", "What should the default fade duration be for sabotage sirens?", FCVAR_NOTIFY, true, 0.0);
+	convar_Fade_Hold = CreateConVar("sm_amongus_sabotage_fade_hold", "100", "What should the default fade hold time be for sabotage sirens?", FCVAR_NOTIFY, true, 0.0);
+
 	convar_TopDownView.AddChangeHook(OnConVarChange);
-	convar_Chat_Gag = CreateConVar("sm_mode_amongus_chat_gag", "0", "Should players be gagged during the match outside of meetings?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-
-	convar_Time_Setup = CreateConVar("sm_mode_amongus_timer_setup", "30", "What should the setup time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Setup.AddChangeHook(OnConVarChange);
-	convar_Time_Round = CreateConVar("sm_mode_amongus_timer_round", "3600", "What should the round time be for matches?", FCVAR_NOTIFY, true, 0.0);
 	convar_Time_Round.AddChangeHook(OnConVarChange);
-
-	convar_Hud = CreateConVar("sm_mode_amongus_hud", "1", "Should the global hud be enabled or disabled?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	convar_Hud.AddChangeHook(OnConVarChange);
-	convar_Hud_Position = CreateConVar("sm_mode_amongus_hud_position", "0.0 0.0", "Where should the hud be on screen?", FCVAR_NOTIFY);
 	convar_Hud_Position.AddChangeHook(OnConVarChange);
-	convar_Hud_Color = CreateConVar("sm_mode_amongus_hud_color", "255 255 255 255", "What should the text color for the hud be?", FCVAR_NOTIFY);
 	convar_Hud_Color.AddChangeHook(OnConVarChange);
 
-	convar_Sabotages_Cooldown = CreateConVar("sm_mode_amongus_sabotages_cooldown", "30", "How long in seconds should Sabotages be on cooldown?", FCVAR_NOTIFY, true, 0.0);
-	convar_Sabotages_Cooldown_Doors = CreateConVar("sm_mode_amongus_sabotages_cooldown_doors", "16", "How long in seconds should the Doors Sabotage be on cooldown?", FCVAR_NOTIFY, true, 0.0);
-	
-	convar_VotePercentage_Ejections = CreateConVar("sm_mode_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	
 	convar_Engine_RespawnWaveTime = FindConVar("mp_respawnwavetime");
-
-	convar_Fade_Dur = CreateConVar("sm_mode_amongus_fade_dur", "100");
-	convar_Fade_Hold = CreateConVar("sm_mode_amongus_fade_hold", "100");
 
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
 	HookEvent("player_death", Event_OnPlayerDeathPre, EventHookMode_Pre);
