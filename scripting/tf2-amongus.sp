@@ -555,6 +555,8 @@ int g_iPathLaserModelIndex = -1;
 
 float g_TEParticleDelay;
 
+int g_CurrentAd;
+
 /*****************************/
 //Managed
 
@@ -734,6 +736,8 @@ public void OnPluginStart()
 			if (IsClientInGame(i) && !IsFakeClient(i))
 				SendHud(i);
 	}
+
+	CreateTimer(3600.0, Timer_ShowAd, _, TIMER_REPEAT);
 }
 
 public void OnPluginEnd()

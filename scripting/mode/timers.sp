@@ -325,3 +325,21 @@ public Action Timer_PickRandomOwner(Handle timer)
 		}
 	}
 }
+
+public Action Timer_ShowAd(Handle timer)
+{
+	switch (g_CurrentAd)
+	{
+		case 0:
+			CPrintToChatAll("To access the gamemodes information and commands, use the command: {H2}!mainmenu");
+		case 1:
+			CPrintToChatAll("To change your color, use the command: {H2}!colors");
+		case 2:
+			CPrintToChatAll("To change your game settings if you're the game owner, use the command: {H2}!gamesettings");
+	}
+
+	g_CurrentAd++;
+
+	if (g_CurrentAd > 2)
+		g_CurrentAd = 0;
+}
