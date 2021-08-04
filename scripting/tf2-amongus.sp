@@ -494,16 +494,31 @@ enum struct Task
 	char display[64];
 	TaskType tasktype;
 	int type;
+	float origin[3];
 	int sprite;
 
-	void Add(int entity, const char[] display, TaskType tasktype, int type)
+	void Add(int entity, const char[] display, TaskType tasktype, int type, float origin[3])
 	{
 		this.entity = entity;
 		this.entityref = EntIndexToEntRef(entity);
 		strcopy(this.display, sizeof(Task::display), display);
 		this.tasktype = tasktype;
 		this.type = type;
+		for (int i = 0; i < 3; i++)
+			this.origin[i] = origin[i];
 		this.sprite = -1;
+	}
+
+	void Clear()
+	{
+		this.entity = -1;
+		this.entityref = INVALID_ENT_REFERENCE;
+		this.display[0] = '\0';
+		this.tasktype = TaskType_Single;
+		this.type = 0;
+		for (int i = 0; i < 3; i++)
+			this.origin[i] = 0.0;
+		this.KillSprite();
 	}
 
 	void CreateSprite()
@@ -518,10 +533,9 @@ enum struct Task
 	void KillSprite()
 	{
 		if (this.sprite > 0 && IsValidEntity(this.sprite))
-		{
 			AcceptEntityInput(this.sprite, "kill");
-			this.sprite = -1;
-		}
+		
+		this.sprite = -1;
 	}
 }
 
@@ -1205,20 +1219,12 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		float origin[3];
 		GetClientEyePosition(client, origin);
 		
-		float origin2[3];
 		for (int i = 0; i < g_TotalTasks; i++)
 		{
 			if (g_Tasks[i].tasktype == TaskType_Map)
 				continue;
-			
-			int entity = g_Tasks[i].entity;
 
-			if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
-				continue;
-			
-			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
-
-			if (GetVectorDistance(origin, origin2) > 100.0)
+			if (GetVectorDistance(origin, g_Tasks[i].origin) > 100.0)
 			{
 				if (g_Player[client].neartask == i)
 				{
@@ -1395,11 +1401,6 @@ void SendHud(int client)
 		for (int i = 0; i < g_Player[client].tasks.Length; i++)
 		{
 			int task = g_Player[client].tasks.Get(i);
-			int entity = g_Tasks[task].entity;
-
-			if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
-				continue;
-			
 			TaskType type = g_Tasks[task].tasktype;
 
 			Format(sHud, sizeof(sHud), "%s\n%s", sHud, g_Tasks[i].display);
@@ -2275,7 +2276,10 @@ void ParseTasks()
 		if (StrContains(sType, "custom", false) != -1)
 			type |= TASK_TYPE_CUSTOM;
 		
-		g_Tasks[g_TotalTasks].Add(entity, sDisplay, tasktype, type);
+		float origin[3];
+		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+		
+		g_Tasks[g_TotalTasks].Add(entity, sDisplay, tasktype, type, origin);
 		g_TotalTasks++;
 	}
 
