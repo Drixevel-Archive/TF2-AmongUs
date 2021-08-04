@@ -587,7 +587,7 @@ void OpenMap(int client, bool repeat = false)
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientInGame(i) || !IsPlayerAlive(i) || g_Player[i].venting)
+		if (!IsClientInGame(i) || !IsPlayerAlive(i) || g_Player[i].venting || g_IsDead[i])
 			continue;
 
 		float origin[3];
