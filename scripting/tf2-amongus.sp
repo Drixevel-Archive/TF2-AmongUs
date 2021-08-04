@@ -1040,6 +1040,17 @@ public void OnClientDisconnect(int client)
 			ForceWin();
 			CPrintToChatAll("%t", "imposters disconnected");
 		}
+
+		int crewmates;
+		for (int i = 1; i <= MaxClients; i++)
+			if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role != Role_Imposter)
+				crewmates++;
+		
+		if (crewmates < 1)
+		{
+			ForceWin();
+			CPrintToChatAll("%t", "crewmates disconnected");
+		}
 	}
 }
 

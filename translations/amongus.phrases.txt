@@ -2,7 +2,12 @@
 {
 	"imposters disconnected"
 	{
-		"en"	"All imposters have disconnected, Crewmates win!"
+		"en"	"All Imposters have disconnected, Crewmates win!"
+	}
+
+	"crewmates disconnected"
+	{
+		"en"	"All Crewmates have disconnected, Imposters win!"
 	}
 
 	"door is locked"
