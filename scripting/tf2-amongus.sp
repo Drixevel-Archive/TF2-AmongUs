@@ -750,7 +750,7 @@ public void OnPluginStart()
 				SendHud(i);
 	}
 
-	CreateTimer(3600.0, Timer_ShowAd, _, TIMER_REPEAT);
+	TriggerTimer(CreateTimer(3600.0, Timer_ShowAd, _, TIMER_REPEAT), true);
 }
 
 public void OnPluginEnd()
