@@ -591,6 +591,8 @@ public void OnPluginStart()
 	CSetHighlight("{crimson}");
 	CSetHighlight2("{darkorchid}");
 
+	CreateConVar("sm_gamemode_amongus_version", PLUGIN_VERSION, PLUGIN_DESCRIPTION, FCVAR_NOTIFY|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_DONTRECORD);
+
 	convar_Required_Players = CreateConVar("sm_mode_amongus_required_players", "3", "How many players should be required for the gamemode to start?", FCVAR_NOTIFY, true, 0.0);
 	convar_TopDownView = CreateConVar("sm_mode_amongus_topdownview", "0", "Should players by default be in a top down view?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	convar_TopDownView.AddChangeHook(OnConVarChange);
