@@ -80,6 +80,9 @@ public void Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadca
 	if (convar_TopDownView.BoolValue)
 		DestroyCamera(client);
 	
+	if (TF2_IsInSetup())
+		return;
+	
 	//We wait 0.2 seconds here because it's required for the ragdoll to spawn after a player dies.
 	CreateTimer(0.2, Timer_CreateDeadBody, userid, TIMER_FLAG_NO_MAPCHANGE);
 
