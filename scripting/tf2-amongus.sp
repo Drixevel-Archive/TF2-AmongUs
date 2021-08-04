@@ -1433,7 +1433,7 @@ void SendHud(int client)
 			int task = g_Player[client].tasks.Get(i);
 			TaskType type = g_Tasks[task].tasktype;
 
-			Format(sHud, sizeof(sHud), "%s\n%s", sHud, g_Tasks[i].display);
+			Format(sHud, sizeof(sHud), "%s\n%s", sHud, g_Tasks[task].display);
 
 			if (type == TaskType_Map)
 			{
@@ -1926,7 +1926,7 @@ public void OnGameFrame()
 					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
 					origin[2] += 10.0;
 
-					TF2_CreateAnnotation(i, x, origin, g_Tasks[i].display, 10.0, "vo/null.wav");
+					TF2_CreateAnnotation(i, x, origin, g_Tasks[task].display, 10.0, "vo/null.wav");
 				}
 			}
 		}
