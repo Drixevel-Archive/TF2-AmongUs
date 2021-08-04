@@ -527,6 +527,10 @@ public void Frame_ListCommands(DataPack pack)
 float g_LastTele[MAXPLAYERS + 1][3];
 void StartIntroSequence()
 {
+	if (g_Match.intro)
+		return;
+	
+	g_Match.intro = true;
 	ScreenFadeAll(100, 2500, FFADE_OUT, view_as<int>({0, 0, 0, 255}), true);
 
 	for (int i = 1; i <= MaxClients; i++)
@@ -622,4 +626,6 @@ public Action Timer_RespawnPlayers(Handle timer)
 		SetClientViewEntity(i, i);
 		SetEntityMoveType(i, MOVETYPE_WALK);
 	}
+
+	g_Match.intro = false;
 }

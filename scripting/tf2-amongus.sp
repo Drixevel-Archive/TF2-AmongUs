@@ -465,6 +465,8 @@ enum struct Match
 
 	int tasks_current;
 	int tasks_goal;
+
+	bool intro;
 }
 
 Match g_Match;
@@ -1491,7 +1493,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 		return Plugin_Continue;
 	
 	//Make it so you can't interact with anything between rounds.
-	if (g_BetweenRounds || TF2_IsInSetup() || g_Player[client].camera != -1)
+	if (g_BetweenRounds || TF2_IsInSetup() || g_Player[client].camera != -1 || g_Match.intro)
 		return Plugin_Stop;
 	
 	if (g_Player[client].neardeath != -1 && !g_IsDead[client])
