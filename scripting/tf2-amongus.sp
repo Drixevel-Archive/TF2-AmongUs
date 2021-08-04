@@ -250,7 +250,11 @@ GlobalForward g_Forward_OnGameSettingsSaveClient;
 GlobalForward g_Forward_OnGameSettingsLoadClient;
 
 GlobalForward g_Forward_OnColorSetPost;
+GlobalForward g_Forward_OnTaskStartedPost;
 GlobalForward g_Forward_OnTaskCompletedPost;
+GlobalForward g_Forward_OnSabotageStartedPost;
+GlobalForward g_Forward_OnSabotageSuccessPost;
+GlobalForward g_Forward_OnSabotageFailurePost;
 
 /*****************************/
 //Globals
@@ -604,8 +608,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	g_Forward_OnGameSettingsSaveClient = new GlobalForward("GameSettings_OnSaveClient", ET_Ignore, Param_Cell);
 	g_Forward_OnGameSettingsLoadClient = new GlobalForward("GameSettings_OnLoadClient", ET_Ignore, Param_Cell);
 
-	g_Forward_OnColorSetPost = new GlobalForward("AmongUs_OnColorSetPost", ET_Ignore, Param_Cell, Param_Cell);
-	g_Forward_OnTaskCompletedPost = new GlobalForward("AmongUs_OnTaskCompletedPost", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnColorSetPost = new GlobalForward("AmongUs_OnColorSet", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnTaskStartedPost = new GlobalForward("AmongUs_OnTaskStarted", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
+	g_Forward_OnTaskCompletedPost = new GlobalForward("AmongUs_OnTaskCompleted", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnSabotageStartedPost = new GlobalForward("AmongUs_OnSabotageStarted", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnSabotageSuccessPost = new GlobalForward("AmongUs_OnSabotageSuccess", ET_Ignore, Param_Cell, Param_Cell);
+	g_Forward_OnSabotageFailurePost = new GlobalForward("AmongUs_OnSabotageFailure", ET_Ignore, Param_Cell, Param_Cell);
 
 	g_Late = late;
 	return APLRes_Success;
@@ -1558,6 +1566,11 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			StopTimer(g_Reactors);
 			CPrintToChatAll("{H1}%N {default}has stopped the Reactor meltdown.", client);
 			g_IsSabotageActive = false;
+
+			Call_StartForward(g_Forward_OnSabotageFailurePost);
+			Call_PushCell(client);
+			Call_PushCell(SABOTAGE_REACTORS);
+			Call_Finish();
 		}
 		else if (StrContains(sType, "communications", false) == 0 && g_DisableCommunications)
 		{
@@ -1572,6 +1585,11 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			StopTimer(g_O2);
 			CPrintToChatAll("{H1}%N {default}has fixed O2.", client);
 			g_IsSabotageActive = false;
+
+			Call_StartForward(g_Forward_OnSabotageFailurePost);
+			Call_PushCell(client);
+			Call_PushCell(SABOTAGE_DEPLETION);
+			Call_Finish();
 		}
 		else if (StrContains(sType, "lights", false) == 0 && g_LightsOff)
 		{
@@ -1628,6 +1646,12 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					g_Player[client].progresstask = task;
 					StopTimer(g_Player[client].doingtask);
 					g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+					Call_StartForward(g_Forward_OnTaskStartedPost);
+					Call_PushCell(client);
+					Call_PushCell(g_Player[client].progresstask);
+					Call_PushCell(g_Player[client].progresstaskpart);
+					Call_Finish();
 
 					EmitSoundToClient(client, SOUND_TASK_INPROGRESS);
 				}
@@ -1711,6 +1735,12 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 						g_Player[client].progresstaskpart = task;
 						StopTimer(g_Player[client].doingtask);
 						g_Player[client].doingtask = CreateTimer(1.0, Timer_DoingTask, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+
+						Call_StartForward(g_Forward_OnTaskStartedPost);
+						Call_PushCell(client);
+						Call_PushCell(g_Player[client].progresstask);
+						Call_PushCell(g_Player[client].progresstaskpart);
+						Call_Finish();
 
 						discovered = true;
 					}
@@ -2211,7 +2241,7 @@ void StartSabotage(int client, int sabotage)
 
 			g_ReactorsTime = 30;
 			StopTimer(g_Reactors);
-			g_Reactors = CreateTimer(1.5, Timer_ReactorTick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+			g_Reactors = CreateTimer(1.5, Timer_ReactorTick, GetClientUserId(client), TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 
 		case SABOTAGE_FIXLIGHTS:
@@ -2241,11 +2271,16 @@ void StartSabotage(int client, int sabotage)
 
 			g_O2Time = 30;
 			StopTimer(g_O2);
-			g_O2 = CreateTimer(1.5, Timer_O2Tick, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+			g_O2 = CreateTimer(1.5, Timer_O2Tick, GetClientUserId(client), TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
 
 	TF2_EquipWeaponSlot(client, TFWeaponSlot_Melee);
+
+	Call_StartForward(g_Forward_OnSabotageStartedPost);
+	Call_PushCell(client);
+	Call_PushCell(sabotage);
+	Call_Finish();
 }
 
 public void TF2_OnWaitingForPlayersEnd()

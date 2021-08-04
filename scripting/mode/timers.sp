@@ -111,6 +111,8 @@ public Action Timer_Suicide(Handle timer, any data)
 
 public Action Timer_ReactorTick(Handle timer, any data)
 {
+	int client = GetClientOfUserId(data);
+
 	g_ReactorsTime--;
 
 	if (g_ReactorsTime > 0)
@@ -130,11 +132,18 @@ public Action Timer_ReactorTick(Handle timer, any data)
 
 	g_IsSabotageActive = false;
 
+	Call_StartForward(g_Forward_OnSabotageSuccessPost);
+	Call_PushCell(client);
+	Call_PushCell(SABOTAGE_REACTORS);
+	Call_Finish();
+
 	return Plugin_Stop;
 }
 
 public Action Timer_O2Tick(Handle timer, any data)
 {
+	int client = GetClientOfUserId(data);
+	
 	g_O2Time--;
 
 	if (g_O2Time > 0)
@@ -151,6 +160,11 @@ public Action Timer_O2Tick(Handle timer, any data)
 	g_O2 = null;
 
 	g_IsSabotageActive = false;
+
+	Call_StartForward(g_Forward_OnSabotageSuccessPost);
+	Call_PushCell(client);
+	Call_PushCell(SABOTAGE_DEPLETION);
+	Call_Finish();
 
 	return Plugin_Stop;
 }
@@ -233,7 +247,7 @@ public Action Timer_DoingTask(Handle timer, any data)
 	int task = g_Player[client].progresstask;
 	int part = g_Player[client].progresstaskpart;
 	int entity = g_Tasks[task].entity;
-	
+
 	if (g_Player[client].taskticks > 0)
 	{
 		if (StrEqual(g_Tasks[task].display, "Submit Scan", false) && g_Player[client].taskticks == 2 && GetGameSetting_Bool("visual_tasks"))

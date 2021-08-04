@@ -33,7 +33,17 @@ forward void GameSettings_OnLoadClient(int client);
  * @param color      Color index.
  * @return           N/A
  */
-forward void AmongUs_OnColorSetPost(int client, int color);
+forward void AmongUs_OnColorSet(int client, int color);
+
+/**
+ * Called whenever a task started by the player.
+ *
+ * @param client     Client index.
+ * @param task       Task index.
+ * @param part       Part index if applicable to a task map.
+ * @return           N/A
+ */
+forward void AmongUs_OnTaskStarted(int client, int task, int part);
 
 /**
  * Called whenever a task is completed fully.
@@ -42,7 +52,16 @@ forward void AmongUs_OnColorSetPost(int client, int color);
  * @param task       Task index.
  * @return           N/A
  */
-forward void AmongUs_OnTaskCompletedPost(int client, int task);
+forward void AmongUs_OnTaskCompleted(int client, int task);
+
+/**
+ * Called whenever a sabotage has been started.
+ *
+ * @param client     Client index.
+ * @param sabotage   Sabotage index.
+ * @return           N/A
+ */
+forward void AmongUs_OnSabotageStarted(int client, int sabotage);
 
 //Methodmaps
 methodmap GameSettings
