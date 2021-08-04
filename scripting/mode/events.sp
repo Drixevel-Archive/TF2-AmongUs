@@ -107,6 +107,14 @@ public void Event_OnPostInventoryApplication(Event event, const char[] name, boo
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Grenade);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Building);
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_PDA);
+
+	//broken attribute
+	TF2Attrib_SetByName(client, "mod see enemy health", 1.0);
+
+	//broken attribute
+	int melee = -1;
+	if ((melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)) != -1)
+		TF2Attrib_SetByName(melee, "mod see enemy health", 1.0);
 }
 
 public void Event_OnRoundStart(Event event, const char[] name, bool dontBroadcast)
