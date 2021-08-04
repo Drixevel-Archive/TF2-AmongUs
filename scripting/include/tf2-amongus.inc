@@ -1,12 +1,50 @@
-#if defined _mode_amongus_ 
+#if defined _tf2_amongus_ 
 	#endinput
 #endif 
-#define _mode_amongus_
+#define _tf2_amongus_
 
+/**
+ * Called whenever a set of game settings has been parsed successfully.
+ *
+ * @return           N/A
+ */
 forward void GameSettings_OnParsed();
+
+/**
+ * Called whenever a clients game settings have been saved.
+ *
+ * @param client     Client index.
+ * @return           N/A
+ */
 forward void GameSettings_OnSaveClient(int client);
+
+/**
+ * Called whenever a clients game settings have been loaded.
+ *
+ * @param client     Client index.
+ * @return           N/A
+ */
 forward void GameSettings_OnLoadClient(int client);
 
+/**
+ * Called whenever a player is set to a certain color.
+ *
+ * @param client     Client index.
+ * @param color      Color index.
+ * @return           N/A
+ */
+forward void AmongUs_OnColorSetPost(int client, int color);
+
+/**
+ * Called whenever a task is completed fully.
+ *
+ * @param client     Client index.
+ * @param task       Task index.
+ * @return           N/A
+ */
+forward void AmongUs_OnTaskCompletedPost(int client, int task);
+
+//Methodmaps
 methodmap GameSettings
 {
 	public GameSettings()
@@ -28,7 +66,7 @@ methodmap GameSettings
 }
 
 #if !defined REQUIRE_PLUGIN
-public __pl_mode_amongus_SetNTVOptional()
+public __pl_tf2_amongus_SetNTVOptional()
 {
 	MarkNativeAsOptional("GameSettings.Parse");
 	MarkNativeAsOptional("GameSettings.GetInt");
@@ -44,10 +82,10 @@ public __pl_mode_amongus_SetNTVOptional()
 }
 #endif  
 
-public SharedPlugin __pl_mode_amongus = 
+public SharedPlugin __pl_tf2_amongus = 
 {
-	name = "mode-amongus",
-	file = "mode-amongus.smx",
+	name = "tf2-amongus",
+	file = "tf2-amongus.smx",
 #if defined REQUIRE_PLUGIN
 	required = 1,
 #else

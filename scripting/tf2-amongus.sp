@@ -206,16 +206,17 @@ upload/download is more similar to divert power, you get a random location to do
 
 /*****************************/
 //Includes
+
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
+#include <colors>
+#include <tf2-amongus>
 
 #include <customkeyvalues>
 #include <tf2attributes>
 #include <navmesh>
 #include <tf2items>
-
-#include <colors>
 
 /*****************************/
 //ConVars
@@ -577,7 +578,7 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CPrintToChatAll("{H1}Mode{default}: Initializing...");
-	RegPluginLibrary("mode-amongus");
+	RegPluginLibrary("tf2-amongus");
 
 	//Natives
 	CreateNative("GameSettings.Parse", Native_GameSettings_Parse);
