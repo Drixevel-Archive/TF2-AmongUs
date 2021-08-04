@@ -283,15 +283,8 @@ bool IsValidTask(int task)
 int GetTaskByName(const char[] name)
 {
 	for (int i = 0; i < g_TotalTasks; i++)
-	{
-		int entity = g_Tasks[i].entity;
-
-		char sDisplay[64];
-		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-
-		if (StrEqual(sDisplay, name, false))
+		if (StrEqual(g_Tasks[i].display, name, false))
 			return i;
-	}
 	
 	return -1;
 }

@@ -233,13 +233,10 @@ public Action Timer_DoingTask(Handle timer, any data)
 	int task = g_Player[client].progresstask;
 	int part = g_Player[client].progresstaskpart;
 	int entity = g_Tasks[task].entity;
-
-	char sDisplay[64];
-	GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-
+	
 	if (g_Player[client].taskticks > 0)
 	{
-		if (StrEqual(sDisplay, "Submit Scan", false) && g_Player[client].taskticks == 2 && GetGameSetting_Bool("visual_tasks"))
+		if (StrEqual(g_Tasks[task].display, "Submit Scan", false) && g_Player[client].taskticks == 2 && GetGameSetting_Bool("visual_tasks"))
 		{
 			float origin[3];
 			GetClientAbsOrigin(client, origin);
@@ -289,7 +286,7 @@ public Action Timer_DoingTask(Handle timer, any data)
 	
 	SendHudToAll();
 
-	if (StrEqual(sDisplay, "Submit Scan", false))
+	if (StrEqual(g_Tasks[task].display, "Submit Scan", false))
 	{
 		g_Player[client].scanning = false;
 		SetEntityMoveType(client, MOVETYPE_WALK);

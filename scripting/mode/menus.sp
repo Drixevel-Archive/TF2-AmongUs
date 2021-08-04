@@ -491,16 +491,11 @@ void OpenAssignTaskMenu(int client)
 		if (type == TaskType_Part)
 			continue;
 		
-		int entity = g_Tasks[i].entity;
-
-		char sDisplay[64];
-		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-
 		char sType[32];
 		GetTaskTypeDisplayName(type, sType, sizeof(sType));
 
 		IntToString(i, sID, sizeof(sID));
-		FormatEx(sItemDisplay, sizeof(sItemDisplay), "%s (%s)", sDisplay, sType);
+		FormatEx(sItemDisplay, sizeof(sItemDisplay), "%s (%s)", g_Tasks[i].display, sType);
 
 		menu.AddItem(sID, sItemDisplay);
 	}

@@ -491,14 +491,16 @@ enum struct Task
 {
 	int entity;
 	int entityref;
+	char display[64];
 	TaskType tasktype;
 	int type;
 	int sprite;
 
-	void Add(int entity, TaskType tasktype, int type)
+	void Add(int entity, const char[] display, TaskType tasktype, int type)
 	{
 		this.entity = entity;
 		this.entityref = EntIndexToEntRef(entity);
+		strcopy(this.display, sizeof(Task::display), display);
 		this.tasktype = tasktype;
 		this.type = type;
 		this.sprite = -1;
@@ -751,19 +753,13 @@ public void OnMapStart()
 
 	HandleSound(SOUND_ALARM);
 	HandleSound(SOUND_BODYFOUND);
-
 	HandleSound(SOUND_ROUNDSTART);
-
 	HandleSound(SOUND_SABOTAGE);
-
 	HandleSound(SOUND_TASK_COMPLETE);
 	HandleSound(SOUND_TASK_INPROGRESS);
-	
 	HandleSound(SOUND_VICTORY_CREW);
 	HandleSound(SOUND_VICTORY_IMPOSTER);
-
 	HandleSound(SOUND_VOTE_CONFIRM);
-
 	HandleSound(SOUND_DISCONNECT);
 	HandleSound(SOUND_IMPOSTER_DEATHMUSIC);
 	HandleSound(SOUND_IMPOSTER_KILL);
@@ -1237,11 +1233,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			else
 			{
 				g_Player[client].neartask = i;
-
-				char sDisplay[256];
-				GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-				
-				PrintCenterText(client, "Near Task: %s (Press MEDIC! to interact)", sDisplay);
+				PrintCenterText(client, "Near Task: %s (Press MEDIC! to interact)", g_Tasks[i].display);
 			}
 		}
 	}
@@ -1410,10 +1402,7 @@ void SendHud(int client)
 			
 			TaskType type = g_Tasks[task].tasktype;
 
-			char sDisplay[64];
-			GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-
-			Format(sHud, sizeof(sHud), "%s\n%s", sHud, sDisplay);
+			Format(sHud, sizeof(sHud), "%s\n%s", sHud, g_Tasks[i].display);
 
 			if (type == TaskType_Map)
 			{
@@ -1604,13 +1593,10 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					else if ((g_Tasks[task].type & TASK_TYPE_SHORT) == TASK_TYPE_SHORT)
 						time = 5;
 					else if ((g_Tasks[task].type & TASK_TYPE_COMMON) == TASK_TYPE_COMMON)
-						time = 5;
-
-					char sDisplay[64];
-					GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));			
+						time = 5;		
 					
 					//This is considered a task AND an action so we just do a hacky update.
-					if (StrEqual(sDisplay, "Submit Scan", false))
+					if (StrEqual(g_Tasks[task].display, "Submit Scan", false))
 					{
 						SetEntityMoveType(client, MOVETYPE_NONE);
 
@@ -1887,15 +1873,12 @@ public void OnGameFrame()
 
 					if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
 						continue;
-					
-					char sDisplay[64];
-					GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 
 					float origin[3];
 					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
 					origin[2] += 10.0;
 
-					TF2_CreateAnnotation(i, x, origin, sDisplay, 10.0, "vo/null.wav");
+					TF2_CreateAnnotation(i, x, origin, g_Tasks[i].display, 10.0, "vo/null.wav");
 				}
 			}
 		}
@@ -2266,6 +2249,9 @@ void ParseTasks()
 		if (StrContains(sName, "task", false) != 0)
 			continue;
 		
+		char sDisplay[32];
+		GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
+		
 		TaskType tasktype;
 		if (StrContains(sName, "task_part", false) == 0)
 			tasktype = TaskType_Part;
@@ -2289,7 +2275,7 @@ void ParseTasks()
 		if (StrContains(sType, "custom", false) != -1)
 			type |= TASK_TYPE_CUSTOM;
 		
-		g_Tasks[g_TotalTasks].Add(entity, tasktype, type);
+		g_Tasks[g_TotalTasks].Add(entity, sDisplay, tasktype, type);
 		g_TotalTasks++;
 	}
 
