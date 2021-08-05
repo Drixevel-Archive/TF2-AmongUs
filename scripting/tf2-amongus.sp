@@ -2111,7 +2111,7 @@ void EjectPlayer(int client)
 
 	if (IsValidEntity(eject_camera))
 	{
-		DispatchKeyValue(eject_camera, "spawnflags", "12");
+		DispatchKeyValue(eject_camera, "spawnflags", "8");
 
 		for (int i = 1; i <= MaxClients; i++)
 		{
