@@ -273,6 +273,12 @@
 		"en"	"Commands with descriptions are also listed in console."
 	}
 
+	"admin played intro"
+	{
+		"#format"	"{1:N}"
+		"en"	"{H1}{1} {default}has played the intro manually."
+	}
+
 	//Errors
 	"error time lock all doors"
 	{
@@ -321,6 +327,11 @@
 	{
 		"#format"	"{1:i}"
 		"en"	"Please wait {H2}{1} {default}seconds before using another sabotage."
+	}
+
+	"error intro already active"
+	{
+		"en"	"Intro is already being played, please wait for it to end."
 	}
 
 	//Replies

@@ -711,6 +711,7 @@ public void OnPluginStart()
 	RegAdminCmdEx("sm_assigntask", Command_AssignTask, ADMFLAG_SLAY, "Assign certain tasks to players.");
 	RegAdminCmdEx("sm_editmarks", Command_EditMarks, ADMFLAG_SLAY, "Opens up the marks editor.");
 	RegAdminCmdEx("sm_paintmarks", Command_PaintMarks, ADMFLAG_SLAY, "Paint marks based on where the players moving.");
+	RegAdminCmdEx("sm_playintro", Command_PlayIntro, ADMFLAG_SLAY, "Plays the introduction to matches.");
 
 	//Stores all game settings.
 	g_GameSettings = new StringMap();

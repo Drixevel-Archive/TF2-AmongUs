@@ -412,3 +412,21 @@ public Action Command_PaintMarks(int client, int args)
 
 	return Plugin_Handled;
 }
+
+public Action Command_PlayIntro(int client, int args)
+{
+	if (g_Match.intro)
+	{
+		if (client > 0)
+			SendDenyMessage(client, "%T", "error intro already active", client);
+		else
+			CReplyToCommand(client, "%T", "error intro already active", client);
+
+		return Plugin_Handled;
+	}
+
+	PlayIntro();
+	CPrintToChatAll("%t", "admin played intro", client);
+	
+	return Plugin_Handled;
+}
