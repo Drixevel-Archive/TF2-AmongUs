@@ -1230,62 +1230,58 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		}
 	}
 
-	if (IsPlayerAlive(client) && g_Match.meeting == null)
+	if (IsPlayerAlive(client) && g_Match.meeting == null && !g_IsDead[client])
 	{
 		float origin[3];
 		GetClientEyePosition(client, origin);
 
 		float origin2[3];
-
-		if (!g_IsDead[client])
+		for (int i = 1; i <= MaxClients; i++)
 		{
-			for (int i = 1; i <= MaxClients; i++)
+			if (!IsClientInGame(i) || IsPlayerAlive(i) || !g_Player[i].showdeath)
+				continue;
+			
+			if (GetVectorDistance(origin, g_Player[i].deathorigin) > 100.0)
 			{
-				if (!IsClientInGame(i) || IsPlayerAlive(i) || !g_Player[i].showdeath)
-					continue;
-				
-				if (GetVectorDistance(origin, g_Player[i].deathorigin) > 100.0)
+				if (g_Player[client].neardeath == i)
 				{
-					if (g_Player[client].neardeath == i)
-					{
-						g_Player[client].neardeath = -1;
-						PrintCenterText(client, "");
-					}
-				}
-				else
-				{
-					g_Player[client].neardeath = i;
-					PrintCenterText(client, "Near Body: %N (Press MEDIC! to call a meeting)", i);
+					g_Player[client].neardeath = -1;
+					PrintCenterText(client, "");
 				}
 			}
+			else
+			{
+				g_Player[client].neardeath = i;
+				PrintCenterText(client, "Near Body: %N (Press MEDIC! to call a meeting)", i);
+			}
+		}
 
-			int entity = -1; char sName[32];
-			while ((entity = FindEntityByClassname(entity, "*")) != -1)
-			{ 	
-				GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
+		int entity = -1; char sName[32];
+		while ((entity = FindEntityByClassname(entity, "*")) != -1)
+		{ 	
+			GetEntPropString(entity, Prop_Data, "m_iName", sName, sizeof(sName));
 
-				if (StrContains(sName, "action", false) != 0)
-					continue;
+			if (StrContains(sName, "action", false) != 0)
+				continue;
+			
+			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
+
+			if (GetVectorDistance(origin, origin2) > 100.0)
+			{
+				if (g_Player[client].nearaction == entity)
+				{
+					g_Player[client].nearaction = -1;
+					PrintCenterText(client, "");
+				}
+			}
+			else if (g_Player[client].nearaction == -1)
+			{
+				g_Player[client].nearaction = entity;
+
+				char sDisplay[256];
+				GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
 				
-				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin2);
-
-				if (GetVectorDistance(origin, origin2) > 100.0)
-				{
-					if (g_Player[client].nearaction == entity)
-					{
-						g_Player[client].nearaction = -1;
-						PrintCenterText(client, "");
-					}
-				}
-				else if (g_Player[client].nearaction == -1)
-				{
-					g_Player[client].nearaction = entity;
-
-					char sDisplay[256];
-					GetCustomKeyValue(entity, "display", sDisplay, sizeof(sDisplay));
-					
-					PrintCenterText(client, "Near Action: %s (Press MEDIC! to interact)", sDisplay);
-				}
+				PrintCenterText(client, "Near Action: %s (Press MEDIC! to interact)", sDisplay);
 			}
 		}
 	}
