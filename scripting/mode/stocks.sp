@@ -675,18 +675,36 @@ stock void StripCharactersPost(char[] buffer, int position)
 	buffer[position] = '\0';
 }
 
-stock int FindEntityByName(const char[] name, const char[] classname = "*")
+stock int FindEntityByName(const char[] name, const char[] classname = "*", bool exact = false, bool casesensitive = false)
 {
 	int entity = -1; char temp[256];
 	while ((entity = FindEntityByClassname(entity, classname)) != -1)
 	{
 		GetEntPropString(entity, Prop_Data, "m_iName", temp, sizeof(temp));
 		
-		if (StrEqual(temp, name, false))
-			return entity;
+		if (exact)
+		{
+			if (StrEqual(temp, name, casesensitive))
+				return entity;
+		}
+		else
+		{
+			if (StrContains(temp, name, casesensitive) != -1)
+				return entity;
+		}
 	}
 	
-	return entity;
+	return -1;
+}
+
+stock int FindEntityByKeyValue(const char[] key, const char[] value, const char[] classname = "*")
+{
+	int entity = -1; char temp[256];
+	while ((entity = FindEntityByClassname(entity, classname)) != -1)
+		if (GetCustomKeyValue(entity, key, temp, sizeof(temp)) && StrContains(value, temp, false) != -1)
+			return entity;
+	
+	return -1;
 }
 
 stock void HandleSound(const char[] sound, bool download = true)

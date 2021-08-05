@@ -1741,14 +1741,14 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 
 					if (g_Tasks[taskmap].tasktype != TaskType_Map)
 						continue;
-				
-					char sLookup[512];
-					Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(client, taskmap) + 1);
 
 					int entity2 = EntRefToEntIndex(g_Tasks[taskmap].entityref);
 
 					if (!IsValidEntity(entity2))
 						continue;
+					
+					char sLookup[512];
+					Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(client, taskmap) + 1);
 
 					char sPart[512];
 					GetCustomKeyValue(entity2, sLookup, sPart, sizeof(sPart));
@@ -1986,15 +1986,33 @@ public void OnGameFrame()
 			for (int x = 0; x < g_Player[i].tasks.Length; x++)
 			{
 				int task = g_Player[i].tasks.Get(x);
+				int entity = EntRefToEntIndex(g_Tasks[task].entityref);
 
-				if (g_Tasks[task].tasktype == TaskType_Single)
+				if (!IsValidEntity(entity))
+					continue;
+
+				if (g_Tasks[task].tasktype == TaskType_Map)
 				{
-					if (IsTaskCompleted(i, task))
-						continue;
-					
-					int entity = EntRefToEntIndex(g_Tasks[task].entityref);
+					char sLookup[512];
+					Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(i, task) + 1);
 
-					if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
+					char sPart[512];
+					GetCustomKeyValue(entity, sLookup, sPart, sizeof(sPart));
+
+					int find = FindEntityByKeyValue("link", sPart, "*");
+
+					if (IsValidEntity(find))
+					{
+						float origin[3];
+						GetEntPropVector(find, Prop_Send, "m_vecOrigin", origin);
+						origin[2] += 10.0;
+
+						TF2_CreateAnnotation(i, x, origin, g_Tasks[task].display, 10.0, "vo/null.wav");
+					}
+				}
+				else if (g_Tasks[task].tasktype == TaskType_Single)
+				{
+					if (IsTaskCompleted(i, task) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
 						continue;
 
 					float origin[3];
