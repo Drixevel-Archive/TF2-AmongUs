@@ -211,6 +211,7 @@ public void Timer_OnRoundStart(const char[] output, int caller, int activator, f
 		g_Player[i].deathorigin[0] = 0.0;
 		g_Player[i].deathorigin[1] = 0.0;
 		g_Player[i].deathorigin[2] = 0.0;
+		g_Player[i].meetings_called = 0;
 
 		if (IsClientInGame(i) && !IsPlayerAlive(i) && TF2_GetClientTeam(i) > TFTeam_Spectator)
 			TF2_RespawnPlayer(i);

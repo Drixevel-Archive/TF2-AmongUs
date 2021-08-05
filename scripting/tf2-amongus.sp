@@ -335,6 +335,8 @@ enum struct Player
 	bool editingmarks;
 	char paintmarks[64];
 
+	int meetings_called;
+
 	void Init()
 	{
 		this.color = NO_COLOR;
@@ -389,6 +391,8 @@ enum struct Player
 
 		this.editingmarks = false;
 		this.paintmarks[0] = '\0';
+
+		this.meetings_called = 0;
 	}
 
 	void Clear()
@@ -445,6 +449,8 @@ enum struct Player
 
 		this.editingmarks = false;
 		this.paintmarks[0] = '\0';
+
+		this.meetings_called = 0;
 	}
 }
 
@@ -1557,7 +1563,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 			
 			int max = GetGameSetting_Int("emergency_meetings");
 
-			if (max > 0 && g_Match.total_meetings >= max)
+			if (max > 0 && g_Player[client].meetings_called >= max)
 			{
 				SendDenyMessage(client, "%T", "error maximum emergencies reached", client);
 				return Plugin_Stop;
@@ -2092,6 +2098,7 @@ void CallMeeting(int client = -1, bool button = false)
 	g_Match.meeting = CreateTimer(1.0, Timer_StartVoting, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 
 	g_Match.total_meetings++;
+	g_Player[client].meetings_called++;
 
 	AcceptEntityInput(g_FogController_Crewmates, "TurnOff");
 	AcceptEntityInput(g_FogController_Imposters, "TurnOff");
@@ -2191,7 +2198,7 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 		
 		int max = GetGameSetting_Int("emergency_meetings");
 
-		if (max > 0 && g_Match.total_meetings >= max)
+		if (max > 0 && g_Player[activator].meetings_called >= max)
 		{
 			SendDenyMessage(activator, "%T", "error maximum emergencies reached", activator);
 			return Plugin_Stop;
@@ -2206,7 +2213,7 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 void OnMatchCompleted(TFTeam team)
 {
 	g_Reconnects.Clear();
-	
+
 	switch (team)
 	{
 		case TFTeam_Red:
