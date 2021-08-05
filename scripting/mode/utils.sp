@@ -525,7 +525,8 @@ public void Frame_ListCommands(DataPack pack)
 	}
 }
 float g_LastTele[MAXPLAYERS + 1][3];
-void StartIntroSequence()
+
+void PlayIntro()
 {
 	if (g_Match.intro)
 		return;

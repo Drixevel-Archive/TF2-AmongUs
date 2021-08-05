@@ -175,7 +175,7 @@ public void Timer_On30SecRemain(const char[] output, int caller, int activator, 
 
 public void Timer_On10SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	StartIntroSequence();
+	PlayIntro();
 }
 
 public void Timer_On5SecRemain(const char[] output, int caller, int activator, float delay)
