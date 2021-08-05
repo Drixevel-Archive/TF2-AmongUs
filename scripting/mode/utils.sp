@@ -251,6 +251,7 @@ void SetGhost(int client)
 	SetEntityRenderMode(client, RENDER_TRANSALPHA);
 	SetEntityRenderColor(client, _, _, _, 70);
 	SetEntityMoveType(client, MOVETYPE_NOCLIP);
+	SetEntProp(client, Prop_Send, "m_CollisionGroup", 2);
 	
 	g_IsDead[client] = true;
 }
@@ -265,6 +266,7 @@ void RemoveGhost(int client)
 	SetEntityRenderMode(client, RENDER_NORMAL);
 	SetEntityRenderColor(client, _, _, _, _);
 	SetEntityMoveType(client, MOVETYPE_WALK);
+	SetEntProp(client, Prop_Data, "m_CollisionGroup", 5);
 	
 	g_IsDead[client] = false;
 }
