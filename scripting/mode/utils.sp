@@ -540,6 +540,7 @@ void PlayIntro()
 	
 	CreateTimer(0.5, Timer_ShowSHH, _, TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(1.0, Timer_SetPlayerIntro, _, TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(5.0, Timer_PlayIntroSound, _, TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(10.0, Timer_HideIntro, _, TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(15.0, Timer_RespawnPlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 }
@@ -610,6 +611,11 @@ void IntroTele(int client)
 			break;
 		}
 	}
+}
+
+public Action Timer_PlayIntroSound(Handle timer)
+{
+	EmitSoundToAll(SOUND_ROUNDSTART);
 }
 
 public Action Timer_HideIntro(Handle timer)
