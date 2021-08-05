@@ -493,8 +493,9 @@ void PrintCommandsInConsole(int client, bool admin)
 	RequestFrame(Frame_ListCommands, pack);
 }
 
-public void Frame_ListCommands(DataPack pack)
+public void Frame_ListCommands(any data)
 {
+	DataPack pack = view_as<DataPack>(data);
 	pack.Reset();
 
 	int userid = pack.ReadCell();
@@ -647,4 +648,22 @@ public Action Timer_RespawnPlayers(Handle timer)
 	}
 
 	g_Match.intro = false;
+}
+
+int GetColorByName(const char[] name)
+{
+	for (int i = 0; i < g_TotalColors; i++)
+		if (StrEqual(g_Colors[i].name, name, false))
+			return i;
+	
+	return -1;
+}
+
+bool IsColorTaken(int color)
+{
+	for (int i = 1; i <= MaxClients; i++)
+		if (g_Player[i].color == color)
+			return true;
+	
+	return false;
 }

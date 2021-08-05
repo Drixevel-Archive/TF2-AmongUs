@@ -60,7 +60,7 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	TF2_RemoveWeaponSlot(client, TFWeaponSlot_PDA);
 
 	//If a player is joining the server and they don't have a color, make sure they do.
-	if (g_Player[client].color == NO_COLOR)
+	if (g_Player[client].color == NO_COLOR || IsColorTaken(g_Player[client].color))
 		AssignColor(client);
 	
 	SetPlayerSpeed(client);

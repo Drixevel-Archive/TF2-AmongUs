@@ -212,6 +212,8 @@ upload/download is more similar to divert power, you get a random location to do
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
+#include <clientprefs>
+
 #include <colors>
 #include <tf2-amongus>
 
@@ -270,6 +272,7 @@ GlobalForward g_Forward_OnVentingEndPost;
 bool g_Late;
 bool g_BetweenRounds;
 ArrayList g_Reconnects;
+Cookie g_Cookie_Color;
 
 Handle g_Hud;
 
@@ -679,6 +682,8 @@ public void OnPluginStart()
 
 	convar_Engine_RespawnWaveTime = FindConVar("mp_respawnwavetime");
 
+	g_Cookie_Color = new Cookie("amongus_color", "The preferred color to be for the player.", CookieAccess_Public);
+
 	HookEvent("player_spawn", Event_OnPlayerSpawn);
 	HookEvent("player_death", Event_OnPlayerDeathPre, EventHookMode_Pre);
 	HookEvent("player_death", Event_OnPlayerDeath);
@@ -753,6 +758,9 @@ public void OnPluginStart()
 
 		if (IsClientInGame(i))
 			OnClientPutInServer(i);
+		
+		if (AreClientCookiesCached(i))
+			OnClientCookiesCached(i);
 	}
 
 	int entity = -1; char classname[32];
@@ -1039,6 +1047,13 @@ public void OnParseDownloadFilter(QueryCookie cookie, int client, ConVarQueryRes
 		SetHudTextParams(-1.0, -1.0, 10.0, 255, 0, 0, 255);
 		ShowHudText(client, -1, "Please reconnect with your downloads filter set to ALL.");
 	}
+}
+
+public void OnClientCookiesCached(int client)
+{
+	char sColor[32];
+	g_Cookie_Color.Get(client, sColor, sizeof(sColor));
+	g_Player[client].color = GetColorByName(sColor);
 }
 
 public void OnClientDisconnect(int client)
@@ -1381,6 +1396,7 @@ void OnButtonPress(int client, int button)
 void SetColor(int client, int color)
 {
 	g_Player[client].color = color;
+	g_Cookie_Color.Set(client, g_Colors[color].name);
 	
 	if (color != NO_COLOR)
 	{
