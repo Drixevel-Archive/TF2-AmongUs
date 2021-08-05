@@ -269,6 +269,7 @@ GlobalForward g_Forward_OnVentingEndPost;
 
 bool g_Late;
 bool g_BetweenRounds;
+ArrayList g_Reconnects;
 
 Handle g_Hud;
 
@@ -734,6 +735,8 @@ public void OnPluginStart()
 
 	g_Hud = CreateHudSynchronizer();
 
+	g_Reconnects = new ArrayList();
+
 	ParseColors();
 	ParseGameSettings();
 
@@ -938,7 +941,7 @@ public Action OnClientCommand(int client, int args)
 {
 	char sCommand[32];
 	GetCmdArg(0, sCommand, sizeof(sCommand));
-	
+
 	if (StrEqual(sCommand, "joinclass", false))
 	{
 		char sClass[32];
@@ -1046,6 +1049,8 @@ public void OnClientDisconnect(int client)
 
 	if (!TF2_IsInSetup())
 	{
+		g_Reconnects.Push(GetSteamAccountID(client));
+
 		int imposters;
 		for (int i = 1; i <= MaxClients; i++)
 			if (IsClientInGame(i) && IsPlayerAlive(i) && g_Player[i].role == Role_Imposter)
@@ -2200,6 +2205,8 @@ public Action OnLogicRelayTriggered(const char[] output, int caller, int activat
 
 void OnMatchCompleted(TFTeam team)
 {
+	g_Reconnects.Clear();
+	
 	switch (team)
 	{
 		case TFTeam_Red:

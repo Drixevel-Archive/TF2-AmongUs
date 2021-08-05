@@ -6,6 +6,13 @@ public void Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroadca
 	int userid = event.GetInt("userid");
 	int client = GetClientOfUserId(userid);
 
+	if (IsClientInGame(client) && IsPlayerAlive(client) && g_Reconnects.FindValue(GetSteamAccountID(client)) != -1)
+	{
+		TF2_ChangeClientTeam(client, TFTeam_Spectator);
+		SendDenyMessage(client, "%T", "error no late loads allowed", client);
+		return;
+	}
+
 	if (IsClientInGame(client) && IsPlayerAlive(client))
 		EmitSoundToAll(SOUND_SPAWN, client);
 

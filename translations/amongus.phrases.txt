@@ -339,6 +339,11 @@
 		"en"	"You are not allowed to use the Eureka Effect's teleport."
 	}
 
+	"error no late loads allowed"
+	{
+		"en"	"You are not allowed to late load into a match."
+	}
+
 	//Replies
 	"current owner"
 	{
