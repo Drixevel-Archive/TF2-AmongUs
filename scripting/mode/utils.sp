@@ -532,11 +532,12 @@ void PlayIntro()
 		return;
 	
 	g_Match.intro = true;
-	ScreenFadeAll(100, 2500, FFADE_OUT, view_as<int>({0, 0, 0, 255}), true);
 
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && IsPlayerAlive(i))
 			TF2_RespawnPlayer(i);
+	
+	ScreenFadeAll(100, 2500, FFADE_OUT, view_as<int>({0, 0, 0, 255}), true);
 	
 	CreateTimer(0.5, Timer_ShowSHH, _, TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(1.0, Timer_SetPlayerIntro, _, TIMER_FLAG_NO_MAPCHANGE);
