@@ -334,6 +334,11 @@
 		"en"	"Intro is already being played, please wait for it to end."
 	}
 
+	"error eureka teleport blocked"
+	{
+		"en"	"You are not allowed to use the Eureka Effect's teleport."
+	}
+
 	//Replies
 	"current owner"
 	{

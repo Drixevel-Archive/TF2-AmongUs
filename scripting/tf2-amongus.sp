@@ -244,6 +244,8 @@ ConVar convar_Engine_RespawnWaveTime;
 ConVar convar_Fade_Dur;
 ConVar convar_Fade_Hold;
 
+ConVar convar_EurekaEffectTele;
+
 /*****************************/
 //Forwards
 
@@ -658,6 +660,7 @@ public void OnPluginStart()
 	convar_VotePercentage_Ejections = CreateConVar("sm_amongus_vote_percentage_ejections", "0.75", "What percentage between 0.0 and 1.0 should votes be required to eject players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	convar_Fade_Dur = CreateConVar("sm_amongus_sabotage_fade_dur", "100", "What should the default fade duration be for sabotage sirens?", FCVAR_NOTIFY, true, 0.0);
 	convar_Fade_Hold = CreateConVar("sm_amongus_sabotage_fade_hold", "100", "What should the default fade hold time be for sabotage sirens?", FCVAR_NOTIFY, true, 0.0);
+	convar_EurekaEffectTele = CreateConVar("sm_amongus_eureka_effect_tele", "0", "Should players be allowed to teleport using the Eureka Effect?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	AutoExecConfig();
 
 	convar_TopDownView.AddChangeHook(OnConVarChange);
@@ -935,7 +938,7 @@ public Action OnClientCommand(int client, int args)
 {
 	char sCommand[32];
 	GetCmdArg(0, sCommand, sizeof(sCommand));
-
+	
 	if (StrEqual(sCommand, "joinclass", false))
 	{
 		char sClass[32];
@@ -970,6 +973,11 @@ public Action OnClientCommand(int client, int args)
 		//Exit
 		if (StrEqual(sArg1, "1", false) && StrEqual(sArg2, "1", false))
 			StartSabotage(client, SABOTAGE_DEPLETION);
+	}
+	else if (!convar_EurekaEffectTele.BoolValue && StrEqual(sCommand, "eureka_teleport", false))
+	{
+		SendDenyMessage(client, "%T", "error eureka teleport blocked", client);
+		return Plugin_Stop;
 	}
 
 	return Plugin_Continue;
