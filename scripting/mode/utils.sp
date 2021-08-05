@@ -567,13 +567,13 @@ public Action Timer_SetPlayerIntro(Handle timer)
 		if (!IsClientInGame(i) || !IsPlayerAlive(i))
 			continue;
 		
-		TeleTest(i);
+		IntroTele(i);
 		AcceptEntityInput(camera, "Enable", i);
 		SetEntityMoveType(i, MOVETYPE_NONE);
 	}
 }
 
-void TeleTest(int client)
+void IntroTele(int client)
 {
 	GetClientAbsOrigin(client, g_LastTele[client]);
 	
