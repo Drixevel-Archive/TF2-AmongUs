@@ -262,7 +262,10 @@ public Action Timer_DoingTask(Handle timer, any data)
 	g_Player[client].taskticks--;
 	int task = g_Player[client].progresstask;
 	int part = g_Player[client].progresstaskpart;
-	int entity = g_Tasks[task].entity;
+	int entity = EntRefToEntIndex(g_Tasks[task].entityref);
+
+	if (!IsValidEntity(entity))
+		return Plugin_Stop;
 
 	if (g_Player[client].taskticks > 0)
 	{

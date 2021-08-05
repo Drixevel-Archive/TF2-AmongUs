@@ -122,7 +122,7 @@ public Action OnTaskSpriteTransmit(int entity, int client)
 	
 	int task = -1;
 	for (int i = 0; i < g_TotalTasks; i++)
-		if (g_Tasks[i].entity == taskent)
+		if (EntRefToEntIndex(g_Tasks[i].entityref) == taskent)
 			task = i;
 
 	if (!IsValidTask(task) || !IsTaskAssigned(client, task))

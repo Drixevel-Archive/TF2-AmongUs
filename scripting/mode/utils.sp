@@ -384,7 +384,10 @@ void AssignTask(int client, int task)
 
 	if (g_Tasks[task].tasktype == TaskType_Map)
 	{
-		int entity = g_Tasks[task].entity;
+		int entity = EntRefToEntIndex(g_Tasks[task].entityref);
+
+		if (!IsValidEntity(entity))
+			return;
 
 		char sStart[64];
 		GetCustomKeyValue(entity, "start", sStart, sizeof(sStart));
@@ -446,7 +449,10 @@ int GetTaskMapParts(int task)
 	if (g_Tasks[task].tasktype != TaskType_Map)
 		return -1;
 	
-	int entity = g_Tasks[task].entity;
+	int entity = EntRefToEntIndex(g_Tasks[task].entityref);
+
+	if (!IsValidEntity(entity))
+		return -1;
 
 	char sParts[16];
 	GetCustomKeyValue(entity, "parts", sParts, sizeof(sParts));

@@ -501,7 +501,7 @@ enum TaskType
 
 enum struct Task
 {
-	int entity;
+	//int entity;
 	int entityref;
 	char display[64];
 	TaskType tasktype;
@@ -511,7 +511,7 @@ enum struct Task
 
 	void Add(int entity, const char[] display, TaskType tasktype, int type, float origin[3])
 	{
-		this.entity = entity;
+		//this.entity = entity;
 		this.entityref = EntIndexToEntRef(entity);
 		strcopy(this.display, sizeof(Task::display), display);
 		this.tasktype = tasktype;
@@ -523,7 +523,7 @@ enum struct Task
 
 	void Clear()
 	{
-		this.entity = -1;
+		//this.entity = -1;
 		this.entityref = INVALID_ENT_REFERENCE;
 		this.display[0] = '\0';
 		this.tasktype = TaskType_Single;
@@ -535,8 +535,13 @@ enum struct Task
 
 	void CreateSprite()
 	{
+		int entity = EntRefToEntIndex(this.entityref);
+
+		if (!IsValidEntity(entity))
+			return;
+		
 		this.KillSprite();
-		this.sprite = CreateSprite(this.entity, TASK_SPRITE, view_as<float>({0.0, 0.0, 0.0}));
+		this.sprite = CreateSprite(entity, TASK_SPRITE, view_as<float>({0.0, 0.0, 0.0}));
 
 		if (IsValidEntity(this.sprite))
 			SDKHook(this.sprite, SDKHook_SetTransmit, OnTaskSpriteTransmit);
@@ -1640,7 +1645,7 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 	else if (g_Player[client].neartask != -1 && g_Player[client].doingtask == null && !TF2_IsInSetup())
 	{
 		int task = g_Player[client].neartask;
-		int entity = g_Tasks[task].entity;
+		int entity = EntRefToEntIndex(g_Tasks[task].entityref);
 
 		if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
 			return Plugin_Stop;
@@ -1709,7 +1714,10 @@ public Action Listener_VoiceMenu(int client, const char[] command, int argc)
 					char sLookup[512];
 					Format(sLookup, sizeof(sLookup), "part %i", GetTaskStep(client, taskmap) + 1);
 
-					int entity2 = g_Tasks[taskmap].entity;
+					int entity2 = EntRefToEntIndex(g_Tasks[taskmap].entityref);
+
+					if (!IsValidEntity(entity2))
+						continue;
 
 					char sPart[512];
 					GetCustomKeyValue(entity2, sLookup, sPart, sizeof(sPart));
@@ -1946,7 +1954,7 @@ public void OnGameFrame()
 					if (IsTaskCompleted(i, task))
 						continue;
 					
-					int entity = g_Tasks[task].entity;
+					int entity = EntRefToEntIndex(g_Tasks[task].entityref);
 
 					if (!IsValidEntity(entity) || !HasEntProp(entity, Prop_Send, "m_vecOrigin"))
 						continue;
