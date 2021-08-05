@@ -560,7 +560,7 @@ public Action Timer_ShowSHH(Handle timer)
 public Action Timer_SetPlayerIntro(Handle timer)
 {
 	int camera = FindEntityByName("intro_cam", "point_viewcontrol");
-	DispatchKeyValue(camera, "spawnflags", "12");
+	DispatchKeyValue(camera, "spawnflags", "8");
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
