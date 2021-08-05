@@ -606,7 +606,7 @@ void IntroTele(int client)
 		if (count < 1)
 		{
 			GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
-			TeleportEntity(client, origin1, angles, NULL_VECTOR);
+			TeleportEntity(client, origin1, angles, view_as<float>({0.0, 0.0, 0.0}));
 			break;
 		}
 	}
