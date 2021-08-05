@@ -1805,6 +1805,13 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	SDKHook(entity, SDKHook_Spawn, OnEntitySpawn);
 
+	if (StrEqual(classname, "trigger_multiple", false))
+	{
+		SDKHook(entity, SDKHook_StartTouch, OnTriggerStartTouch);
+		SDKHook(entity, SDKHook_Touch, OnTriggerTouch);
+		SDKHook(entity, SDKHook_EndTouch, OnTriggerEndTouch);
+	}
+
 	if (g_Late)
 		OnEntitySpawn(entity);
 }

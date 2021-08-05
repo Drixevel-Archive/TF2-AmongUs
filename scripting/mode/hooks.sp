@@ -130,3 +130,27 @@ public Action OnTaskSpriteTransmit(int entity, int client)
 	
 	return Plugin_Continue;
 }
+
+public Action OnTriggerStartTouch(int entity, int other)
+{
+	if (other > 0 && other <= MaxClients && g_IsDead[other])
+		return Plugin_Stop;
+	
+	return Plugin_Continue;
+}
+
+public Action OnTriggerTouch(int entity, int other)
+{
+	if (other > 0 && other <= MaxClients && g_IsDead[other])
+		return Plugin_Stop;
+	
+	return Plugin_Continue;
+}
+
+public Action OnTriggerEndTouch(int entity, int other)
+{
+	if (other > 0 && other <= MaxClients && g_IsDead[other])
+		return Plugin_Stop;
+	
+	return Plugin_Continue;
+}
