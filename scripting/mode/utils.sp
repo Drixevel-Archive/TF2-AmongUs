@@ -524,7 +524,6 @@ public void Frame_ListCommands(DataPack pack)
 		CPrintToChat(client, "%T", "commands in console", client);
 	}
 }
-float g_LastTele[MAXPLAYERS + 1][3];
 
 void PlayIntro()
 {
@@ -573,9 +572,13 @@ public Action Timer_SetPlayerIntro(Handle timer)
 	}
 }
 
+float g_LastTeleOrigin[MAXPLAYERS + 1][3];
+float g_LastTeleAngles[MAXPLAYERS + 1][3];
+
 void IntroTele(int client)
 {
-	GetClientAbsOrigin(client, g_LastTele[client]);
+	GetClientAbsOrigin(client, g_LastTeleOrigin[client]);
+	GetClientAbsAngles(client, g_LastTeleAngles[client]);
 	
 	int entity = -1; float origin1[3]; float origin2[3]; float angles[3]; char sName[64];
 	while ((entity = FindEntityByClassname(entity, "info_teleport_destination")) != -1)
@@ -623,7 +626,7 @@ public Action Timer_RespawnPlayers(Handle timer)
 		if (!IsClientInGame(i))
 			continue;
 
-		TeleportEntity(i, g_LastTele[i], NULL_VECTOR, NULL_VECTOR);
+		TeleportEntity(i, g_LastTeleOrigin[i], g_LastTeleAngles[i], view_as<float>({0.0, 0.0, 0.0}));
 		AcceptEntityInput(camera, "Disable", i);
 		SetClientViewEntity(i, i);
 		SetEntityMoveType(i, MOVETYPE_WALK);
