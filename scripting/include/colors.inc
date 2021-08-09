@@ -37,7 +37,7 @@ static bool g_bSkipPlayers[MAXPLAYERS + 1];
 *	Sets the prefix for all chat prints to use.
 *	
 *	prefix		- String to use.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -107,7 +107,7 @@ stock void CSkipNextClient(int client)
 *	
 *	client		- Client index.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -137,7 +137,7 @@ stock void CPrintToChat(int client, const char[] message, any ...)
 *	client		- Client index.
 *	author		- Author index.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -155,7 +155,7 @@ stock void CPrintToChatEx(int client, int author, const char[] message, any ...)
 *	Sends a chat print to all clients.
 *	
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -192,7 +192,7 @@ stock void CPrintToChatAll(const char[] message, any ...)
 *	
 *	author		- Author index.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -211,7 +211,7 @@ stock void CPrintToChatAllEx(int author, const char[] message, any ...)
 *	
 *	team		- Team index.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -247,7 +247,7 @@ stock void CPrintToChatTeam(int team, const char[] message, any ...)
 *	
 *	team		- Team index.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -267,7 +267,7 @@ stock void CPrintToChatTeamEx(int team, int author, const char[] message, any ..
 *	
 *	bitflags	- Bit Flags.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -310,7 +310,7 @@ stock void CPrintToChatAdmins(int bitflags, const char[] message, any ...)
 *	
 *	bitflags	- Bit Flags.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -329,7 +329,7 @@ stock void CPrintToChatAdminsEx(int bitflags, int author, const char[] message, 
 *	
 *	client		- Client index.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -372,7 +372,7 @@ stock void CReplyToCommand(int client, const char[] message, any ...)
 *	
 *	client		- Client index.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -399,9 +399,9 @@ stock void CShowActivity(int client, const char[] message, any ...)
 *	All users receive a message in their chat text, except for the originating client, who receives the message based on the current ReplySource.
 *	
 *	client		- Client index.
-*	tag			- Tag to show.
+*	tag		- Tag to show.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -430,9 +430,9 @@ stock void CShowActivityEx(int client, const char[] tag, const char[] message, a
 *	Same as ShowActivity(), except the tag parameter is used instead of "[SM] " (note that you must supply any spacing).
 *	
 *	client		- Client index.
-*	tag			- Tag to show.
+*	tag		- Tag to show.
 *	message		- Message string.
-*	any			- Extra Parameters
+*	any		- Extra Parameters
 *	
 *	Return		- N/A
 */
@@ -460,7 +460,7 @@ stock void CShowActivity2(int client, const char[] tag, const char[] message, an
 /*
 *	Strips all colors from the specified string.
 *	
-*	msg			- String buffer.
+*	msg		- String buffer.
 *	size		- Size of the string.
 *	
 *	Return		- N/A
@@ -473,7 +473,7 @@ stock void CRemoveColors(char[] msg, int size)
 /*
 *	Processes colors in a string by replacing found tags with color/hex codes.
 *	
-*	msg			- String buffer.
+*	msg		- String buffer.
 *	size		- Size of the string.
 *	removecolors	- Whether to remove colors or keep them. (same as CRemoveColors)
 *	
