@@ -105,14 +105,14 @@ void OpenSettingsMenu(int client, bool backbutton = false)
 
 	menu.AddItem("start", "Start Match");
 
-	char sMap[32];
-	GetCurrentMap(sMap, sizeof(sMap));
+	//char sMap[32];
+	//GetCurrentMap(sMap, sizeof(sMap));
 
 	menu.AddItem("reset", "Reset Settings To Default");
 
-	FormatEx(sInfo, sizeof(sInfo), "map");
-	FormatEx(sDisplay, sizeof(sDisplay), "Map: %s", sMap);
-	menu.AddItem(sInfo, sDisplay);
+	//FormatEx(sInfo, sizeof(sInfo), "map");
+	//FormatEx(sDisplay, sizeof(sDisplay), "Map: %s", sMap);
+	//menu.AddItem(sInfo, sDisplay);
 
 	FormatEx(sInfo, sizeof(sInfo), "imposters");
 	FormatEx(sDisplay, sizeof(sDisplay), "# Imposters: %i (Limit: 0)", GetGameSetting_Int("imposters"));

@@ -813,7 +813,7 @@ public void OnMapStart()
 	GetCurrentMap(sMap, sizeof(sMap));
 
 	LoadMarks(sMap);
-
+	
 	/////
 	//Precache Files
 
